@@ -16,10 +16,10 @@ from typing import Any
 from neo4j import READ_ACCESS, WRITE_ACCESS, Driver, GraphDatabase, unit_of_work
 from neo4j.exceptions import ClientError, Neo4jError, ServiceUnavailable
 
-from kyun.config import settings
-from kyun.graph.queries import load_cypher, schema_statements
+from untangle.config import settings
+from untangle.graph.queries import load_cypher, schema_statements
 
-log = logging.getLogger("kyun.graph")
+log = logging.getLogger("untangle.graph")
 
 UNIQUE_ID_LABELS = [
     "Repo", "Person", "Identity", "Commit", "File", "Module", "Symbol", "ConfigKey", "Dependency",
@@ -127,7 +127,7 @@ class Graph:
         return {"constraints": len(constraints), "indexes": len([s for s in statements if _INDEX_NAME.search(s)])}
 
     def wipe_repo(self, repo: str) -> int:
-        """Delete everything ingested for one repository (used by `kyun ingest --reset`), then the people and
+        """Delete everything ingested for one repository (used by `untangle ingest --reset`), then the people and
         identities that no longer connect to anything (Person/Identity are shared across repositories, so they
         carry no `repo` and are only removed once nothing refers to them)."""
         total = 0
