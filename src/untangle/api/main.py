@@ -1,7 +1,7 @@
-"""Kyun HTTP API (CONTRACTS §6). Every endpoint is a thin wrapper over `kyun.answer.service`; the meeting and KT
-endpoints delegate to `kyun.kt.service` when that package is importable and answer 501 otherwise.
+"""Untangle HTTP API (CONTRACTS §6). Every endpoint is a thin wrapper over `untangle.answer.service`; the meeting and KT
+endpoints delegate to `untangle.kt.service` when that package is importable and answer 501 otherwise.
 
-Run with `uv run uvicorn kyun.api.main:app --port 8090` or `kyun serve`."""
+Run with `uv run uvicorn untangle.api.main:app --port 8090` or `untangle serve`."""
 
 from __future__ import annotations
 
@@ -19,9 +19,9 @@ from fastapi.responses import JSONResponse
 from neo4j.exceptions import Neo4jError
 from pydantic import ValidationError
 
-from kyun import __version__
-from kyun.answer import service
-from kyun.answer.models import (
+from untangle import __version__
+from untangle.answer import service
+from untangle.answer.models import (
     AskRequest,
     AskResponse,
     EntityResponse,
@@ -31,15 +31,15 @@ from kyun.answer.models import (
     TimelineResponse,
     WhyPath,
 )
-from kyun.api import meetings as meeting_shape
-from kyun.api.health import shape_health
-from kyun.config import settings
-from kyun.graph.db import GraphUnavailable
+from untangle.api import meetings as meeting_shape
+from untangle.api.health import shape_health
+from untangle.config import settings
+from untangle.graph.db import GraphUnavailable
 
-log = logging.getLogger("kyun.api")
+log = logging.getLogger("untangle.api")
 
 app = FastAPI(
-    title="Kyun API", version=__version__,
+    title="Untangle API", version=__version__,
     description="Answers 'why is the code like this?' from a graph of a repository's history, with evidence on every answer.",
 )
 app.add_middleware(
@@ -60,7 +60,7 @@ async def log_requests(request: Request, call_next):  # type: ignore[no-untyped-
     response = await call_next(request)
     ms = (time.perf_counter() - started) * 1000.0
     log.info("%s %s -> %d in %.0f ms", request.method, request.url.path, response.status_code, ms)
-    response.headers["x-kyun-ms"] = f"{ms:.0f}"
+    response.headers["x-untangle-ms"] = f"{ms:.0f}"
     response.headers["x-request-id"] = request_id
     return response
 
@@ -152,15 +152,15 @@ def stats(repo: str | None = None) -> dict[str, Any]:
     return service.get_graph().stats(repo)
 
 
-# -- meetings / KT: owned by kyun.kt; delegated when present ----------------------------------------------------------
+# -- meetings / KT: owned by untangle.kt; delegated when present ----------------------------------------------------------
 
-_KT_MISSING = "handover-call (KT) support is not installed: kyun.kt.service is missing or has no %s()"
+_KT_MISSING = "handover-call (KT) support is not installed: untangle.kt.service is missing or has no %s()"
 
 
 def _kt(function: str) -> Any:
-    """`kyun.kt.service.<function>` or a 501: the KT package is optional and owned by another module."""
+    """`untangle.kt.service.<function>` or a 501: the KT package is optional and owned by another module."""
     try:
-        module = importlib.import_module("kyun.kt.service")
+        module = importlib.import_module("untangle.kt.service")
     except ImportError as exc:
         raise HTTPException(status_code=501, detail=f"{_KT_MISSING % function} ({exc})") from exc
     fn = getattr(module, function, None)
@@ -189,7 +189,7 @@ async def kt_ingest(
     speakers: Annotated[int | None, Form()] = None, audio: Annotated[UploadFile | None, File()] = None,
     transcript: Annotated[UploadFile | None, File()] = None,
 ) -> Any:
-    """Multipart `{repo, title, audio | transcript}` -> `{meeting_id, utterances, decisions, ...}` from `kyun.kt.service`.
+    """Multipart `{repo, title, audio | transcript}` -> `{meeting_id, utterances, decisions, ...}` from `untangle.kt.service`.
     The upload is spooled to a temporary file because the KT functions take paths (Sarvam batch jobs need one)."""
     if audio is None and transcript is None:
         raise HTTPException(status_code=400, detail="send an `audio` file or a `transcript` JSON file")
@@ -197,7 +197,7 @@ async def kt_ingest(
     function = "ingest_audio" if audio is not None else "ingest_transcript"
     ingest = _kt(function)
     suffix = Path(upload.filename or ("audio.wav" if audio is not None else "transcript.json")).suffix or ".bin"
-    with tempfile.TemporaryDirectory(prefix="kyun-kt-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="untangle-kt-") as tmp:
         path = Path(tmp) / f"upload{suffix}"
         path.write_bytes(await upload.read())
         name = title or Path(upload.filename or "handover").stem

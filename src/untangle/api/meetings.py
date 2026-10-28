@@ -1,8 +1,8 @@
-"""Shape `kyun.kt.service` reads into the web contract (`MeetingSummary`, `MeetingDetail` in web/src/lib/types.ts).
+"""Shape `untangle.kt.service` reads into the web contract (`MeetingSummary`, `MeetingDetail` in web/src/lib/types.ts).
 
 The KT service returns graph-shaped rows (counts named after what they count, speakers as people, decisions as
 compact maps); the web app wants explicit `*_count` fields, a speaker legend keyed by label, and full
-`DecisionCard`s. Decision cards come from `kyun.answer.service.why_path`, the same projection the decision pages
+`DecisionCard`s. Decision cards come from `untangle.answer.service.why_path`, the same projection the decision pages
 use, so a decision reads identically wherever it appears."""
 
 from __future__ import annotations
@@ -10,10 +10,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kyun.answer import service as answer_service
-from kyun.graph.db import Graph
+from untangle.answer import service as answer_service
+from untangle.graph.db import Graph
 
-log = logging.getLogger("kyun.api.meetings")
+log = logging.getLogger("untangle.api.meetings")
 
 
 def summary_out(row: dict[str, Any]) -> dict[str, Any]:
