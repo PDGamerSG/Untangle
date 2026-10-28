@@ -3,10 +3,10 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel
 
-from kyun import ids
-from kyun.embed import FakeEmbedder
-from kyun.graph.queries import list_queries, load_cypher, schema_statements
-from kyun.llm import FakeLLM, LLMUnavailable, parse_json
+from untangle import ids
+from untangle.embed import FakeEmbedder
+from untangle.graph.queries import list_queries, load_cypher, schema_statements
+from untangle.llm import FakeLLM, LLMUnavailable, parse_json
 
 
 def test_tokens_split_identifiers_and_paths():
@@ -57,7 +57,7 @@ def test_schema_applies_and_queries_load(graph):
 
 
 def test_cached_embedder_only_embeds_unseen_text(tmp_path):
-    from kyun.embed import CachedEmbedder
+    from untangle.embed import CachedEmbedder
 
     inner = FakeEmbedder(16)
     calls: list[list[str]] = []

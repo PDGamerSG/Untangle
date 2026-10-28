@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kyun.pulse import build_response, classify, risk_id, score
+from untangle.pulse import build_response, classify, risk_id, score
 
 
 def test_contradiction_is_the_primary_signal_and_scores_highest():
@@ -35,7 +35,7 @@ def test_build_response_summarises_risks_and_coverage():
 
 
 def test_service_pulse_maps_query_rows(monkeypatch):
-    from kyun.answer import service
+    from untangle.answer import service
 
     class FakeRecorder:
         def __init__(self, graph):

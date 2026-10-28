@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from _answer_fixture import T_NOW, Fixture
-from kyun.answer.compose import (
+from untangle.answer.compose import (
     SYSTEM_PROMPT,
     build_user_prompt,
     compose,
@@ -14,9 +14,9 @@ from kyun.answer.compose import (
     render_template,
     validate,
 )
-from kyun.answer.confidence import score, signals_from
-from kyun.answer.retrieve import build_dossiers, version_from_row
-from kyun.llm import FakeLLM
+from untangle.answer.confidence import score, signals_from
+from untangle.answer.retrieve import build_dossiers, version_from_row
+from untangle.llm import FakeLLM
 
 FX = Fixture("test/fixture")
 
@@ -115,7 +115,7 @@ def test_compose_never_calls_the_model_for_refusals():
     llm = FakeLLM({"Question:": "made up [dec:x]"})
     out = compose(ev, _confidence(ev), llm)
     assert out.note == "refused" and not llm.calls
-    assert out.answer.startswith("Kyun found nothing in the graph that answers that.")
+    assert out.answer.startswith("Untangle found nothing in the graph that answers that.")
 
 
 def test_user_prompt_lists_versions_oldest_first_with_ids():
@@ -211,8 +211,8 @@ def test_refusal_wording():
     ev = FX.evidence("why does the billing webhook retry twice?", with_dossiers=False)
     text = render_refusal(ev)
     assert text == (
-        "Kyun found nothing in the graph that answers that. Closest related: app.concurrency in config.toml (ConfigKey), config.toml (File). "
+        "Untangle found nothing in the graph that answers that. Closest related: app.concurrency in config.toml (ConfigKey), config.toml (File). "
         "Person to ask: Kailash Nadh, who authored 2 of 2 commits on app.concurrency, stated 2 recorded decisions about it."
     )
     ev.entities, ev.people = [], []
-    assert render_refusal(ev) == "Kyun found nothing in the graph that answers that. Closest related: none. Person to ask: no one is recorded for this."
+    assert render_refusal(ev) == "Untangle found nothing in the graph that answers that. Closest related: none. Person to ask: no one is recorded for this."

@@ -10,8 +10,8 @@ import httpx
 import pytest
 import respx
 
-from kyun.ingest.decisions import closes_numbers, mentioned_numbers, supersedes_numbers
-from kyun.ingest.github_api import GitHubClient, GitHubError, is_incident, to_ms
+from untangle.ingest.decisions import closes_numbers, mentioned_numbers, supersedes_numbers
+from untangle.ingest.github_api import GitHubClient, GitHubError, is_incident, to_ms
 
 FIXTURES = Path(__file__).parent / "fixtures" / "github"
 BASE = "https://api.github.com"

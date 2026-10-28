@@ -9,13 +9,13 @@ import pytest
 from fastapi import HTTPException
 
 from _answer_fixture import Fixture, seed_graph, unseed_people
-from kyun.answer import service
-from kyun.api import main as api
+from untangle.answer import service
+from untangle.api import main as api
 
 
 @pytest.fixture
 async def client():
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=api.app), base_url="http://kyun.test") as c:
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=api.app), base_url="http://untangle.test") as c:
         yield c
 
 
@@ -51,7 +51,7 @@ def test_kt_delegation_answers_501_when_the_function_is_missing():
     with pytest.raises(HTTPException) as exc:
         api._kt("definitely_not_a_kt_function")
     assert exc.value.status_code == 501
-    assert "kyun.kt.service" in exc.value.detail
+    assert "untangle.kt.service" in exc.value.detail
 
 
 async def test_openapi_lists_every_contract_endpoint(client):
@@ -95,7 +95,7 @@ async def test_ask_matches_the_service(client, graph, seeded_api: Fixture):
     assert data["why"]["subgraph"]["edges"][0].keys() >= {"from", "to", "type"}
     assert data["baseline"]["note"].startswith("vector-only")
     assert set(data) >= {"question", "repo", "mode", "answer", "refused", "confidence", "evidence_chain", "supersession", "citations", "entities", "why", "baseline"}
-    assert r.headers["x-kyun-ms"]
+    assert r.headers["x-untangle-ms"]
     at = await client.post("/ask", json={"question": "what was app.concurrency?", "repo": seeded_api.repo, "at": "2022-05-01"})
     assert at.json()["answer"].startswith("On 1 May 2022")
     bad = await client.post("/ask", json={"question": "what was app.concurrency?", "repo": seeded_api.repo, "at": "yesterday"})

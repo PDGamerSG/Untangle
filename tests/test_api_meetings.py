@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from kyun.api import meetings as shape
+from untangle.api import meetings as shape
 
 
 def _row() -> dict:

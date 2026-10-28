@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from kyun import ids
-from kyun.kt.extract import extract_decisions, extract_heuristic, extract_with_llm
-from kyun.kt.pipeline import (
+from untangle import ids
+from untangle.kt.extract import extract_decisions, extract_heuristic, extract_with_llm
+from untangle.kt.pipeline import (
     EntityRef,
     Matcher,
     build_aliases,
@@ -22,8 +22,8 @@ from kyun.kt.pipeline import (
     meeting_slug,
     resolve_term,
 )
-from kyun.kt.transcript import load_transcript
-from kyun.llm import LLM, FakeLLM
+from untangle.kt.transcript import load_transcript
+from untangle.llm import LLM, FakeLLM
 
 SAMPLE = Path(__file__).resolve().parents[1] / "data" / "kt" / "listmonk-kt-sample.json"
 TERMS = [
@@ -185,7 +185,7 @@ def test_keyterms_prefer_spoken_forms_and_sentences_and_slugs_are_stable():
 
 
 def test_kt_cli_registers_the_contract_flags():
-    from kyun.kt.cli import register
+    from untangle.kt.cli import register
 
     parser = argparse.ArgumentParser()
     register(parser.add_subparsers(dest="command"))
@@ -260,7 +260,7 @@ def _seed(graph, repo: str) -> None:
 
 @pytest.mark.neo4j
 def test_ingest_kt_end_to_end_confirms_the_committed_value(graph, test_repo, kt_people):
-    from kyun.kt import service
+    from untangle.kt import service
 
     _seed(graph, test_repo)
     assert "app.concurrency" in keyterms_for_repo(graph, test_repo)
@@ -374,7 +374,7 @@ def test_ingest_kt_different_value_contradicts_and_never_supersedes_code(graph, 
 def test_answer_keeps_the_repository_record_in_the_lead_and_names_the_conflict(graph, test_repo, kt_people):
     """A handover call that contradicts the repository must not win: the answer leads with the code record,
     cites the call, says the two conflict and loses confidence for it."""
-    from kyun.answer.service import ask
+    from untangle.answer.service import ask
 
     _seed(graph, test_repo)
     now = int(time.time() * 1000)

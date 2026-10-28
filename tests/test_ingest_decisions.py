@@ -6,15 +6,15 @@ from __future__ import annotations
 import pytest
 
 from ingest_fixture import DATES_MS, build_repo
-from kyun import ids
-from kyun.ingest.chunks import build_sources, chunk_rows, chunk_text
-from kyun.ingest.config_history import config_history, history_paths
-from kyun.ingest.decisions import explicit_supersessions, first_paragraph, pr_change_decisions, revert_decisions
-from kyun.ingest.extract_llm import extract_pr_rationales, locate_quotes, most_discussed
-from kyun.ingest.git_history import GitRepo
-from kyun.ingest.github_api import CommentRecord, GitHubData, PRCommitRecord, PullRecord, ReviewRecord
-from kyun.ingest.loader import People, file_rows, github_rows
-from kyun.llm import FakeLLM
+from untangle import ids
+from untangle.ingest.chunks import build_sources, chunk_rows, chunk_text
+from untangle.ingest.config_history import config_history, history_paths
+from untangle.ingest.decisions import explicit_supersessions, first_paragraph, pr_change_decisions, revert_decisions
+from untangle.ingest.extract_llm import extract_pr_rationales, locate_quotes, most_discussed
+from untangle.ingest.git_history import GitRepo
+from untangle.ingest.github_api import CommentRecord, GitHubData, PRCommitRecord, PullRecord, ReviewRecord
+from untangle.ingest.loader import People, file_rows, github_rows
+from untangle.llm import FakeLLM
 
 REPO = "test/decisions"
 
@@ -174,7 +174,7 @@ def test_chunking(repo):
     assert len(sources) == 6 and sources[0].source_kind == "commit" and sources[0].source_id.startswith("commit:test/decisions@")
     rows = chunk_rows(REPO, sources, embedder=None)
     assert all(r["embedding"] is None and r["repo"] == REPO and r["seq"] == 0 for r in rows) and 4 <= len(rows) <= 6
-    from kyun.embed import FakeEmbedder
+    from untangle.embed import FakeEmbedder
 
     embedded = chunk_rows(REPO, sources, embedder=FakeEmbedder(16))
     assert all(len(r["embedding"]) == 16 for r in embedded) and embedded[0]["id"] == ids.chunk_id(embedded[0]["source_id"], 0)

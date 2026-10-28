@@ -12,7 +12,7 @@ from typing import Any
 import httpx
 import pytest
 
-from kyun.kt.sarvam import SarvamClient, SarvamError, entries_from_response, split_wav_windows, wav_duration_seconds
+from untangle.kt.sarvam import SarvamClient, SarvamError, entries_from_response, split_wav_windows, wav_duration_seconds
 
 KEY = "test-subscription-key"
 

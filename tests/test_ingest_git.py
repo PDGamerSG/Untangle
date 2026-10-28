@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from ingest_fixture import DATES_MS, build_repo
-from kyun.ingest.git_history import GitRepo, detect_revert, parse_log
+from untangle.ingest.git_history import GitRepo, detect_revert, parse_log
 
 
 @pytest.fixture(scope="module")

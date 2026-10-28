@@ -11,7 +11,7 @@ os.environ.setdefault("LLM_BACKEND", "fake")
 os.environ.setdefault("EMBED_BACKEND", "fake")
 os.environ.setdefault("EMBED_DIM", "384")
 
-from kyun.graph.db import Graph, GraphUnavailable, connect  # noqa: E402
+from untangle.graph.db import Graph, GraphUnavailable, connect  # noqa: E402
 
 _CREATED: list[str] = []  # test repos this session created; only these are wiped at the end (parallel runs share the DB)
 

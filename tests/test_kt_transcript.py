@@ -6,9 +6,9 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from kyun.kt.transcript import (
+from untangle.kt.transcript import (
     MAX_UTTERANCE_CHARS,
-    from_kyun_json,
+    from_untangle_json,
     from_sarvam,
     from_text,
     load_transcript,
@@ -113,15 +113,15 @@ def test_sarvam_timestamps_only_response_gets_one_speaker_and_no_language():
 
 
 def test_load_transcript_detects_the_three_formats(tmp_path):
-    kyun = tmp_path / "k.json"
-    kyun.write_text(json.dumps({"title": "K", "utterances": [{"speaker": "A", "start_ms": 0, "end_ms": 1000, "text": "namaste"}]}), encoding="utf-8")
+    untangle = tmp_path / "k.json"
+    untangle.write_text(json.dumps({"title": "K", "utterances": [{"speaker": "A", "start_ms": 0, "end_ms": 1000, "text": "namaste"}]}), encoding="utf-8")
     sarvam = tmp_path / "s.json"
     sarvam.write_text(json.dumps({"transcript": "namaste", "language_code": "hi-IN"}), encoding="utf-8")
     sarvam_list = tmp_path / "list.json"
     sarvam_list.write_text(json.dumps([{"transcript": "ek"}, {"transcript": "do"}]), encoding="utf-8")
     txt = tmp_path / "t.txt"
     txt.write_text("Rohan: namaste\nPriya: namaste", encoding="utf-8")
-    assert load_transcript(kyun).source == "transcript-json" and load_transcript(kyun).title == "K"
+    assert load_transcript(untangle).source == "transcript-json" and load_transcript(untangle).title == "K"
     s = load_transcript(sarvam, language="hi-IN")
     assert s.source == "sarvam-batch" and s.utterances[0].text == "namaste" and s.title == "s"
     assert len(load_transcript(sarvam_list).utterances) == 1  # same placeholder speaker, 0 s apart: merged
@@ -149,5 +149,5 @@ def test_untrusted_rows_are_coerced_and_empty_ones_dropped():
         ("Speaker_One", 0, 0, "ok text here", None),
         ("SPEAKER_01", 9001, 9500, "देवनागरी", "hi-IN"),
     ]
-    t = from_kyun_json({"utterances": [{"speaker": "S1", "text": "x"}], "speakers": {"S1": "Rohan"}})
+    t = from_untangle_json({"utterances": [{"speaker": "S1", "text": "x"}], "speakers": {"S1": "Rohan"}})
     assert t.speakers == {"S1": {"name": "Rohan", "login": None, "email": None}} and t.started_at is None

@@ -9,8 +9,8 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from kyun.eval.gold import load_gold
-from kyun.eval.harness import call_ask, normalise_response, percentile, run_eval
+from untangle.eval.gold import load_gold
+from untangle.eval.harness import call_ask, normalise_response, percentile, run_eval
 
 GOLD = Path(__file__).resolve().parents[1] / "eval" / "gold" / "listmonk.yaml"
 
@@ -37,7 +37,7 @@ def _fake_ask(question: str, repo: str, *, mode: str = "graph", at: str | None =
     if mode == "baseline":
         return {"question": question, "repo": repo, "mode": mode, "answer": "retry limit is 3 and then 5", "refused": False, "citations": {}, "evidence_chain": [], "entities": [], "supersession": [], "baseline": {"answer": "retry limit is 3 and then 5", "chunks": []}}
     if "MongoDB" in question or "Kafka" in question:
-        return {"question": question, "repo": repo, "mode": mode, "answer": "Kyun found nothing in the graph that answers that.", "refused": True, "citations": {}, "evidence_chain": [], "entities": [], "supersession": []}
+        return {"question": question, "repo": repo, "mode": mode, "answer": "Untangle found nothing in the graph that answers that.", "refused": True, "citations": {}, "evidence_chain": [], "entities": [], "supersession": []}
     if "who" in question.lower():
         return SimpleNamespace(
             answer="Ask Rahul: he authored most changes to cmd/retry.go [person:gh:rahul].", refused=False, citations={}, supersession=[],
@@ -151,7 +151,7 @@ def test_gold_validation_rejects_duplicate_ids_and_unknown_keys(tmp_path):
 
 
 def test_eval_cli_registers_and_runs(tmp_path, monkeypatch, capsys):
-    from kyun.eval import cli
+    from untangle.eval import cli
 
     gold = _write_gold(tmp_path)
     captured = {}

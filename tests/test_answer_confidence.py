@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from _answer_fixture import T_NOW, Fixture
-from kyun.answer.confidence import HIGH, MEDIUM, REFUSE, Signals, authority_of, score, signals_from
+from untangle.answer.confidence import HIGH, MEDIUM, REFUSE, Signals, authority_of, score, signals_from
 
 
 def test_nothing_anchored_refuses():

@@ -8,11 +8,11 @@ import uuid
 import pytest
 
 from _answer_fixture import T_NOW, Fixture, seed_graph, unseed_people
-from kyun.answer import service
-from kyun.answer.retrieve import Recorder, gather
-from kyun.answer.router import resolve_entities, route
-from kyun.embed import FakeEmbedder
-from kyun.llm import FakeLLM
+from untangle.answer import service
+from untangle.answer.retrieve import Recorder, gather
+from untangle.answer.router import resolve_entities, route
+from untangle.embed import FakeEmbedder
+from untangle.llm import FakeLLM
 
 pytestmark = pytest.mark.neo4j
 
@@ -102,7 +102,7 @@ def test_reference_question_finds_the_decision(graph, seeded):
 def test_unanswerable_question_refuses_and_names_a_person(graph, seeded):
     r = _ask(graph, seeded, "why does the billing webhook retry twice?")
     assert r.refused and r.confidence.label == "refuse"
-    assert r.answer.startswith("Kyun found nothing in the graph that answers that.")
+    assert r.answer.startswith("Untangle found nothing in the graph that answers that.")
     assert "Person to ask: Kailash Nadh" in r.answer
     assert r.evidence_chain == [] and r.citations == {} and r.why.route == "refuse"
 

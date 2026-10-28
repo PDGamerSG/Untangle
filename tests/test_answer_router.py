@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from kyun.answer.router import (
+from untangle.answer.router import (
     MATCH_THRESHOLD,
     RouterDecision,
     detect_intent,
@@ -13,7 +13,7 @@ from kyun.answer.router import (
     match_strength,
     route,
 )
-from kyun.answer.text import fmt_date, iso, parse_at
+from untangle.answer.text import fmt_date, iso, parse_at
 
 
 def test_mentions_cover_paths_keys_identifiers_quotes_and_refs():

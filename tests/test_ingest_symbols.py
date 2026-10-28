@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from kyun.ingest.symbols import (
+from untangle.ingest.symbols import (
     config_format,
     extract_config_keys,
     extract_symbols,
@@ -178,7 +178,7 @@ def test_skip_rules_and_classification():
 
 
 def test_sql_seed_tuples_become_config_values():
-    from kyun.ingest.symbols import config_format, parse_config
+    from untangle.ingest.symbols import config_format, parse_config
 
     sql = """
     INSERT INTO settings (key, value) VALUES

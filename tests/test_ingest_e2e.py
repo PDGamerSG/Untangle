@@ -9,9 +9,9 @@ import argparse
 import pytest
 
 from ingest_fixture import DATES_MS, build_repo
-from kyun import ids
-from kyun.ingest.cli import register
-from kyun.ingest.pipeline import ingest_repo
+from untangle import ids
+from untangle.ingest.cli import register
+from untangle.ingest.pipeline import ingest_repo
 
 pytestmark = pytest.mark.neo4j
 
