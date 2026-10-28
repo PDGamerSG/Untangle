@@ -11,11 +11,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from kyun.answer.models import Confidence
-from kyun.answer.text import MS_PER_DAY, fmt_date, kind_of_id
+from untangle.answer.models import Confidence
+from untangle.answer.text import MS_PER_DAY, fmt_date, kind_of_id
 
 if TYPE_CHECKING:
-    from kyun.answer.retrieve import Evidence
+    from untangle.answer.retrieve import Evidence
 
 HIGH, MEDIUM, REFUSE = 0.75, 0.5, 0.2
 

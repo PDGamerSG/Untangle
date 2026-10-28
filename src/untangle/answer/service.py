@@ -9,11 +9,11 @@ import threading
 import time
 from typing import Any
 
-from kyun import __version__
-from kyun.answer import baseline as baseline_mod
-from kyun.answer.compose import CITATION, compose
-from kyun.answer.confidence import score, signals_from
-from kyun.answer.models import (
+from untangle import __version__
+from untangle.answer import baseline as baseline_mod
+from untangle.answer.compose import CITATION, compose
+from untangle.answer.confidence import score, signals_from
+from untangle.answer.models import (
     AskResponse,
     Citation,
     CommitCard,
@@ -36,7 +36,7 @@ from kyun.answer.models import (
     Why,
     WhyPath,
 )
-from kyun.answer.retrieve import (
+from untangle.answer.retrieve import (
     Evidence,
     Recorder,
     Version,
@@ -47,14 +47,14 @@ from kyun.answer.retrieve import (
     version_from_row,
     why_path_rows,
 )
-from kyun.answer.router import resolve_entities, resolve_people, route
-from kyun.answer.text import iso, label_of, parse_at
-from kyun.config import settings
-from kyun.embed import Embedder, make_embedder
-from kyun.graph.db import Graph, connect
-from kyun.llm import LLM, make_llm
+from untangle.answer.router import resolve_entities, resolve_people, route
+from untangle.answer.text import iso, label_of, parse_at
+from untangle.config import settings
+from untangle.embed import Embedder, make_embedder
+from untangle.graph.db import Graph, connect
+from untangle.llm import LLM, make_llm
 
-log = logging.getLogger("kyun.answer.service")
+log = logging.getLogger("untangle.answer.service")
 
 _graph: Graph | None = None
 _llm: LLM | None = None
@@ -363,7 +363,7 @@ def timeline(repo: str, at: str | int | None, *, graph: Graph | None = None) -> 
 
 def pulse(repo: str, *, graph: Graph | None = None, now_ms: int | None = None, limit: int = 24) -> PulseResponse:
     """Return deterministic knowledge risks for a repository."""
-    from kyun.pulse import build_response
+    from untangle.pulse import build_response
 
     graph = graph or get_graph()
     now = now_ms or int(time.time() * 1000)

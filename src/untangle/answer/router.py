@@ -11,13 +11,13 @@ import re
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
-from kyun.answer.text import parse_at
-from kyun.ids import tokens
+from untangle.answer.text import parse_at
+from untangle.ids import tokens
 
 if TYPE_CHECKING:
-    from kyun.answer.retrieve import Recorder
+    from untangle.answer.retrieve import Recorder
 
-log = logging.getLogger("kyun.answer.router")
+log = logging.getLogger("untangle.answer.router")
 
 INTENTS = ("why", "who_to_ask", "what_changed", "belief_at", "is_current", "list_decisions")
 
@@ -27,7 +27,7 @@ STOPWORDS = frozenset(
     there here we our us you your they their them he she his her i me my mine can could should would will shall may
     might must not no yes so such than too very just also still again ever never now currently current get got make
     made like about into over under before after since until during per via vs versus please tell explain show know
-    reason reasons because cause caused did does kyun kya kyu kyon hai hain kaise kab kahan kaun kyunki ye yeh woh wo
+    reason reasons because cause caused did does untangle kya kyu kyon hai hain kaise kab kahan kaun kyunki ye yeh woh wo
     ka ki ke ko se me mein par bhi tha thi hum aap tum one some any all each every both either neither more most much
     many few less least own same other another really actually exactly thing things way ways code repo repository
     project file files""".split()

@@ -8,14 +8,14 @@ import logging
 import math
 from typing import Any
 
-from kyun.answer.models import Baseline, BaselineChunk
-from kyun.answer.retrieve import Recorder
-from kyun.answer.text import squash
-from kyun.embed import Embedder, make_embedder
-from kyun.graph.db import Graph, Neo4jError
-from kyun.llm import LLM, LLMUnavailable
+from untangle.answer.models import Baseline, BaselineChunk
+from untangle.answer.retrieve import Recorder
+from untangle.answer.text import squash
+from untangle.embed import Embedder, make_embedder
+from untangle.graph.db import Graph, Neo4jError
+from untangle.llm import LLM, LLMUnavailable
 
-log = logging.getLogger("kyun.answer.baseline")
+log = logging.getLogger("untangle.answer.baseline")
 
 NOTE = "vector-only, no graph: no supersession, no confidence"
 FIRST_K = 500  # candidates asked from the HNSW index before the repo filter

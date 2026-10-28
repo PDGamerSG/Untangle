@@ -13,13 +13,13 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from kyun.answer.models import Citation, CypherCall
-from kyun.answer.router import ResolvedEntity, RouterDecision, resolve_entities, scrub_repo_terms, specific_terms
-from kyun.answer.text import date_forms, fmt_date, kind_of_id, label_of, short_sha, squash
-from kyun.graph.db import Graph
-from kyun.ids import commit_id, issue_id, pr_id, tokens
+from untangle.answer.models import Citation, CypherCall
+from untangle.answer.router import ResolvedEntity, RouterDecision, resolve_entities, scrub_repo_terms, specific_terms
+from untangle.answer.text import date_forms, fmt_date, kind_of_id, label_of, short_sha, squash
+from untangle.graph.db import Graph
+from untangle.ids import commit_id, issue_id, pr_id, tokens
 
-log = logging.getLogger("kyun.answer.retrieve")
+log = logging.getLogger("untangle.answer.retrieve")
 
 READ_TIMEOUT_MS = 2000
 RRF_K = 60
@@ -46,7 +46,7 @@ class Recorder:
 
 
 def _file_name(name: str) -> str:
-    from kyun.graph.queries import cypher_path
+    from untangle.graph.queries import cypher_path
 
     try:
         return cypher_path(name).stem

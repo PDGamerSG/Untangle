@@ -17,18 +17,18 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from kyun.answer.confidence import Confidence
-from kyun.answer.retrieve import Dossier, Evidence, Version, describe_where, is_removed, moved_from, moved_to, when
-from kyun.answer.text import date_forms, fmt_date, kind_of_id, short_sha, squash
-from kyun.llm import LLM, LLMUnavailable
+from untangle.answer.confidence import Confidence
+from untangle.answer.retrieve import Dossier, Evidence, Version, describe_where, is_removed, moved_from, moved_to, when
+from untangle.answer.text import date_forms, fmt_date, kind_of_id, short_sha, squash
+from untangle.llm import LLM, LLMUnavailable
 
-log = logging.getLogger("kyun.answer.compose")
+log = logging.getLogger("untangle.answer.compose")
 
 CITATION = re.compile(r"\[([a-z]+:[^\]\s]+)\]")
 _NUMBER = re.compile(r"\d{2,}")
 MAX_SENTENCES = 5
 
-SYSTEM_PROMPT = """You are Kyun, which answers "why is the code like this?" for a software repository from a graph of its commits, pull requests, issues, design records (ADRs) and recorded handover calls. You answer using ONLY the evidence you are given.
+SYSTEM_PROMPT = """You are Untangle, which answers "why is the code like this?" for a software repository from a graph of its commits, pull requests, issues, design records (ADRs) and recorded handover calls. You answer using ONLY the evidence you are given.
 
 The evidence has sections.
 - EVIDENCE A lists DECISIONS from the graph. Each DECISION shows every version of one value or choice, numbered oldest to newest (v1 is the oldest). For each version you get its id, value, status (superseded or ACTIVE, the current one), the dates it was valid, who stated it, where it was decided (a pull request, issue, commit, ADR or handover call), the stated rationale if any, the evidence excerpts and any incident it was motivated by.
@@ -224,7 +224,7 @@ def render_refusal(evidence: Evidence) -> str:
         person = f"{p.display}, who {p.why(evidence.entity_short)}"
     else:
         person = "no one is recorded for this"
-    return f"Kyun found nothing in the graph that answers that. Closest related: {related}. Person to ask: {person}."
+    return f"Untangle found nothing in the graph that answers that. Closest related: {related}. Person to ask: {person}."
 
 
 def render_template(evidence: Evidence, *, at_ms: int | None = None) -> str:
