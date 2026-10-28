@@ -13,9 +13,9 @@ from array import array
 from functools import cache
 from pathlib import Path
 
-from kyun.config import PROJECT_ROOT, Settings, settings
+from untangle.config import PROJECT_ROOT, Settings, settings
 
-log = logging.getLogger("kyun.embed")
+log = logging.getLogger("untangle.embed")
 _WORD = re.compile(r"[0-9A-Za-zऀ-ॿ]+")
 
 

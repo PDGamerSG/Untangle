@@ -60,7 +60,7 @@ class Settings:
 @cache
 def settings() -> Settings:
     _load_env()
-    cache_dir = Path(_env("KYUN_REPO_CACHE", str(PROJECT_ROOT / ".cache" / "repos")))
+    cache_dir = Path(_env("UNTANGLE_REPO_CACHE", str(PROJECT_ROOT / ".cache" / "repos")))
     if not cache_dir.is_absolute():
         cache_dir = PROJECT_ROOT / cache_dir
     return Settings(

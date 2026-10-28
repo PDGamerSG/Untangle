@@ -1,4 +1,4 @@
-"""Deterministic knowledge-risk scoring for Kyun Pulse.
+"""Deterministic knowledge-risk scoring for Untangle Pulse.
 
 The graph supplies facts; this module turns those facts into stable categories, scores,
 ids, and human-readable reasons. No language model is involved in ranking a risk.
@@ -10,7 +10,7 @@ import hashlib
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from kyun.answer.models import (
+from untangle.answer.models import (
     EntityRef,
     PersonCard,
     PulseResponse,
@@ -18,7 +18,7 @@ from kyun.answer.models import (
     PulseSummary,
     Ref,
 )
-from kyun.answer.text import iso
+from untangle.answer.text import iso
 
 SIGNAL_WEIGHTS: dict[str, float] = {
     "contradiction": 0.72,
@@ -104,8 +104,8 @@ def build_risk(row: Mapping[str, Any], *, repo: str) -> PulseRisk | None:
     decision_id = str(decision_row.get("id") or "")
     if not entity_id or not decision_id:
         return None
-    from kyun.answer.retrieve import version_from_row
-    from kyun.answer.service import decision_card  # avoid importing service at module import time
+    from untangle.answer.retrieve import version_from_row
+    from untangle.answer.service import decision_card  # avoid importing service at module import time
     version = version_from_row(decision_row)
     return PulseRisk(
         id=risk_id(repo, decision_id, entity_id), category=classify(signal_map), score=risk_score,

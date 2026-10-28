@@ -14,9 +14,9 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from kyun.config import Settings, settings
+from untangle.config import Settings, settings
 
-log = logging.getLogger("kyun.llm")
+log = logging.getLogger("untangle.llm")
 T = TypeVar("T", bound=BaseModel)
 
 DEFAULT_MODELS = {"anthropic": "claude-haiku-5-5", "sarvam": "sarvam-105b", "openai": "gpt-4o-mini", "fake": "fake"}

@@ -1,4 +1,4 @@
-"""`kyun` command line (CONTRACTS §5): schema, ask, stats, serve here; `ingest`, `kt` and `eval` are registered by
+"""`untangle` command line (CONTRACTS §5): schema, ask, stats, serve here; `ingest`, `kt` and `eval` are registered by
 their own packages through `register(subparsers)` when they are installed. The only module allowed to print."""
 
 from __future__ import annotations
@@ -10,24 +10,24 @@ import logging
 import sys
 from typing import Any
 
-from kyun import __version__
+from untangle import __version__
 
-log = logging.getLogger("kyun.cli")
+log = logging.getLogger("untangle.cli")
 
-_PLUGINS = ("kyun.ingest.cli", "kyun.kt.cli", "kyun.eval.cli")
+_PLUGINS = ("untangle.ingest.cli", "untangle.kt.cli", "untangle.eval.cli")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="kyun", description="Kyun (क्यों): why is the code like this?")
+    parser = argparse.ArgumentParser(prog="untangle", description="Untangle (क्यों): why is the code like this?")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="-v for INFO, -vv for DEBUG")
-    parser.add_argument("--version", action="version", version=f"kyun {__version__}")
+    parser.add_argument("--version", action="version", version=f"untangle {__version__}")
     sub = parser.add_subparsers(dest="command", metavar="command")
     sub.required = True
 
     p = sub.add_parser("schema", help="ensure constraints and indexes")
     p.set_defaults(func=cmd_schema)
 
-    p = sub.add_parser("ask", help='ask a question: kyun ask "why is the retry limit 3?" --repo owner/name')
+    p = sub.add_parser("ask", help='ask a question: untangle ask "why is the retry limit 3?" --repo owner/name')
     p.add_argument("question")
     p.add_argument("--repo", required=True, help="owner/name of an ingested repository")
     p.add_argument("--at", help="answer as of this date (YYYY-MM-DD)")
@@ -69,7 +69,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def cmd_schema(args: argparse.Namespace) -> int:
-    from kyun.graph.db import connect
+    from untangle.graph.db import connect
 
     graph = connect(require=True)
     try:
@@ -81,7 +81,7 @@ def cmd_schema(args: argparse.Namespace) -> int:
 
 
 def cmd_ask(args: argparse.Namespace) -> int:
-    from kyun.answer import service
+    from untangle.answer import service
 
     mode = "baseline" if args.baseline_only else "both" if args.baseline else "graph"
     response = service.ask(args.question, args.repo, at=args.at, mode=mode)
@@ -93,7 +93,7 @@ def cmd_ask(args: argparse.Namespace) -> int:
 
 
 def cmd_stats(args: argparse.Namespace) -> int:
-    from kyun.answer import service
+    from untangle.answer import service
 
     stats = service.get_graph().stats(args.repo)
     if args.json:
@@ -111,10 +111,10 @@ def cmd_stats(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
-    from kyun.config import settings
+    from untangle.config import settings
 
     s = settings()
-    uvicorn.run("kyun.api.main:app", host=args.host or s.api_host, port=args.port or s.api_port, reload=args.reload, log_level="info")
+    uvicorn.run("untangle.api.main:app", host=args.host or s.api_host, port=args.port or s.api_port, reload=args.reload, log_level="info")
     return 0
 
 
