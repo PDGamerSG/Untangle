@@ -1,0 +1,3519 @@
+{
+ "exported_at": "2026-10-28T16:03:54.752350+00:00",
+ "repo": "knadh/listmonk",
+ "cards": {
+  "dec:knadh/listmonk:config_value:1746b14b6895": {
+   "id": "dec:knadh/listmonk:config_value:1746b14b6895",
+   "kind": "config_value",
+   "key": "schema.sql::app.concurrency|config_value",
+   "subject": "schema.sql::app.concurrency",
+   "predicate": "config_value",
+   "object": "10",
+   "text": "`app.concurrency` in `schema.sql` is `10`",
+   "rationale": "Add settings UI and \"hot reload\" support to the app.",
+   "status": "active",
+   "valid_from_iso": "2020-07-08T11:00:14Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "schema.sql",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:schema.sql",
+     "label": "File",
+     "name": "schema.sql",
+     "path": "schema.sql",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@942eb7c3d86e",
+    "kind": "Commit",
+    "title": "Add settings UI and \"hot reload\" support to the app.",
+    "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+    "number": null,
+    "created_at_iso": "2020-07-08T11:00:14Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2020-07-08T11:00:14Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:507117e52193": {
+   "id": "dec:knadh/listmonk:kt:507117e52193",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.concurrency|config_value",
+   "subject": "schema.sql::app.concurrency",
+   "predicate": "config_value",
+   "object": "10",
+   "text": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "SES का rate limit hit हो रहा था",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:30:28Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "schema.sql",
+     "key": "app.concurrency"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:ffd03841ed0f": {
+   "id": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+   "kind": "config_value",
+   "key": "config.toml.sample::app.concurrency|config_value",
+   "subject": "config.toml.sample::app.concurrency",
+   "predicate": "config_value",
+   "object": "5",
+   "text": "`app.concurrency` in `config.toml.sample` is `5`",
+   "rationale": "Add support for message throughput rate limiting",
+   "status": "superseded",
+   "valid_from_iso": "2020-04-02T12:52:27Z",
+   "valid_to_iso": "2020-07-08T11:00:14Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "config.toml.sample",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:config.toml.sample",
+     "label": "File",
+     "name": "config.toml.sample",
+     "path": "config.toml.sample",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@894ede561a45",
+    "kind": "Commit",
+    "title": "Add support for message throughput rate limiting",
+    "url": "https://github.com/knadh/listmonk/commit/894ede561a45a5e8218613e0c68e1e557f665b6f",
+    "number": null,
+    "created_at_iso": "2020-04-02T12:52:27Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2020-04-02T12:52:27Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:d3c44eb38b14": {
+   "id": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+   "kind": "config_value",
+   "key": "config.toml.sample::app.concurrency|config_value",
+   "subject": "config.toml.sample::app.concurrency",
+   "predicate": "config_value",
+   "object": "100",
+   "text": "`app.concurrency` in `config.toml.sample` is `100`",
+   "rationale": "Fresh start",
+   "status": "superseded",
+   "valid_from_iso": "2018-10-25T13:51:47Z",
+   "valid_to_iso": "2020-04-02T12:52:27Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "config.toml.sample",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:config.toml.sample",
+     "label": "File",
+     "name": "config.toml.sample",
+     "path": "config.toml.sample",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@3ab21383b1c2",
+    "kind": "Commit",
+    "title": "Fresh start",
+    "url": "https://github.com/knadh/listmonk/commit/3ab21383b1c2a3c490146b7c88d1d49ec616acd4",
+    "number": null,
+    "created_at_iso": "2018-10-25T13:51:47Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2018-10-25T13:51:47Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:599023a9f988": {
+   "id": "dec:knadh/listmonk:config_value:599023a9f988",
+   "kind": "config_value",
+   "key": "config.toml.sample::app.concurrency|config_value",
+   "subject": "config.toml.sample::app.concurrency",
+   "predicate": "config_value",
+   "object": "removed",
+   "text": "`app.concurrency` was removed from `config.toml.sample`",
+   "rationale": "Add settings UI and \"hot reload\" support to the app.",
+   "status": "active",
+   "valid_from_iso": "2020-07-08T11:00:14Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "config.toml.sample",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:config.toml.sample",
+     "label": "File",
+     "name": "config.toml.sample",
+     "path": "config.toml.sample",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@942eb7c3d86e",
+    "kind": "Commit",
+    "title": "Add settings UI and \"hot reload\" support to the app.",
+    "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+    "number": null,
+    "created_at_iso": "2020-07-08T11:00:14Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2020-07-08T11:00:14Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:4fdd77ff4d9f": {
+   "id": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+   "kind": "config_value",
+   "key": "config-demo.toml::app.concurrency|config_value",
+   "subject": "config-demo.toml::app.concurrency",
+   "predicate": "config_value",
+   "object": "removed",
+   "text": "`app.concurrency` was removed from `config-demo.toml`",
+   "rationale": "Refactor `blacklist` to `blocklist`",
+   "status": "active",
+   "valid_from_iso": "2020-08-01T11:15:29Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "config-demo.toml",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:config-demo.toml",
+     "label": "File",
+     "name": "config-demo.toml",
+     "path": "config-demo.toml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@8c0804ba9f10",
+    "kind": "Commit",
+    "title": "Refactor `blacklist` to `blocklist`",
+    "url": "https://github.com/knadh/listmonk/commit/8c0804ba9f1000fd72e2bbf6b216fd02fda828f7",
+    "number": null,
+    "created_at_iso": "2020-08-01T11:15:29Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2020-08-01T11:15:29Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:87ab95030d1b": {
+   "id": "dec:knadh/listmonk:config_value:87ab95030d1b",
+   "kind": "config_value",
+   "key": "config-demo.toml::app.concurrency|config_value",
+   "subject": "config-demo.toml::app.concurrency",
+   "predicate": "config_value",
+   "object": "5",
+   "text": "`app.concurrency` in `config-demo.toml` is `5`",
+   "rationale": "feat: Add separate config for demo setup, tweak docs",
+   "status": "superseded",
+   "valid_from_iso": "2020-07-08T17:08:31Z",
+   "valid_to_iso": "2020-08-01T11:15:29Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "config-demo.toml",
+     "key": "app.concurrency"
+    },
+    {
+     "id": "file:knadh/listmonk:config-demo.toml",
+     "label": "File",
+     "name": "config-demo.toml",
+     "path": "config-demo.toml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "pr:knadh/listmonk#153",
+    "kind": "PullRequest",
+    "title": "feat: Add separate config for demo setup, tweak docs",
+    "url": "https://github.com/knadh/listmonk/pull/153",
+    "number": 153,
+    "created_at_iso": "2020-07-09T07:25:43Z",
+    "excerpt": null,
+    "author": "mr-karan",
+    "at_iso": "2020-07-09T07:25:43Z"
+   },
+   "stated_by": {
+    "id": "person:gh:mr-karan",
+    "name": "Karan Sharma",
+    "login": "mr-karan",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:3c6e00c4240c": {
+   "id": "dec:knadh/listmonk:config_value:3c6e00c4240c",
+   "kind": "config_value",
+   "key": "docker-compose.yml::x-app-defaults.networks|config_value",
+   "subject": "docker-compose.yml::x-app-defaults.networks",
+   "predicate": "config_value",
+   "object": "listmonk",
+   "text": "`x-app-defaults.networks` in `docker-compose.yml` is `listmonk`",
+   "rationale": "feat: Add docker demo setup (PR #1: WIP: Create Docker release)",
+   "status": "superseded",
+   "valid_from_iso": "2019-07-12T08:20:44Z",
+   "valid_to_iso": "2024-10-27T10:05:28Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:docker-compose.yml::x-app-defaults.networks",
+     "label": "ConfigKey",
+     "name": "x-app-defaults.networks",
+     "path": "docker-compose.yml",
+     "key": "x-app-defaults.networks"
+    },
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "pr:knadh/listmonk#1",
+    "kind": "PullRequest",
+    "title": "WIP: Create Docker release",
+    "url": "https://github.com/knadh/listmonk/pull/1",
+    "number": 1,
+    "created_at_iso": "2019-07-12T10:18:30Z",
+    "excerpt": null,
+    "author": "mr-karan",
+    "at_iso": "2019-07-12T10:18:30Z"
+   },
+   "stated_by": {
+    "id": "person:email:karan.sharma@zerodha.com",
+    "name": "Karan Sharma",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:246e09f7755f": {
+   "id": "dec:knadh/listmonk:config_value:246e09f7755f",
+   "kind": "config_value",
+   "key": "docker-compose.yml::x-app-defaults.networks|config_value",
+   "subject": "docker-compose.yml::x-app-defaults.networks",
+   "predicate": "config_value",
+   "object": "removed",
+   "text": "`x-app-defaults.networks` was removed from `docker-compose.yml`",
+   "rationale": "Simplify and refactor docker-compose.yml and remove install scripts.",
+   "status": "active",
+   "valid_from_iso": "2024-10-27T10:05:28Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:docker-compose.yml::x-app-defaults.networks",
+     "label": "ConfigKey",
+     "name": "x-app-defaults.networks",
+     "path": "docker-compose.yml",
+     "key": "x-app-defaults.networks"
+    },
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@7fcc6f71e29b",
+    "kind": "Commit",
+    "title": "Simplify and refactor docker-compose.yml and remove install scripts.",
+    "url": "https://github.com/knadh/listmonk/commit/7fcc6f71e29b0e0866bc8cc746430064b572cb71",
+    "number": null,
+    "created_at_iso": "2024-10-27T10:05:28Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2024-10-27T10:05:28Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:22e0cfa31295": {
+   "id": "dec:knadh/listmonk:dependency:22e0cfa31295",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.12.3",
+   "text": "`github.com/lib/pq` (go) is at `v1.12.3` in `go.mod`",
+   "rationale": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+   "status": "active",
+   "valid_from_iso": "2026-10-06T10:29:38Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@8ff79d489168",
+    "kind": "Commit",
+    "title": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+    "url": "https://github.com/knadh/listmonk/commit/8ff79d489168047802b5c964e2586df9441e0810",
+    "number": null,
+    "created_at_iso": "2026-10-06T10:29:38Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-06T10:29:38Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:2874fcef546f": {
+   "id": "dec:knadh/listmonk:dependency:2874fcef546f",
+   "kind": "dependency",
+   "key": "dep|github.com/altcha-org/altcha-lib-go|dependency_version",
+   "subject": "github.com/altcha-org/altcha-lib-go",
+   "predicate": "dependency_version",
+   "object": "removed",
+   "text": "`github.com/altcha-org/altcha-lib-go` (go) was removed from `go.mod`",
+   "rationale": "Upgrade Altcha to v2. Has internal breaking changes in its function and architecture. Closes #3170.",
+   "status": "active",
+   "valid_from_iso": "2026-10-19T07:35:12Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/altcha-org/altcha-lib-go",
+     "label": "Dependency",
+     "name": "github.com/altcha-org/altcha-lib-go",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@515b73213cff",
+    "kind": "Commit",
+    "title": "Upgrade Altcha to v2. Has internal breaking changes in its function and architecture. Closes #3170.",
+    "url": "https://github.com/knadh/listmonk/commit/515b73213cff59275587e8206d2c32ce1dee2684",
+    "number": null,
+    "created_at_iso": "2026-10-19T07:35:12Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-19T07:35:12Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:56411b48bbe7": {
+   "id": "dec:knadh/listmonk:dependency:56411b48bbe7",
+   "kind": "dependency",
+   "key": "dep|github.com/altcha-org/altcha-lib-go|dependency_version",
+   "subject": "github.com/altcha-org/altcha-lib-go",
+   "predicate": "dependency_version",
+   "object": "v1.0.0",
+   "text": "`github.com/altcha-org/altcha-lib-go` (go) is at `v1.0.0` in `go.mod`",
+   "rationale": "Bump github.com/altcha-org/altcha-lib-go from 0.2.2 to 1.0.0 (#2819)",
+   "status": "superseded",
+   "valid_from_iso": "2025-12-29T10:52:54Z",
+   "valid_to_iso": "2026-10-19T07:35:12Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/altcha-org/altcha-lib-go",
+     "label": "Dependency",
+     "name": "github.com/altcha-org/altcha-lib-go",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "pr:knadh/listmonk#2819",
+    "kind": "PullRequest",
+    "title": "Bump github.com/altcha-org/altcha-lib-go from 0.2.2 to 1.0.0",
+    "url": "https://github.com/knadh/listmonk/pull/2819",
+    "number": 2819,
+    "created_at_iso": "2025-12-29T10:52:54Z",
+    "excerpt": null,
+    "author": "dependabot[bot]",
+    "at_iso": "2025-12-29T10:52:54Z"
+   },
+   "stated_by": {
+    "id": "person:gh:dependabot[bot]",
+    "name": "dependabot[bot]",
+    "login": "dependabot[bot]",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:e83fa5b469f1": {
+   "id": "dec:knadh/listmonk:dependency:e83fa5b469f1",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.10.9",
+   "text": "`github.com/lib/pq` (go) is at `v1.10.9` in `go.mod`",
+   "rationale": "Update Go deps.",
+   "status": "superseded",
+   "valid_from_iso": "2024-01-27T15:25:50Z",
+   "valid_to_iso": "2026-10-06T10:29:38Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@f14df890a45d",
+    "kind": "Commit",
+    "title": "Update Go deps.",
+    "url": "https://github.com/knadh/listmonk/commit/f14df890a45d2f0a05b0b0676dd91ba4925d5b69",
+    "number": null,
+    "created_at_iso": "2024-01-27T15:25:50Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2024-01-27T15:25:50Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:88818f3ee176": {
+   "id": "dec:knadh/listmonk:dependency:88818f3ee176",
+   "kind": "dependency",
+   "key": "dep|github.com/altcha-org/altcha-lib-go|dependency_version",
+   "subject": "github.com/altcha-org/altcha-lib-go",
+   "predicate": "dependency_version",
+   "object": "v0.2.2",
+   "text": "`github.com/altcha-org/altcha-lib-go` (go) was added at `v0.2.2` in `go.mod`",
+   "rationale": "Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0 (#2634)",
+   "status": "superseded",
+   "valid_from_iso": "2025-09-08T13:00:21Z",
+   "valid_to_iso": "2025-12-29T10:52:54Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/altcha-org/altcha-lib-go",
+     "label": "Dependency",
+     "name": "github.com/altcha-org/altcha-lib-go",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "pr:knadh/listmonk#2634",
+    "kind": "PullRequest",
+    "title": "Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0",
+    "url": "https://github.com/knadh/listmonk/pull/2634",
+    "number": 2634,
+    "created_at_iso": "2025-09-08T13:00:21Z",
+    "excerpt": null,
+    "author": "dependabot[bot]",
+    "at_iso": "2025-09-08T13:00:21Z"
+   },
+   "stated_by": {
+    "id": "person:gh:dependabot[bot]",
+    "name": "dependabot[bot]",
+    "login": "dependabot[bot]",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:6e8ca5154822": {
+   "id": "dec:knadh/listmonk:dependency:6e8ca5154822",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.10.7",
+   "text": "`github.com/lib/pq` (go) is at `v1.10.7` in `go.mod`",
+   "rationale": "Upgrade Go package deps.",
+   "status": "superseded",
+   "valid_from_iso": "2023-03-19T16:19:12Z",
+   "valid_to_iso": "2024-01-27T15:25:50Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@3646e6d20a8a",
+    "kind": "Commit",
+    "title": "Upgrade Go package deps.",
+    "url": "https://github.com/knadh/listmonk/commit/3646e6d20a8aa827349788c588e59a49175fd4e4",
+    "number": null,
+    "created_at_iso": "2023-03-19T16:19:12Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2023-03-19T16:19:12Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:2bc349195f02": {
+   "id": "dec:knadh/listmonk:dependency:2bc349195f02",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.10.3",
+   "text": "`github.com/lib/pq` (go) is at `v1.10.3` in `go.mod`",
+   "rationale": "Update Go deps.",
+   "status": "superseded",
+   "valid_from_iso": "2021-09-28T18:37:26Z",
+   "valid_to_iso": "2023-03-19T16:19:12Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@d0f1a2700bf9",
+    "kind": "Commit",
+    "title": "Update Go deps.",
+    "url": "https://github.com/knadh/listmonk/commit/d0f1a2700bf965343a447c2ca2bd46b1c0bcd1ce",
+    "number": null,
+    "created_at_iso": "2021-09-28T18:37:26Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2021-09-28T18:37:26Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:59209e3f0bdc": {
+   "id": "dec:knadh/listmonk:dependency:59209e3f0bdc",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.3.0",
+   "text": "`github.com/lib/pq` (go) is at `v1.3.0` in `go.mod`",
+   "rationale": "Update and cleanup deps",
+   "status": "superseded",
+   "valid_from_iso": "2020-03-08T10:33:57Z",
+   "valid_to_iso": "2021-09-28T18:37:26Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@83d888a30b53",
+    "kind": "Commit",
+    "title": "Update and cleanup deps",
+    "url": "https://github.com/knadh/listmonk/commit/83d888a30b5364dd2ba702592db933305a9dc485",
+    "number": null,
+    "created_at_iso": "2020-03-08T10:33:57Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2020-03-08T10:33:57Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:dependency:34f1dce73367": {
+   "id": "dec:knadh/listmonk:dependency:34f1dce73367",
+   "kind": "dependency",
+   "key": "dep|github.com/lib/pq|dependency_version",
+   "subject": "github.com/lib/pq",
+   "predicate": "dependency_version",
+   "object": "v1.0.0",
+   "text": "`github.com/lib/pq` (go) was added at `v1.0.0` in `go.mod`",
+   "rationale": "chore: Go modules and add readme",
+   "status": "superseded",
+   "valid_from_iso": "2019-01-09T11:13:13Z",
+   "valid_to_iso": "2020-03-08T10:33:57Z",
+   "confidence": 0.95,
+   "signal": "lockfile_diff",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    },
+    {
+     "id": "file:knadh/listmonk:go.mod",
+     "label": "File",
+     "name": "go.mod",
+     "path": "go.mod",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@4ef5a3a04213",
+    "kind": "Commit",
+    "title": "chore: Go modules and add readme",
+    "url": "https://github.com/knadh/listmonk/commit/4ef5a3a0421385e3906d73752627a93a23119b0f",
+    "number": null,
+    "created_at_iso": "2019-01-09T11:13:13Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2019-01-09T11:13:13Z"
+   },
+   "stated_by": {
+    "id": "person:gh:joeirimpan",
+    "name": "Joe Paul",
+    "login": "joeirimpan",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:06f225d4b2c5": {
+   "id": "dec:knadh/listmonk:kt:06f225d4b2c5",
+   "kind": "kt",
+   "key": "kt|internal/manager|owner",
+   "subject": "internal/manager",
+   "predicate": "owner",
+   "object": "Priya Nair",
+   "text": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:51Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "module:knadh/listmonk:internal/manager",
+     "label": "Module",
+     "name": "manager",
+     "path": "internal/manager",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:54bfab88d0a8": {
+   "id": "dec:knadh/listmonk:kt:54bfab88d0a8",
+   "kind": "kt",
+   "key": "kt|docker-compose.yml|constraint",
+   "subject": "docker-compose.yml",
+   "predicate": "constraint",
+   "object": "एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+   "text": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:37Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:077614c13476": {
+   "id": "dec:knadh/listmonk:config_value:077614c13476",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.ports|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.ports",
+   "predicate": "config_value",
+   "object": "127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025",
+   "text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025`",
+   "rationale": "Fix Mailhog port not being available inside the dev container.",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T09:27:45Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "label": "ConfigKey",
+     "name": "services.dev.ports",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.ports"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@db19a7c02931",
+    "kind": "Commit",
+    "title": "Fix Mailhog port not being available inside the dev container.",
+    "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+    "number": null,
+    "created_at_iso": "2026-10-20T09:27:45Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T09:27:45Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:b069981bf4db": {
+   "id": "dec:knadh/listmonk:config_value:b069981bf4db",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.ports|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.ports",
+   "predicate": "config_value",
+   "object": "127.0.0.1:9000:9000",
+   "text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000`",
+   "rationale": "Refactor and simply dev docker environment. Closes #3102.",
+   "status": "superseded",
+   "valid_from_iso": "2026-10-10T18:10:00Z",
+   "valid_to_iso": "2026-10-20T09:27:45Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "label": "ConfigKey",
+     "name": "services.dev.ports",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.ports"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@9ca898c286b9",
+    "kind": "Commit",
+    "title": "Refactor and simply dev docker environment. Closes #3102.",
+    "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+    "number": null,
+    "created_at_iso": "2026-10-10T18:10:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-10T18:10:00Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:2650b22d78da": {
+   "id": "dec:knadh/listmonk:config_value:2650b22d78da",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.mailhog.ports|config_value",
+   "subject": "dev/docker-compose.yml::services.mailhog.ports",
+   "predicate": "config_value",
+   "object": "removed",
+   "text": "`services.mailhog.ports` was removed from `dev/docker-compose.yml`",
+   "rationale": "Fix Mailhog port not being available inside the dev container.",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T09:27:45Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.mailhog.ports",
+     "label": "ConfigKey",
+     "name": "services.mailhog.ports",
+     "path": "dev/docker-compose.yml",
+     "key": "services.mailhog.ports"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@db19a7c02931",
+    "kind": "Commit",
+    "title": "Fix Mailhog port not being available inside the dev container.",
+    "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+    "number": null,
+    "created_at_iso": "2026-10-20T09:27:45Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T09:27:45Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:074b98aec652": {
+   "id": "dec:knadh/listmonk:config_value:074b98aec652",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.mailhog.ports|config_value",
+   "subject": "dev/docker-compose.yml::services.mailhog.ports",
+   "predicate": "config_value",
+   "object": "127.0.0.1:1025:1025, 127.0.0.1:8025:8025",
+   "text": "`services.mailhog.ports` in `dev/docker-compose.yml` is `127.0.0.1:1025:1025, 127.0.0.1:8025:8025`",
+   "rationale": "Refactor and simply dev docker environment. Closes #3102.",
+   "status": "superseded",
+   "valid_from_iso": "2026-10-10T18:10:00Z",
+   "valid_to_iso": "2026-10-20T09:27:45Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.mailhog.ports",
+     "label": "ConfigKey",
+     "name": "services.mailhog.ports",
+     "path": "dev/docker-compose.yml",
+     "key": "services.mailhog.ports"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@9ca898c286b9",
+    "kind": "Commit",
+    "title": "Refactor and simply dev docker environment. Closes #3102.",
+    "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+    "number": null,
+    "created_at_iso": "2026-10-10T18:10:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-10T18:10:00Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:5c44ea022381": {
+   "id": "dec:knadh/listmonk:config_value:5c44ea022381",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.environment.mailhog_url|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.environment.MAILHOG_URL",
+   "predicate": "config_value",
+   "object": "http://localhost:8025",
+   "text": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://localhost:8025`",
+   "rationale": "Fix Mailhog port not being available inside the dev container.",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T09:27:45Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.environment.MAILHOG_URL",
+     "label": "ConfigKey",
+     "name": "services.dev.environment.MAILHOG_URL",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.environment.MAILHOG_URL"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@db19a7c02931",
+    "kind": "Commit",
+    "title": "Fix Mailhog port not being available inside the dev container.",
+    "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+    "number": null,
+    "created_at_iso": "2026-10-20T09:27:45Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T09:27:45Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:cd6b4a22b4cd": {
+   "id": "dec:knadh/listmonk:config_value:cd6b4a22b4cd",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.environment.mailhog_url|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.environment.MAILHOG_URL",
+   "predicate": "config_value",
+   "object": "http://mailhog:8025",
+   "text": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://mailhog:8025`",
+   "rationale": "Fix Playwright test scaffolding to work with the Docker dev env.",
+   "status": "superseded",
+   "valid_from_iso": "2026-10-15T10:05:34Z",
+   "valid_to_iso": "2026-10-20T09:27:45Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.environment.MAILHOG_URL",
+     "label": "ConfigKey",
+     "name": "services.dev.environment.MAILHOG_URL",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.environment.MAILHOG_URL"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@f82179bee22d",
+    "kind": "Commit",
+    "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+    "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+    "number": null,
+    "created_at_iso": "2026-10-15T10:05:34Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-15T10:05:34Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:4d234d9cc4c0": {
+   "id": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.environment.mailhog_smtp_host|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.environment.MAILHOG_SMTP_HOST",
+   "predicate": "config_value",
+   "object": "localhost",
+   "text": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `localhost`",
+   "rationale": "Fix Mailhog port not being available inside the dev container.",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T09:27:45Z",
+   "valid_to_iso": null,
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.environment.MAILHOG_SMTP_HOST",
+     "label": "ConfigKey",
+     "name": "services.dev.environment.MAILHOG_SMTP_HOST",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.environment.MAILHOG_SMTP_HOST"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@db19a7c02931",
+    "kind": "Commit",
+    "title": "Fix Mailhog port not being available inside the dev container.",
+    "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+    "number": null,
+    "created_at_iso": "2026-10-20T09:27:45Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T09:27:45Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:cddf4286491d": {
+   "id": "dec:knadh/listmonk:config_value:cddf4286491d",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.dev.environment.mailhog_smtp_host|config_value",
+   "subject": "dev/docker-compose.yml::services.dev.environment.MAILHOG_SMTP_HOST",
+   "predicate": "config_value",
+   "object": "mailhog",
+   "text": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `mailhog`",
+   "rationale": "Fix Playwright test scaffolding to work with the Docker dev env.",
+   "status": "superseded",
+   "valid_from_iso": "2026-10-15T10:05:34Z",
+   "valid_to_iso": "2026-10-20T09:27:45Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.environment.MAILHOG_SMTP_HOST",
+     "label": "ConfigKey",
+     "name": "services.dev.environment.MAILHOG_SMTP_HOST",
+     "path": "dev/docker-compose.yml",
+     "key": "services.dev.environment.MAILHOG_SMTP_HOST"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "commit:knadh/listmonk@f82179bee22d",
+    "kind": "Commit",
+    "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+    "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+    "number": null,
+    "created_at_iso": "2026-10-15T10:05:34Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-15T10:05:34Z"
+   },
+   "stated_by": {
+    "id": "person:gh:knadh",
+    "name": "Kailash Nadh",
+    "login": "knadh",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:config_value:c78125d62d9c": {
+   "id": "dec:knadh/listmonk:config_value:c78125d62d9c",
+   "kind": "config_value",
+   "key": "dev/docker-compose.yml::services.mailhog.ports|config_value",
+   "subject": "dev/docker-compose.yml::services.mailhog.ports",
+   "predicate": "config_value",
+   "object": "1025:1025, 8025:8025",
+   "text": "`services.mailhog.ports` in `dev/docker-compose.yml` is `1025:1025, 8025:8025`",
+   "rationale": "feat: Add dev docker setup",
+   "status": "superseded",
+   "valid_from_iso": "2021-12-01T17:47:14Z",
+   "valid_to_iso": "2026-10-10T18:10:00Z",
+   "confidence": 0.95,
+   "signal": "config_diff",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.mailhog.ports",
+     "label": "ConfigKey",
+     "name": "services.mailhog.ports",
+     "path": "dev/docker-compose.yml",
+     "key": "services.mailhog.ports"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "dev/docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "pr:knadh/listmonk#608",
+    "kind": "PullRequest",
+    "title": "feat: Add dev docker setup",
+    "url": "https://github.com/knadh/listmonk/pull/608",
+    "number": 608,
+    "created_at_iso": "2021-12-05T07:07:30Z",
+    "excerpt": null,
+    "author": "mr-karan",
+    "at_iso": "2021-12-05T07:07:30Z"
+   },
+   "stated_by": {
+    "id": "person:gh:mr-karan",
+    "name": "Karan Sharma",
+    "login": "mr-karan",
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:554978c865c8": {
+   "id": "dec:knadh/listmonk:kt:554978c865c8",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.message_rate|config_value",
+   "subject": "schema.sql::app.message_rate",
+   "predicate": "config_value",
+   "object": "10",
+   "text": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:30:48Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate",
+     "path": "schema.sql",
+     "key": "app.message_rate"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:c8f3d954d3b8": {
+   "id": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.batch_size|config_value",
+   "subject": "schema.sql::app.batch_size",
+   "predicate": "config_value",
+   "object": "1000",
+   "text": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "Postgres से subscribers 1000-1000 के batch में निकलते हैं, एक साथ पूरी list memory में नहीं आती",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:31:27Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.batch_size",
+     "label": "ConfigKey",
+     "name": "app.batch_size",
+     "path": "schema.sql",
+     "key": "app.batch_size"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:e0f967c7ce94": {
+   "id": "dec:knadh/listmonk:kt:e0f967c7ce94",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.max_send_errors|config_value",
+   "subject": "schema.sql::app.max_send_errors",
+   "predicate": "config_value",
+   "object": "1000",
+   "text": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "एक गलत SMTP config पूरी list burn ना करे, 1000 से ज़्यादा send errors पे manager campaign को pause कर देता है",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:31:49Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.max_send_errors",
+     "label": "ConfigKey",
+     "name": "app.max_send_errors",
+     "path": "schema.sql",
+     "key": "app.max_send_errors"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:84400718b7e9": {
+   "id": "dec:knadh/listmonk:kt:84400718b7e9",
+   "kind": "kt",
+   "key": "kt|config.toml.sample::smtp.my0.max_msg_retries|config_value",
+   "subject": "config.toml.sample::smtp.my0.max_msg_retries",
+   "predicate": "config_value",
+   "object": "2",
+   "text": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:11Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "label": "ConfigKey",
+     "name": "smtp.my0.max_msg_retries",
+     "path": "config.toml.sample",
+     "key": "smtp.my0.max_msg_retries"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:eae9696d9977": {
+   "id": "dec:knadh/listmonk:kt:eae9696d9977",
+   "kind": "kt",
+   "key": "kt|internal/manager/manager.go|kt_said",
+   "subject": "internal/manager/manager.go",
+   "predicate": "kt_said",
+   "object": "हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ।",
+   "text": "internal/manager/manager.go: हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:33Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go",
+     "path": "internal/manager/manager.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:c8ec299a889f": {
+   "id": "dec:knadh/listmonk:kt:c8ec299a889f",
+   "kind": "kt",
+   "key": "kt|internal/manager/manager.go|constraint",
+   "subject": "internal/manager/manager.go",
+   "predicate": "constraint",
+   "object": "manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है।",
+   "text": "internal/manager/manager.go constraint: manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:59Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go",
+     "path": "internal/manager/manager.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:855231fc063f": {
+   "id": "dec:knadh/listmonk:kt:855231fc063f",
+   "kind": "kt",
+   "key": "kt|queries.sql|chose",
+   "subject": "queries.sql",
+   "predicate": "chose",
+   "object": "postgres",
+   "text": "queries.sql: chose postgres (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "query plans predictable रहते हैं और Postgres के jsonb और array features सीधे use होते हैं",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:33:41Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:queries.sql",
+     "label": "File",
+     "name": "queries.sql",
+     "path": "queries.sql",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:441e001034cf": {
+   "id": "dec:knadh/listmonk:kt:441e001034cf",
+   "kind": "kt",
+   "key": "kt|github.com/lib/pq|chose",
+   "subject": "github.com/lib/pq",
+   "predicate": "chose",
+   "object": "Database driver के लिए हम github.com/lib/pq ही use करते हैं।",
+   "text": "github.com/lib/pq: chose Database driver के लिए हम github.com/lib/pq ही use करते हैं। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:07Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:9bdb4d959edc": {
+   "id": "dec:knadh/listmonk:kt:9bdb4d959edc",
+   "kind": "kt",
+   "key": "kt|sqlx|chose",
+   "subject": "sqlx",
+   "predicate": "chose",
+   "object": "lib/pq",
+   "text": "sqlx: chose lib/pq (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "sqlx के साथ lib/pq stable है और कोई performance issue नहीं था",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:07Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:c827a0678f54": {
+   "id": "dec:knadh/listmonk:kt:c827a0678f54",
+   "kind": "kt",
+   "key": "kt|cmd/campaigns.go|owner",
+   "subject": "cmd/campaigns.go",
+   "predicate": "owner",
+   "object": "Priya Nair",
+   "text": "cmd/campaigns.go is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:17Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "name": "campaigns.go",
+     "path": "cmd/campaigns.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:868a18bdeb39": {
+   "id": "dec:knadh/listmonk:kt:868a18bdeb39",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.concurrency|constraint",
+   "subject": "schema.sql::app.concurrency",
+   "predicate": "constraint",
+   "object": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा।",
+   "text": "schema.sql::app.concurrency constraint: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:57Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "schema.sql",
+     "key": "app.concurrency"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  "dec:knadh/listmonk:kt:3ada84b1d737": {
+   "id": "dec:knadh/listmonk:kt:3ada84b1d737",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.message_rate|constraint",
+   "subject": "schema.sql::app.message_rate",
+   "predicate": "constraint",
+   "object": "दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+   "text": "schema.sql::app.message_rate constraint: दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:57Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate",
+     "path": "schema.sql",
+     "key": "app.message_rate"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  }
+ },
+ "paths": {
+  "dec:knadh/listmonk:config_value:1746b14b6895": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@942eb7c3d86e",
+     "kind": "Commit",
+     "title": "Add settings UI and \"hot reload\" support to the app.",
+     "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+     "number": null,
+     "created_at_iso": "2020-07-08T11:00:14Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2020-07-08T11:00:14Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@942eb7c3d86e",
+     "kind": "Commit",
+     "title": "Add settings UI and \"hot reload\" support to the app.",
+     "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+     "number": null,
+     "created_at_iso": "2020-07-08T11:00:14Z",
+     "excerpt": "Add settings UI and \"hot reload\" support to the app.\n\nThis is a major breaking change that moves away from having the\nentire app configuration in external TOML files to settings being\nin the database with a UI to update them dynamically.\n\nThe app loads all config into memory (app settings, SMTP conf)\non boot. \"Hot\" rep",
+     "author": "Kailash Nadh",
+     "at_iso": "2020-07-08T11:00:14Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:1746b14b6895"
+     },
+     "rows": 1,
+     "ms": 6.7
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:507117e52193": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हमने app.concurrency को 10 पे रखा है क्योंकि SES का rate limit hit हो रहा था। जब ये 25 था तो Amazon SES से 454 throttling errors आते थे और campaign बीच में अटक जाती थी।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:507117e52193"
+     },
+     "rows": 1,
+     "ms": 4.8
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:ffd03841ed0f": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@894ede561a45",
+     "kind": "Commit",
+     "title": "Add support for message throughput rate limiting",
+     "url": "https://github.com/knadh/listmonk/commit/894ede561a45a5e8218613e0c68e1e557f665b6f",
+     "number": null,
+     "created_at_iso": "2020-04-02T12:52:27Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2020-04-02T12:52:27Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:d3c44eb38b14"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:config_value:599023a9f988"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@894ede561a45",
+     "kind": "Commit",
+     "title": "Add support for message throughput rate limiting",
+     "url": "https://github.com/knadh/listmonk/commit/894ede561a45a5e8218613e0c68e1e557f665b6f",
+     "number": null,
+     "created_at_iso": "2020-04-02T12:52:27Z",
+     "excerpt": "Add support for message throughput rate limiting",
+     "author": "Kailash Nadh",
+     "at_iso": "2020-04-02T12:52:27Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:ffd03841ed0f"
+     },
+     "rows": 3,
+     "ms": 6.2
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:d3c44eb38b14": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@3ab21383b1c2",
+     "kind": "Commit",
+     "title": "Fresh start",
+     "url": "https://github.com/knadh/listmonk/commit/3ab21383b1c2a3c490146b7c88d1d49ec616acd4",
+     "number": null,
+     "created_at_iso": "2018-10-25T13:51:47Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2018-10-25T13:51:47Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:ffd03841ed0f",
+    "dec:knadh/listmonk:config_value:599023a9f988"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@3ab21383b1c2",
+     "kind": "Commit",
+     "title": "Fresh start",
+     "url": "https://github.com/knadh/listmonk/commit/3ab21383b1c2a3c490146b7c88d1d49ec616acd4",
+     "number": null,
+     "created_at_iso": "2018-10-25T13:51:47Z",
+     "excerpt": "Fresh start",
+     "author": "Kailash Nadh",
+     "at_iso": "2018-10-25T13:51:47Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:d3c44eb38b14"
+     },
+     "rows": 3,
+     "ms": 6.7
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:599023a9f988": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@942eb7c3d86e",
+     "kind": "Commit",
+     "title": "Add settings UI and \"hot reload\" support to the app.",
+     "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+     "number": null,
+     "created_at_iso": "2020-07-08T11:00:14Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2020-07-08T11:00:14Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:d3c44eb38b14",
+    "dec:knadh/listmonk:config_value:ffd03841ed0f"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@942eb7c3d86e",
+     "kind": "Commit",
+     "title": "Add settings UI and \"hot reload\" support to the app.",
+     "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+     "number": null,
+     "created_at_iso": "2020-07-08T11:00:14Z",
+     "excerpt": "Add settings UI and \"hot reload\" support to the app.\n\nThis is a major breaking change that moves away from having the\nentire app configuration in external TOML files to settings being\nin the database with a UI to update them dynamically.\n\nThe app loads all config into memory (app settings, SMTP conf)\non boot. \"Hot\" rep",
+     "author": "Kailash Nadh",
+     "at_iso": "2020-07-08T11:00:14Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:599023a9f988"
+     },
+     "rows": 3,
+     "ms": 5.7
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:4fdd77ff4d9f": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@8c0804ba9f10",
+     "kind": "Commit",
+     "title": "Refactor `blacklist` to `blocklist`",
+     "url": "https://github.com/knadh/listmonk/commit/8c0804ba9f1000fd72e2bbf6b216fd02fda828f7",
+     "number": null,
+     "created_at_iso": "2020-08-01T11:15:29Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2020-08-01T11:15:29Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:87ab95030d1b"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@8c0804ba9f10",
+     "kind": "Commit",
+     "title": "Refactor `blacklist` to `blocklist`",
+     "url": "https://github.com/knadh/listmonk/commit/8c0804ba9f1000fd72e2bbf6b216fd02fda828f7",
+     "number": null,
+     "created_at_iso": "2020-08-01T11:15:29Z",
+     "excerpt": "Refactor `blacklist` to `blocklist`",
+     "author": "Kailash Nadh",
+     "at_iso": "2020-08-01T11:15:29Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:4fdd77ff4d9f"
+     },
+     "rows": 2,
+     "ms": 7.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:87ab95030d1b": {
+   "evidence": [
+    {
+     "id": "pr:knadh/listmonk#153",
+     "kind": "PullRequest",
+     "title": "feat: Add separate config for demo setup, tweak docs",
+     "url": "https://github.com/knadh/listmonk/pull/153",
+     "number": 153,
+     "created_at_iso": "2020-07-09T07:25:43Z",
+     "excerpt": null,
+     "author": "mr-karan",
+     "at_iso": "2020-07-09T07:25:43Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:4fdd77ff4d9f"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@06bb719a7b84",
+     "kind": "Commit",
+     "title": "feat: Add separate config for demo setup, tweak docs",
+     "url": "https://github.com/knadh/listmonk/commit/06bb719a7b84a55748cc04e5a4c26018f4dafe33",
+     "number": null,
+     "created_at_iso": "2020-07-08T17:08:31Z",
+     "excerpt": "feat: Add separate config for demo setup, tweak docs\n\nThis PR adds `config-demo.toml` to `Dockerfile` which uses the db host\n`demo-db`. This is more suited for demo setups. For normal docker installations\nthe db host is changed back to `db` which is a better sane default.\nReworded `INSTALL.md` and `README.md` for more ",
+     "author": "Karan Sharma",
+     "at_iso": "2020-07-08T17:08:31Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:87ab95030d1b"
+     },
+     "rows": 2,
+     "ms": 7.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:3c6e00c4240c": {
+   "evidence": [
+    {
+     "id": "pr:knadh/listmonk#1",
+     "kind": "PullRequest",
+     "title": "WIP: Create Docker release",
+     "url": "https://github.com/knadh/listmonk/pull/1",
+     "number": 1,
+     "created_at_iso": "2019-07-12T10:18:30Z",
+     "excerpt": null,
+     "author": "mr-karan",
+     "at_iso": "2019-07-12T10:18:30Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:246e09f7755f"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@728d1c26e739",
+     "kind": "Commit",
+     "title": "feat: Add docker demo setup",
+     "url": "https://github.com/knadh/listmonk/commit/728d1c26e739b5bc3cc4f881f218e302b27469da",
+     "number": null,
+     "created_at_iso": "2019-07-12T08:20:44Z",
+     "excerpt": "feat: Add docker demo setup",
+     "author": "Karan Sharma",
+     "at_iso": "2019-07-12T08:20:44Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:3c6e00c4240c"
+     },
+     "rows": 2,
+     "ms": 8.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:246e09f7755f": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@7fcc6f71e29b",
+     "kind": "Commit",
+     "title": "Simplify and refactor docker-compose.yml and remove install scripts.",
+     "url": "https://github.com/knadh/listmonk/commit/7fcc6f71e29b0e0866bc8cc746430064b572cb71",
+     "number": null,
+     "created_at_iso": "2024-10-27T10:05:28Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2024-10-27T10:05:28Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:3c6e00c4240c"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@7fcc6f71e29b",
+     "kind": "Commit",
+     "title": "Simplify and refactor docker-compose.yml and remove install scripts.",
+     "url": "https://github.com/knadh/listmonk/commit/7fcc6f71e29b0e0866bc8cc746430064b572cb71",
+     "number": null,
+     "created_at_iso": "2024-10-27T10:05:28Z",
+     "excerpt": "Simplify and refactor docker-compose.yml and remove install scripts.\n\n- Remove \"demo\", \"production\" containers and have just one.\n- Remove dependency on config.toml and inline config to env vars.\n- Have a single idempotent instal+upgrade+run command that eliminates\n  the need for manual upgrade steps.\n- Remove `.sh` in",
+     "author": "Kailash Nadh",
+     "at_iso": "2024-10-27T10:05:28Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:246e09f7755f"
+     },
+     "rows": 2,
+     "ms": 6.7
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:22e0cfa31295": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@8ff79d489168",
+     "kind": "Commit",
+     "title": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+     "url": "https://github.com/knadh/listmonk/commit/8ff79d489168047802b5c964e2586df9441e0810",
+     "number": null,
+     "created_at_iso": "2026-10-06T10:29:38Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-06T10:29:38Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:34f1dce73367",
+    "dec:knadh/listmonk:dependency:59209e3f0bdc",
+    "dec:knadh/listmonk:dependency:2bc349195f02",
+    "dec:knadh/listmonk:dependency:6e8ca5154822",
+    "dec:knadh/listmonk:dependency:e83fa5b469f1"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@8ff79d489168",
+     "kind": "Commit",
+     "title": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+     "url": "https://github.com/knadh/listmonk/commit/8ff79d489168047802b5c964e2586df9441e0810",
+     "number": null,
+     "created_at_iso": "2026-10-06T10:29:38Z",
+     "excerpt": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-06T10:29:38Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:22e0cfa31295"
+     },
+     "rows": 6,
+     "ms": 7.8
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:2874fcef546f": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@515b73213cff",
+     "kind": "Commit",
+     "title": "Upgrade Altcha to v2. Has internal breaking changes in its function and architecture. Closes #3170.",
+     "url": "https://github.com/knadh/listmonk/commit/515b73213cff59275587e8206d2c32ce1dee2684",
+     "number": null,
+     "created_at_iso": "2026-10-19T07:35:12Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-19T07:35:12Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:88818f3ee176",
+    "dec:knadh/listmonk:dependency:56411b48bbe7"
+   ],
+   "newer": [],
+   "motivated_by": [
+    {
+     "id": "issue:knadh/listmonk#3170",
+     "kind": "Issue",
+     "title": "Altcha is not a sufficient replacement for hCaptcha",
+     "url": "https://github.com/knadh/listmonk/issues/3170",
+     "number": 3170,
+     "created_at_iso": "2026-07-28T09:58:06Z",
+     "excerpt": "My website has a registration form that forwards subscriptions to listmonk. My list is configured with double opt-in.\n\nA few months ago, I switched to Altcha following the deprecation of hCaptcha support in listmonk.\nI'm using listmonk's default complexity of 300,000, which is well above Altcha's suggested value of 100",
+     "author": null,
+     "at_iso": "2026-07-28T09:58:06Z"
+    }
+   ],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@515b73213cff",
+     "kind": "Commit",
+     "title": "Upgrade Altcha to v2. Has internal breaking changes in its function and architecture. Closes #3170.",
+     "url": "https://github.com/knadh/listmonk/commit/515b73213cff59275587e8206d2c32ce1dee2684",
+     "number": null,
+     "created_at_iso": "2026-10-19T07:35:12Z",
+     "excerpt": "Upgrade Altcha to v2. Has internal breaking changes in its function and architecture. Closes #3170.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-19T07:35:12Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:2874fcef546f"
+     },
+     "rows": 3,
+     "ms": 6.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:56411b48bbe7": {
+   "evidence": [
+    {
+     "id": "pr:knadh/listmonk#2819",
+     "kind": "PullRequest",
+     "title": "Bump github.com/altcha-org/altcha-lib-go from 0.2.2 to 1.0.0",
+     "url": "https://github.com/knadh/listmonk/pull/2819",
+     "number": 2819,
+     "created_at_iso": "2025-12-29T10:52:54Z",
+     "excerpt": null,
+     "author": "dependabot[bot]",
+     "at_iso": "2025-12-29T10:52:54Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:88818f3ee176"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:dependency:2874fcef546f"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@183d0ea279d5",
+     "kind": "Commit",
+     "title": "Bump github.com/altcha-org/altcha-lib-go from 0.2.2 to 1.0.0 (#2819)",
+     "url": "https://github.com/knadh/listmonk/commit/183d0ea279d55c2e12a4746e8db83800e7b388c5",
+     "number": null,
+     "created_at_iso": "2025-12-29T10:52:54Z",
+     "excerpt": "Bump github.com/altcha-org/altcha-lib-go from 0.2.2 to 1.0.0 (#2819)\n\nBumps [github.com/altcha-org/altcha-lib-go](https://github.com/altcha-org/altcha-lib-go) from 0.2.2 to 1.0.0.\n- [Commits](https://github.com/altcha-org/altcha-lib-go/compare/v0.2.2...v1.0.0)\n\n---\nupdated-dependencies:\n- dependency-name: github.com/al",
+     "author": "dependabot[bot]",
+     "at_iso": "2025-12-29T10:52:54Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:56411b48bbe7"
+     },
+     "rows": 3,
+     "ms": 5.2
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:e83fa5b469f1": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@f14df890a45d",
+     "kind": "Commit",
+     "title": "Update Go deps.",
+     "url": "https://github.com/knadh/listmonk/commit/f14df890a45d2f0a05b0b0676dd91ba4925d5b69",
+     "number": null,
+     "created_at_iso": "2024-01-27T15:25:50Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2024-01-27T15:25:50Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:34f1dce73367",
+    "dec:knadh/listmonk:dependency:59209e3f0bdc",
+    "dec:knadh/listmonk:dependency:2bc349195f02",
+    "dec:knadh/listmonk:dependency:6e8ca5154822"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:dependency:22e0cfa31295"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@f14df890a45d",
+     "kind": "Commit",
+     "title": "Update Go deps.",
+     "url": "https://github.com/knadh/listmonk/commit/f14df890a45d2f0a05b0b0676dd91ba4925d5b69",
+     "number": null,
+     "created_at_iso": "2024-01-27T15:25:50Z",
+     "excerpt": "Update Go deps.",
+     "author": "Kailash Nadh",
+     "at_iso": "2024-01-27T15:25:50Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:e83fa5b469f1"
+     },
+     "rows": 6,
+     "ms": 7.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:88818f3ee176": {
+   "evidence": [
+    {
+     "id": "pr:knadh/listmonk#2634",
+     "kind": "PullRequest",
+     "title": "Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0",
+     "url": "https://github.com/knadh/listmonk/pull/2634",
+     "number": 2634,
+     "created_at_iso": "2025-09-08T13:00:21Z",
+     "excerpt": null,
+     "author": "dependabot[bot]",
+     "at_iso": "2025-09-08T13:00:21Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:dependency:56411b48bbe7",
+    "dec:knadh/listmonk:dependency:2874fcef546f"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@e8b0eafc00cd",
+     "kind": "Commit",
+     "title": "Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0 (#2634)",
+     "url": "https://github.com/knadh/listmonk/commit/e8b0eafc00cde56cd1775a33d3f9c5e3b0d2dc69",
+     "number": null,
+     "created_at_iso": "2025-09-08T13:00:21Z",
+     "excerpt": "Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0 (#2634)\n\nBumps [github.com/go-viper/mapstructure/v2](https://github.com/go-viper/mapstructure) from 2.3.0 to 2.4.0.\n- [Release notes](https://github.com/go-viper/mapstructure/releases)\n- [Changelog](https://github.com/go-viper/mapstructure/blob/main/CHANGELOG",
+     "author": "dependabot[bot]",
+     "at_iso": "2025-09-08T13:00:21Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:88818f3ee176"
+     },
+     "rows": 3,
+     "ms": 6.2
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:6e8ca5154822": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@3646e6d20a8a",
+     "kind": "Commit",
+     "title": "Upgrade Go package deps.",
+     "url": "https://github.com/knadh/listmonk/commit/3646e6d20a8aa827349788c588e59a49175fd4e4",
+     "number": null,
+     "created_at_iso": "2023-03-19T16:19:12Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2023-03-19T16:19:12Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:34f1dce73367",
+    "dec:knadh/listmonk:dependency:59209e3f0bdc",
+    "dec:knadh/listmonk:dependency:2bc349195f02"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:dependency:e83fa5b469f1",
+    "dec:knadh/listmonk:dependency:22e0cfa31295"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@3646e6d20a8a",
+     "kind": "Commit",
+     "title": "Upgrade Go package deps.",
+     "url": "https://github.com/knadh/listmonk/commit/3646e6d20a8aa827349788c588e59a49175fd4e4",
+     "number": null,
+     "created_at_iso": "2023-03-19T16:19:12Z",
+     "excerpt": "Upgrade Go package deps.",
+     "author": "Kailash Nadh",
+     "at_iso": "2023-03-19T16:19:12Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:6e8ca5154822"
+     },
+     "rows": 6,
+     "ms": 7.1
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:2bc349195f02": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@d0f1a2700bf9",
+     "kind": "Commit",
+     "title": "Update Go deps.",
+     "url": "https://github.com/knadh/listmonk/commit/d0f1a2700bf965343a447c2ca2bd46b1c0bcd1ce",
+     "number": null,
+     "created_at_iso": "2021-09-28T18:37:26Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2021-09-28T18:37:26Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:34f1dce73367",
+    "dec:knadh/listmonk:dependency:59209e3f0bdc"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:dependency:6e8ca5154822",
+    "dec:knadh/listmonk:dependency:e83fa5b469f1",
+    "dec:knadh/listmonk:dependency:22e0cfa31295"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@d0f1a2700bf9",
+     "kind": "Commit",
+     "title": "Update Go deps.",
+     "url": "https://github.com/knadh/listmonk/commit/d0f1a2700bf965343a447c2ca2bd46b1c0bcd1ce",
+     "number": null,
+     "created_at_iso": "2021-09-28T18:37:26Z",
+     "excerpt": "Update Go deps.",
+     "author": "Kailash Nadh",
+     "at_iso": "2021-09-28T18:37:26Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:2bc349195f02"
+     },
+     "rows": 6,
+     "ms": 6.5
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:59209e3f0bdc": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@83d888a30b53",
+     "kind": "Commit",
+     "title": "Update and cleanup deps",
+     "url": "https://github.com/knadh/listmonk/commit/83d888a30b5364dd2ba702592db933305a9dc485",
+     "number": null,
+     "created_at_iso": "2020-03-08T10:33:57Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2020-03-08T10:33:57Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:dependency:34f1dce73367"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:dependency:2bc349195f02",
+    "dec:knadh/listmonk:dependency:6e8ca5154822",
+    "dec:knadh/listmonk:dependency:e83fa5b469f1",
+    "dec:knadh/listmonk:dependency:22e0cfa31295"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@83d888a30b53",
+     "kind": "Commit",
+     "title": "Update and cleanup deps",
+     "url": "https://github.com/knadh/listmonk/commit/83d888a30b5364dd2ba702592db933305a9dc485",
+     "number": null,
+     "created_at_iso": "2020-03-08T10:33:57Z",
+     "excerpt": "Update and cleanup deps",
+     "author": "Kailash Nadh",
+     "at_iso": "2020-03-08T10:33:57Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:59209e3f0bdc"
+     },
+     "rows": 6,
+     "ms": 6.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:dependency:34f1dce73367": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@4ef5a3a04213",
+     "kind": "Commit",
+     "title": "chore: Go modules and add readme",
+     "url": "https://github.com/knadh/listmonk/commit/4ef5a3a0421385e3906d73752627a93a23119b0f",
+     "number": null,
+     "created_at_iso": "2019-01-09T11:13:13Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2019-01-09T11:13:13Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:dependency:59209e3f0bdc",
+    "dec:knadh/listmonk:dependency:2bc349195f02",
+    "dec:knadh/listmonk:dependency:6e8ca5154822",
+    "dec:knadh/listmonk:dependency:e83fa5b469f1",
+    "dec:knadh/listmonk:dependency:22e0cfa31295"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@4ef5a3a04213",
+     "kind": "Commit",
+     "title": "chore: Go modules and add readme",
+     "url": "https://github.com/knadh/listmonk/commit/4ef5a3a0421385e3906d73752627a93a23119b0f",
+     "number": null,
+     "created_at_iso": "2019-01-09T11:13:13Z",
+     "excerpt": "chore: Go modules and add readme",
+     "author": "Joe Paul",
+     "at_iso": "2019-01-09T11:13:13Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:dependency:34f1dce73367"
+     },
+     "rows": 6,
+     "ms": 6.7
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:06f225d4b2c5": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:06f225d4b2c5"
+     },
+     "rows": 1,
+     "ms": 4.9
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:54bfab88d0a8": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "CI बनाता है, Dockerfile root में है। एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:54bfab88d0a8"
+     },
+     "rows": 1,
+     "ms": 6.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:077614c13476": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:b069981bf4db"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": "Fix Mailhog port not being available inside the dev container.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:077614c13476"
+     },
+     "rows": 2,
+     "ms": 4.9
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:b069981bf4db": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@9ca898c286b9",
+     "kind": "Commit",
+     "title": "Refactor and simply dev docker environment. Closes #3102.",
+     "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+     "number": null,
+     "created_at_iso": "2026-10-10T18:10:00Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-10T18:10:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:077614c13476"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@9ca898c286b9",
+     "kind": "Commit",
+     "title": "Refactor and simply dev docker environment. Closes #3102.",
+     "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+     "number": null,
+     "created_at_iso": "2026-10-10T18:10:00Z",
+     "excerpt": "Refactor and simply dev docker environment. Closes #3102.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-10T18:10:00Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:b069981bf4db"
+     },
+     "rows": 2,
+     "ms": 4.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:2650b22d78da": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:c78125d62d9c",
+    "dec:knadh/listmonk:config_value:074b98aec652"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": "Fix Mailhog port not being available inside the dev container.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:2650b22d78da"
+     },
+     "rows": 3,
+     "ms": 5.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:074b98aec652": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@9ca898c286b9",
+     "kind": "Commit",
+     "title": "Refactor and simply dev docker environment. Closes #3102.",
+     "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+     "number": null,
+     "created_at_iso": "2026-10-10T18:10:00Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-10T18:10:00Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:c78125d62d9c"
+   ],
+   "newer": [
+    "dec:knadh/listmonk:config_value:2650b22d78da"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@9ca898c286b9",
+     "kind": "Commit",
+     "title": "Refactor and simply dev docker environment. Closes #3102.",
+     "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c",
+     "number": null,
+     "created_at_iso": "2026-10-10T18:10:00Z",
+     "excerpt": "Refactor and simply dev docker environment. Closes #3102.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-10T18:10:00Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:074b98aec652"
+     },
+     "rows": 3,
+     "ms": 4.1
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:5c44ea022381": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:cd6b4a22b4cd"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": "Fix Mailhog port not being available inside the dev container.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:5c44ea022381"
+     },
+     "rows": 2,
+     "ms": 4.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:cd6b4a22b4cd": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@f82179bee22d",
+     "kind": "Commit",
+     "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+     "number": null,
+     "created_at_iso": "2026-10-15T10:05:34Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-15T10:05:34Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:5c44ea022381"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@f82179bee22d",
+     "kind": "Commit",
+     "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+     "number": null,
+     "created_at_iso": "2026-10-15T10:05:34Z",
+     "excerpt": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-15T10:05:34Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:cd6b4a22b4cd"
+     },
+     "rows": 2,
+     "ms": 3.5
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:4d234d9cc4c0": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "older": [
+    "dec:knadh/listmonk:config_value:cddf4286491d"
+   ],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "kind": "Commit",
+     "title": "Fix Mailhog port not being available inside the dev container.",
+     "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+     "number": null,
+     "created_at_iso": "2026-10-20T09:27:45Z",
+     "excerpt": "Fix Mailhog port not being available inside the dev container.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-20T09:27:45Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:4d234d9cc4c0"
+     },
+     "rows": 2,
+     "ms": 4.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:cddf4286491d": {
+   "evidence": [
+    {
+     "id": "commit:knadh/listmonk@f82179bee22d",
+     "kind": "Commit",
+     "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+     "number": null,
+     "created_at_iso": "2026-10-15T10:05:34Z",
+     "excerpt": null,
+     "author": null,
+     "at_iso": "2026-10-15T10:05:34Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:4d234d9cc4c0"
+   ],
+   "motivated_by": [],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@f82179bee22d",
+     "kind": "Commit",
+     "title": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "url": "https://github.com/knadh/listmonk/commit/f82179bee22df01e871fde8a86efa17abc4bcc23",
+     "number": null,
+     "created_at_iso": "2026-10-15T10:05:34Z",
+     "excerpt": "Fix Playwright test scaffolding to work with the Docker dev env.",
+     "author": "Kailash Nadh",
+     "at_iso": "2026-10-15T10:05:34Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:cddf4286491d"
+     },
+     "rows": 2,
+     "ms": 3.9
+    }
+   ]
+  },
+  "dec:knadh/listmonk:config_value:c78125d62d9c": {
+   "evidence": [
+    {
+     "id": "pr:knadh/listmonk#608",
+     "kind": "PullRequest",
+     "title": "feat: Add dev docker setup",
+     "url": "https://github.com/knadh/listmonk/pull/608",
+     "number": 608,
+     "created_at_iso": "2021-12-05T07:07:30Z",
+     "excerpt": null,
+     "author": "mr-karan",
+     "at_iso": "2021-12-05T07:07:30Z"
+    }
+   ],
+   "older": [],
+   "newer": [
+    "dec:knadh/listmonk:config_value:074b98aec652",
+    "dec:knadh/listmonk:config_value:2650b22d78da"
+   ],
+   "motivated_by": [
+    {
+     "id": "issue:knadh/listmonk#562",
+     "kind": "Issue",
+     "title": "Docker-Compose-dev.yml",
+     "url": "https://github.com/knadh/listmonk/issues/562",
+     "number": 562,
+     "created_at_iso": "2021-10-29T16:33:25Z",
+     "excerpt": "Good day,\r\n\r\ncould you add a docker-compose-dev.yml?\r\nI wanted to try my luck with IMAP and bounce.\r\nUnfortunately, some things in your project are not clear to me and that's why I can't manage to start it (file paths are not correct in your Dockerfile). So that I can develop myself I would ask you to write a Docker-Co",
+     "author": null,
+     "at_iso": "2021-10-29T16:33:25Z"
+    }
+   ],
+   "implemented_by": [
+    {
+     "id": "commit:knadh/listmonk@e977b901e181",
+     "kind": "Commit",
+     "title": "feat: Add dev docker setup",
+     "url": "https://github.com/knadh/listmonk/commit/e977b901e181bcfed9ffe2cedf3b960a4069a230",
+     "number": null,
+     "created_at_iso": "2021-12-01T17:47:14Z",
+     "excerpt": "feat: Add dev docker setup",
+     "author": "Karan Sharma",
+     "at_iso": "2021-12-01T17:47:14Z"
+    }
+   ],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:config_value:c78125d62d9c"
+     },
+     "rows": 3,
+     "ms": 5.0
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:554978c865c8": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0005",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, internal/manager में उतने ही goroutines messages push करते हैं। और message_rate को भी 10 रखा है, मतलब हर worker एक second में 10 messages से ज़्यादा push नहीं करेगा। दोनों मिलाकर 100 messages per second, SES की limit उससे ऊपर है इसलिए safe है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:554978c865c8"
+     },
+     "rows": 1,
+     "ms": 4.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:c8f3d954d3b8": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0009",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "app.batch_size 1000 इसलिए है क्योंकि Postgres से subscribers 1000-1000 के batch में निकलते हैं, एक साथ पूरी list memory में नहीं आती। sliding window के साथ ये number well tested है, इसे बढ़ाने से DB पे load बढ़ता है, फायदा कुछ नहीं।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:c8f3d954d3b8"
+     },
+     "rows": 1,
+     "ms": 4.1
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:e0f967c7ce94": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0011",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "max_send_errors को 1000 रखा है ताकि एक गलत SMTP config पूरी list burn ना करे, 1000 से ज़्यादा send errors पे manager campaign को pause कर देता है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:e0f967c7ce94"
+     },
+     "rows": 1,
+     "ms": 3.8
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:84400718b7e9": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0013",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, config.toml में [smtp] block है, वहाँ max_conns और max_msg_retries हैं। max_msg_retries 2 ही रहने दो, ज़्यादा retries से duplicate deliveries का risk है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:84400718b7e9"
+     },
+     "rows": 1,
+     "ms": 4.6
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:eae9696d9977": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0015",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ। दो हफ्ते बाद duplicate sends की complaints आईं, क्योंकि SMTP timeout के बाद message actually deliver हो चुका होता था। तो हमने वो commit revert कर दिया।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:eae9696d9977"
+     },
+     "rows": 1,
+     "ms": 5.5
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:c8ec299a889f": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "SMTP level पे max_msg_retries है, वो connection retry है, message retry नहीं। manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:c8ec299a889f"
+     },
+     "rows": 1,
+     "ms": 5.4
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:855231fc063f": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0021",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, queries.sql में हमने raw SQL रखा है, ORM नहीं, क्योंकि query plans predictable रहते हैं और Postgres के jsonb और array features सीधे use होते हैं। goyesql उस file को parse करके named queries देता है, और sqlx से scan होता है। कोई ORM introduce मत करना, upstream maintainers का भी यही stand है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:855231fc063f"
+     },
+     "rows": 1,
+     "ms": 5.1
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:441e001034cf": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0023",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "Database driver के लिए हम github.com/lib/pq ही use करते हैं। pgx पे switch करने का plan था पर हमने नहीं किया क्योंकि sqlx के साथ lib/pq stable है और कोई performance issue नहीं था। HTTP के लिए github.com/labstack/echo/v4 है, config के लिए github.com/knadh/koanf।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:441e001034cf"
+     },
+     "rows": 1,
+     "ms": 5.6
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:9bdb4d959edc": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0023",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "Database driver के लिए हम github.com/lib/pq ही use करते हैं। pgx पे switch करने का plan था पर हमने नहीं किया क्योंकि sqlx के साथ lib/pq stable है और कोई performance issue नहीं था। HTTP के लिए github.com/labstack/echo/v4 है, config के लिए github.com/knadh/koanf।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:9bdb4d959edc"
+     },
+     "rows": 1,
+     "ms": 4.9
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:c827a0678f54": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0030",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "cmd/campaigns.go Priya देखेगी, internal/messenger अभी के लिए Arjun की team देखेगी जब तक नया hire नहीं आता।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:c827a0678f54"
+     },
+     "rows": 1,
+     "ms": 4.3
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:868a18bdeb39": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:868a18bdeb39"
+     },
+     "rows": 1,
+     "ms": 4.5
+    }
+   ]
+  },
+  "dec:knadh/listmonk:kt:3ada84b1d737": {
+   "evidence": [
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "kind": "Utterance",
+     "title": "handover call, S1",
+     "url": null,
+     "number": null,
+     "created_at_iso": "2026-10-20T04:30:00Z",
+     "excerpt": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+     "author": "Rohan Mehta",
+     "at_iso": "2026-10-20T04:30:00Z"
+    }
+   ],
+   "older": [],
+   "newer": [],
+   "motivated_by": [],
+   "implemented_by": [],
+   "cypher": [
+    {
+     "name": "32_why_path",
+     "params": {
+      "id": "dec:knadh/listmonk:kt:3ada84b1d737"
+     },
+     "rows": 1,
+     "ms": 4.8
+    }
+   ]
+  }
+ }
+}

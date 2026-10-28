@@ -1,0 +1,16 @@
+[
+ {
+  "id": 501,
+  "user": {
+   "login": "bob",
+   "id": 40965,
+   "type": "User",
+   "html_url": "https://github.com/bob"
+  },
+  "body": "LGTM, pgx is faster and the pool handles reconnects.",
+  "state": "APPROVED",
+  "html_url": "https://github.com/acme/demo/pull/7#pullrequestreview-501",
+  "submitted_at": "2024-02-28T12:00:00Z",
+  "commit_id": "C3SHA"
+ }
+]

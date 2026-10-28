@@ -1,0 +1,26 @@
+# Local Neo4j for development. Production/demo uses Neo4j AuraDB (set NEO4J_URI to the neo4j+s:// URI).
+# Kyun only uses features AuraDB Free offers: one database, vector + full-text indexes, no APOC/GDS required.
+services:
+  neo4j:
+    image: neo4j:enterprise
+    container_name: kyun-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: eval
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-kyun-dev-password}
+      NEO4J_server_memory_heap_initial__size: 512M
+      NEO4J_server_memory_heap_max__size: 1500M
+      NEO4J_server_memory_pagecache_size: 512M
+      NEO4J_db_transaction_timeout: 60s
+    volumes:
+      - kyun_neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+
+volumes:
+  kyun_neo4j_data:

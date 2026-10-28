@@ -1,0 +1,26 @@
+[
+ {
+  "sha": "C3SHA",
+  "commit": {
+   "author": {
+    "name": "Ada Lovelace",
+    "email": "ada@example.com",
+    "date": "2024-03-01T10:00:00Z"
+   },
+   "message": "Switch to pgx (#7)\n\nCloses #3"
+  },
+  "author": {
+   "login": "ada",
+   "id": 18355,
+   "type": "User",
+   "html_url": "https://github.com/ada"
+  },
+  "committer": {
+   "login": "ada",
+   "id": 18355,
+   "type": "User",
+   "html_url": "https://github.com/ada"
+  },
+  "html_url": "https://github.com/acme/demo/commit/C3SHA"
+ }
+]

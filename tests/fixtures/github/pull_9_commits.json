@@ -1,0 +1,21 @@
+[
+ {
+  "sha": "C6SHA",
+  "commit": {
+   "author": {
+    "name": "Ada Lovelace",
+    "email": "ada@example.com",
+    "date": "2024-06-01T10:00:00Z"
+   },
+   "message": "Fix crash on startup (#9)\n\nFixes #5"
+  },
+  "author": {
+   "login": "ada",
+   "id": 18355,
+   "type": "User",
+   "html_url": "https://github.com/ada"
+  },
+  "committer": null,
+  "html_url": "https://github.com/acme/demo/commit/C6SHA"
+ }
+]

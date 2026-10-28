@@ -1,0 +1,16 @@
+[
+ {
+  "full_name": "knadh/listmonk",
+  "url": "https://github.com/knadh/listmonk",
+  "head_sha": "a74f40b346aca27ceed3e2bbf6528712d3d16375",
+  "commit_count": 2270,
+  "ingested_at_iso": "2026-10-28T15:45:13Z",
+  "counts": {
+   "commits": 2270,
+   "prs": 896,
+   "issues": 2284,
+   "decisions": 2546,
+   "meetings": 1
+  }
+ }
+]

@@ -1,0 +1,1188 @@
+{
+ "question": "who should I ask about internal/manager?",
+ "repo": "knadh/listmonk",
+ "mode": "both",
+ "answer": "Owner on record: Priya Nair; Rohan Mehta said so in the handover call 'Listmonk handover: campaign manager and config' on 20 Oct 2026 [dec:knadh/listmonk:kt:06f225d4b2c5]. Person to ask about `internal/manager`: Kailash Nadh, who authored 57 of 69 commits on manager, reviewed 1 of 15 PRs touching it [person:gh:knadh]. Also Rohan Mehta, who stated 1 recorded decision about it [person:email:rohan.mehta@example.com] and Pierre-Olivier Mercier, who authored 1 of 69 commits on manager [person:gh:nemunaire].",
+ "refused": false,
+ "confidence": {
+  "score": 0.7,
+  "label": "medium",
+  "reasons": [
+   "2 independent sources",
+   "backed by a handover call",
+   "decision is active",
+   "entity matched exactly (manager)",
+   "decided within the last year",
+   "stated by a named person"
+  ]
+ },
+ "evidence_chain": [
+  {
+   "role": "decision",
+   "id": "dec:knadh/listmonk:kt:06f225d4b2c5",
+   "title": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:51Z",
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "title": "handover call 'Listmonk handover: campaign manager and config'",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+   "title": "handover call, S1",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": "अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी।",
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "person",
+   "id": "person:email:rohan.mehta@example.com",
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": "Rohan Mehta",
+   "why": "stated the decision and stated 1 recorded decision about it",
+   "iso": null
+  },
+  {
+   "role": "date",
+   "id": null,
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": "2026-10-20T04:34:51Z"
+  }
+ ],
+ "supersession": [],
+ "citations": {
+  "dec:knadh/listmonk:kt:06f225d4b2c5": {
+   "kind": "decision",
+   "title": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "url": null,
+   "excerpt": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+  },
+  "person:gh:knadh": {
+   "kind": "person",
+   "title": "Kailash Nadh",
+   "url": null,
+   "excerpt": null
+  },
+  "person:email:rohan.mehta@example.com": {
+   "kind": "person",
+   "title": "Rohan Mehta",
+   "url": null,
+   "excerpt": null
+  },
+  "person:gh:nemunaire": {
+   "kind": "person",
+   "title": "Pierre-Olivier Mercier",
+   "url": null,
+   "excerpt": null
+  }
+ },
+ "entities": [
+  {
+   "id": "module:knadh/listmonk:internal/manager",
+   "label": "Module",
+   "name": "manager",
+   "path": "internal/manager",
+   "key": null
+  }
+ ],
+ "why": {
+  "route": "entity_who_to_ask",
+  "cypher": [
+   {
+    "name": "30_resolve_entities",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "internal^3 OR manager^3 OR ask",
+     "exact": [
+      "internal/manager",
+      "manager"
+     ],
+     "limit": 25
+    },
+    "rows": 25,
+    "ms": 10.3
+   },
+   {
+    "name": "31_decisions_about",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "module:knadh/listmonk:internal/manager"
+     ],
+     "terms": [
+      "internal",
+      "manager",
+      "ask"
+     ],
+     "limit": 12,
+     "chain_limit": 60
+    },
+    "rows": 12,
+    "ms": 11.2
+   },
+   {
+    "name": "36_prs_about_entity",
+    "params": {
+     "ids": [
+      "module:knadh/listmonk:internal/manager"
+     ],
+     "limit": 6
+    },
+    "rows": 6,
+    "ms": 8.9
+   },
+   {
+    "name": "38_recent_commits_about",
+    "params": {
+     "ids": [
+      "module:knadh/listmonk:internal/manager"
+     ],
+     "limit": 6
+    },
+    "rows": 6,
+    "ms": 7.4
+   },
+   {
+    "name": "34_person_to_ask",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "module:knadh/listmonk:internal/manager"
+     ],
+     "now": 1793203434172,
+     "limit": 4
+    },
+    "rows": 4,
+    "ms": 7.3
+   },
+   {
+    "name": "37_neighbourhood",
+    "params": {
+     "ids": [
+      "dec:knadh/listmonk:kt:06f225d4b2c5",
+      "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+      "person:email:rohan.mehta@example.com",
+      "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+      "dec:knadh/listmonk:kt:c8ec299a889f",
+      "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+      "module:knadh/listmonk:internal/manager",
+      "pr:knadh/listmonk#3056",
+      "pr:knadh/listmonk#3171",
+      "pr:knadh/listmonk#3136",
+      "commit:knadh/listmonk@a74f40b346ac",
+      "commit:knadh/listmonk@33896f18bcc9",
+      "... +1"
+     ],
+     "per_seed": 5,
+     "limit": 60
+    },
+    "rows": 1,
+    "ms": 17.5
+   },
+   {
+    "name": "50_vector_chunks",
+    "params": {
+     "q": "<vector dim=384>",
+     "k": 500,
+     "repo": "knadh/listmonk",
+     "limit": 8
+    },
+    "rows": 8,
+    "ms": 13.7
+   }
+  ],
+  "subgraph": {
+   "nodes": [
+    {
+     "id": "dec:knadh/listmonk:kt:06f225d4b2c5",
+     "label": "Decision",
+     "props": {
+      "at": 1792470891000,
+      "kind": "kt",
+      "name": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "Priya Nair",
+      "status": "active",
+      "text": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:c8ec299a889f",
+     "label": "Decision",
+     "props": {
+      "at": 1792470779000,
+      "kind": "kt",
+      "name": "internal/manager/manager.go constraint: manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है।",
+      "status": "active",
+      "text": "internal/manager/manager.go constraint: manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है। (said by "
+     }
+    },
+    {
+     "id": "module:knadh/listmonk:internal/manager",
+     "label": "Module",
+     "props": {
+      "name": "manager",
+      "path": "internal/manager"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#3056",
+     "label": "PullRequest",
+     "props": {
+      "at": 1791656300000,
+      "name": "Allow Go templates in campaign From header",
+      "number": 3056,
+      "text": "Some concurrent softwares (like ActiveCampaign) allows template in the From header.\r\n\r\nThis pull request adds support for this!",
+      "url": "https://github.com/knadh/listmonk/pull/3056"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#3171",
+     "label": "PullRequest",
+     "props": {
+      "at": 1788579830000,
+      "name": "fix: ensure relative CID images load in web views",
+      "number": 3171,
+      "text": "Previously, a relative-link CID image in a template would not render properly in the web view or archive of the message; it would use a link relative to the act",
+      "url": "https://github.com/knadh/listmonk/pull/3171"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#3136",
+     "label": "PullRequest",
+     "props": {
+      "at": 1783833790000,
+      "name": "fix: improve tracking pixel HTML attributes for anti-spam compliance",
+      "number": 3136,
+      "text": "## Problem\n\nThe current tracking pixel is rendered as a bare `<img>` tag without explicit size attributes:\n\n```html\n<img src=\"https://...\" alt=\"\" />\n```\n\nThis c",
+      "url": "https://github.com/knadh/listmonk/pull/3136"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@a74f40b346ac",
+     "label": "Commit",
+     "props": {
+      "at": 1793123110000,
+      "name": "Add `IsPreview` to template funcs. Closes #3311.",
+      "text": "Add `IsPreview` to template funcs. Closes #3311.",
+      "url": "https://github.com/knadh/listmonk/commit/a74f40b346aca27ceed3e2bbf6528712d3d16375"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@33896f18bcc9",
+     "label": "Commit",
+     "props": {
+      "at": 1792346852000,
+      "name": "Fix incorrect realtime update of stats on the campaign page.",
+      "text": "Fix incorrect realtime update of stats on the campaign page.\n\n- Fix stats sent count which was set incorrectly after a recent refactor\n  of how sent counts are ",
+      "url": "https://github.com/knadh/listmonk/commit/33896f18bcc9136327cee26e38ebbb23e9f39717"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@a729a4a6d635",
+     "label": "Commit",
+     "props": {
+      "at": 1792160800000,
+      "name": "Fix campaign resume checkpoints to avoid skipping unsent subscribers",
+      "text": "Fix campaign resume checkpoints to avoid skipping unsent subscribers\n\nPreviously, `next-campaign-subscribers` that fetched a batch of subs for sending\nwould imm",
+      "url": "https://github.com/knadh/listmonk/commit/a729a4a6d635dabb75fa0ec53df25eec2e6f2285"
+     }
+    },
+    {
+     "id": "person:email:rohan.mehta@example.com",
+     "label": "Person",
+     "props": {
+      "kind": "speaker",
+      "name": "Rohan Mehta"
+     }
+    },
+    {
+     "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "label": "Meeting",
+     "props": {
+      "at": 1793202323268,
+      "name": "Listmonk handover: campaign manager and config"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "label": "Utterance",
+     "props": {
+      "text": "अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी।"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "label": "Utterance",
+     "props": {
+      "text": "SMTP level पे max_msg_retries है, वो connection retry है, message retry नहीं। manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:change:5090a7d7f163",
+     "label": "Decision",
+     "props": {
+      "at": 1791656300000,
+      "kind": "change",
+      "name": "PR #3056: Allow Go templates in campaign From header",
+      "object": "Allow Go templates in campaign From header",
+      "status": "active",
+      "text": "PR #3056: Allow Go templates in campaign From header"
+     }
+    },
+    {
+     "id": "person:gh:nemunaire",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Pierre-Olivier Mercier"
+     }
+    },
+    {
+     "id": "person:gh:github-actions[bot]",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "github-actions[bot]"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#476",
+     "label": "PullRequest",
+     "props": {
+      "at": 1632242469000,
+      "name": "Bump prismjs from 1.24.0 to 1.25.0 in /frontend",
+      "number": 476,
+      "text": "Bumps [prismjs](https://github.com/PrismJS/prism) from 1.24.0 to 1.25.0.\n<details>\n<summary>Release notes</summary>\n<p><em>Sourced from <a href=\"https://github.",
+      "url": "https://github.com/knadh/listmonk/pull/476"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:docs/docs/content/templating.md",
+     "label": "File",
+     "props": {
+      "name": "templating.md",
+      "path": "docs/docs/content/templating.md"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:change:afb939dae98c",
+     "label": "Decision",
+     "props": {
+      "at": 1788579830000,
+      "kind": "change",
+      "name": "PR #3171: fix: ensure relative CID images load in web views",
+      "object": "fix: ensure relative CID images load in web views",
+      "status": "active",
+      "text": "PR #3171: fix: ensure relative CID images load in web views"
+     }
+    },
+    {
+     "id": "person:gh:joshuaboniface",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Joshua M. Boniface"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:cmd/manager_store.go",
+     "label": "File",
+     "props": {
+      "name": "manager_store.go",
+      "path": "cmd/manager_store.go"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:cmd/archive.go",
+     "label": "File",
+     "props": {
+      "name": "archive.go",
+      "path": "cmd/archive.go"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:change:0c04035665d9",
+     "label": "Decision",
+     "props": {
+      "at": 1783833790000,
+      "kind": "change",
+      "name": "PR #3136: fix: improve tracking pixel HTML attributes for anti-spam compliance",
+      "object": "fix: improve tracking pixel HTML attributes for anti-spam compliance",
+      "status": "active",
+      "text": "PR #3136: fix: improve tracking pixel HTML attributes for anti-spam compliance"
+     }
+    },
+    {
+     "id": "person:gh:shustovte",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "shustovTE"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#3172",
+     "label": "PullRequest",
+     "props": {
+      "at": 1785396863000,
+      "name": "Sync upstream/master (July 2026) — keep Tiptap editor",
+      "number": 3172,
+      "text": "Syncs `upstream/master` through `911e0b77` (post-v6.2.0).\n\n## Why this looked bigger than it was\nThe June sync was a **squash merge**, so `merge-base` was stuck",
+      "url": "https://github.com/knadh/listmonk/pull/3172"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "props": {
+      "name": "manager.go",
+      "path": "internal/manager/manager.go"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:cmd/public.go",
+     "label": "File",
+     "props": {
+      "name": "public.go",
+      "path": "cmd/public.go"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:507117e52193",
+     "label": "Decision",
+     "props": {
+      "at": 1792470628000,
+      "kind": "kt",
+      "name": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:554978c865c8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470648000,
+      "kind": "kt",
+      "name": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470687000,
+      "kind": "kt",
+      "name": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "label": "Decision",
+     "props": {
+      "at": 1792470709000,
+      "kind": "kt",
+      "name": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:84400718b7e9",
+     "label": "Decision",
+     "props": {
+      "at": 1792470731000,
+      "kind": "kt",
+      "name": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "2",
+      "status": "active",
+      "text": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "person:gh:knadh",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Kailash Nadh"
+     }
+    },
+    {
+     "id": "issue:knadh/listmonk#3311",
+     "label": "Issue",
+     "props": {
+      "at": 1792946472000,
+      "name": "Template expression for switching on whether the template is rendered as a preview",
+      "number": 3311,
+      "text": "Instead of using listmonks built-in tracking, I'm using a [Umami](https://umami.is/) for tracking. So in my template, I'm removing the `{{ TrackView }}`  and ad",
+      "url": "https://github.com/knadh/listmonk/issues/3311"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:models/campaigns.go",
+     "label": "File",
+     "props": {
+      "name": "campaigns.go",
+      "path": "models/campaigns.go"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:internal/manager/pipe.go",
+     "label": "File",
+     "props": {
+      "name": "pipe.go",
+      "path": "internal/manager/pipe.go"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "props": {
+      "name": "campaigns.go",
+      "path": "cmd/campaigns.go"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:static/admin/assets/js/views/campaigns.js",
+     "label": "File",
+     "props": {
+      "name": "campaigns.js",
+      "path": "static/admin/assets/js/views/campaigns.js"
+     }
+    },
+    {
+     "id": "issue:knadh/listmonk#3022",
+     "label": "Issue",
+     "props": {
+      "at": 1777530156000,
+      "name": "Campaign is not sent to all subscribers",
+      "number": 3022,
+      "text": "**Version:**\n - listmonk: 6.1\n - OS: Docker container\n\n**Description of the bug and steps to reproduce:**\nWhen I started a campaign in production, only the half",
+      "url": "https://github.com/knadh/listmonk/issues/3022"
+     }
+    },
+    {
+     "id": "module:knadh/listmonk:internal",
+     "label": "Module",
+     "props": {
+      "name": "internal",
+      "path": "internal"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:internal/manager/message.go",
+     "label": "File",
+     "props": {
+      "name": "message.go",
+      "path": "internal/manager/message.go"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0028",
+     "label": "Utterance",
+     "props": {
+      "text": "ठीक है, मैं ले रही हूँ।"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026",
+     "label": "Utterance",
+     "props": {
+      "text": "ownership पे आते हैं। तुम्हारे जाने के बाद internal/manager कौन देखेगा?"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0018",
+     "label": "Utterance",
+     "props": {
+      "text": "Good. अब code structure, Priya के लिए।"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0016",
+     "label": "Utterance",
+     "props": {
+      "text": "तो अभी retry बिल्कुल नहीं है?"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "label": "ConfigKey",
+     "props": {
+      "name": "smtp.my0.max_msg_retries",
+      "path": "config.toml.sample"
+     }
+    }
+   ],
+   "edges": [
+    {
+     "from": "dec:knadh/listmonk:kt:06f225d4b2c5",
+     "to": "module:knadh/listmonk:internal/manager",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:06f225d4b2c5",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:06f225d4b2c5",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:06f225d4b2c5",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8ec299a889f",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8ec299a889f",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8ec299a889f",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8ec299a889f",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "module:knadh/listmonk:internal/manager",
+     "to": "module:knadh/listmonk:internal",
+     "type": "IN"
+    },
+    {
+     "from": "pr:knadh/listmonk#3056",
+     "to": "file:knadh/listmonk:docs/docs/content/templating.md",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3056",
+     "to": "file:knadh/listmonk:internal/manager/message.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3056",
+     "to": "file:knadh/listmonk:models/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3056",
+     "to": "file:knadh/listmonk:cmd/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3171",
+     "to": "file:knadh/listmonk:cmd/manager_store.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3171",
+     "to": "file:knadh/listmonk:cmd/archive.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3171",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3171",
+     "to": "file:knadh/listmonk:cmd/public.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3136",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3136",
+     "to": "file:knadh/listmonk:cmd/public.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "file:knadh/listmonk:cmd/archive.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "file:knadh/listmonk:docs/docs/content/templating.md",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "file:knadh/listmonk:models/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "file:knadh/listmonk:cmd/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a74f40b346ac",
+     "to": "issue:knadh/listmonk#3311",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "commit:knadh/listmonk@33896f18bcc9",
+     "to": "file:knadh/listmonk:internal/manager/pipe.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@33896f18bcc9",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@33896f18bcc9",
+     "to": "file:knadh/listmonk:cmd/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@33896f18bcc9",
+     "to": "file:knadh/listmonk:static/admin/assets/js/views/campaigns.js",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a729a4a6d635",
+     "to": "file:knadh/listmonk:cmd/manager_store.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a729a4a6d635",
+     "to": "file:knadh/listmonk:internal/manager/pipe.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a729a4a6d635",
+     "to": "file:knadh/listmonk:models/campaigns.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a729a4a6d635",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@a729a4a6d635",
+     "to": "issue:knadh/listmonk#3022",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0016",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0018",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0028",
+     "type": "HAS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "SPOKEN_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0028",
+     "type": "NEXT"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "SPOKEN_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0018",
+     "type": "NEXT"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "to": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "file:knadh/listmonk:docs/docs/content/templating.md",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "file:knadh/listmonk:internal/manager/message.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "file:knadh/listmonk:models/campaigns.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "file:knadh/listmonk:cmd/campaigns.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "pr:knadh/listmonk#3056",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:5090a7d7f163",
+     "to": "person:gh:nemunaire",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:nemunaire",
+     "to": "pr:knadh/listmonk#3056",
+     "type": "OPENED"
+    },
+    {
+     "from": "person:gh:github-actions[bot]",
+     "to": "pr:knadh/listmonk#3056",
+     "type": "REVIEWED"
+    },
+    {
+     "from": "person:gh:github-actions[bot]",
+     "to": "pr:knadh/listmonk#3171",
+     "type": "REVIEWED"
+    },
+    {
+     "from": "pr:knadh/listmonk#476",
+     "to": "pr:knadh/listmonk#3056",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "file:knadh/listmonk:cmd/manager_store.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "file:knadh/listmonk:cmd/archive.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "file:knadh/listmonk:cmd/public.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "pr:knadh/listmonk#3171",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:afb939dae98c",
+     "to": "person:gh:joshuaboniface",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:joshuaboniface",
+     "to": "pr:knadh/listmonk#3171",
+     "type": "OPENED"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:0c04035665d9",
+     "to": "file:knadh/listmonk:internal/manager/manager.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:0c04035665d9",
+     "to": "file:knadh/listmonk:cmd/public.go",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:0c04035665d9",
+     "to": "pr:knadh/listmonk#3136",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:0c04035665d9",
+     "to": "person:gh:shustovte",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:shustovte",
+     "to": "pr:knadh/listmonk#3136",
+     "type": "OPENED"
+    },
+    {
+     "from": "pr:knadh/listmonk#3172",
+     "to": "pr:knadh/listmonk#3136",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "file:knadh/listmonk:internal/manager/manager.go",
+     "to": "module:knadh/listmonk:internal/manager",
+     "type": "IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@a74f40b346ac",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@33896f18bcc9",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@a729a4a6d635",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@a74f40b346ac",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@33896f18bcc9",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@a729a4a6d635",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "file:knadh/listmonk:internal/manager/pipe.go",
+     "to": "module:knadh/listmonk:internal/manager",
+     "type": "IN"
+    },
+    {
+     "from": "file:knadh/listmonk:internal/manager/message.go",
+     "to": "module:knadh/listmonk:internal/manager",
+     "type": "IN"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+     "type": "NEXT"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0016",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+     "type": "NEXT"
+    }
+   ]
+  },
+  "llm": {
+   "backend": "fake",
+   "model": "fake",
+   "used": false
+  }
+ },
+ "baseline": {
+  "answer": "Closest passages by embedding similarity, best first: (1) commit: Update general-question.md [chunk:commit:knadh/listmonk@6a2658006634#0] (2) issue: User Management Please add a User Management. [chunk:issue:knadh/listmonk#539#0] (3) utterance: Arjun Rao: ownership पे आते हैं। तुम्हारे जाने के बाद internal/manager कौन देखेगा? [chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026#0] (4) utterance: Rohan Mehta: अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी। [chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027#0] (5) issue: User Management for Multiple Admins We should have User management to handle multiple admins like Editor, Viewer, Privileges [chunk:issue:knadh/listmonk#2074#0]",
+  "chunks": [
+   {
+    "id": "chunk:commit:knadh/listmonk@6a2658006634#0",
+    "text": "Update general-question.md",
+    "source_kind": "commit",
+    "score": 0.8369221091270447,
+    "source_id": "commit:knadh/listmonk@6a2658006634"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#539#0",
+    "text": "User Management\nPlease add a User Management.",
+    "source_kind": "issue",
+    "score": 0.8352978825569153,
+    "source_id": "issue:knadh/listmonk#539"
+   },
+   {
+    "id": "chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026#0",
+    "text": "Arjun Rao: ownership पे आते हैं। तुम्हारे जाने के बाद internal/manager कौन देखेगा?",
+    "source_kind": "utterance",
+    "score": 0.8339684009552002,
+    "source_id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026"
+   },
+   {
+    "id": "chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027#0",
+    "text": "Rohan Mehta: अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी।",
+    "source_kind": "utterance",
+    "score": 0.8312286734580994,
+    "source_id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#2074#0",
+    "text": "User Management for Multiple Admins\nWe should have User management to handle multiple admins like Editor, Viewer, Privileges",
+    "source_kind": "issue",
+    "score": 0.8299007415771484,
+    "source_id": "issue:knadh/listmonk#2074"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#563#2",
+    "text": "github.com/knadh/listmonk/listmonk_app/internal/manager; to add it:\n go get github.com/knadh/listmonk/listmonk_app/internal/manager\ncmd/init.go:11:2: no required module provides package github.com/knadh/listmonk/listmonk_app/internal/media; to add it:\n go get github.com/knadh/listmonk/listmonk_app/internal/media\ncmd/init.go:12:2: no required module provides package github.com/knadh/listmonk/listmonk_app/internal/media/providers/filesystem; to add it:\n go get github.com/knadh/listmonk/listmonk_app/internal/media/providers/filesystem\ncmd/init.go:13:2: no required module provides package github.com/knadh/listmonk/listmonk_app/internal/media/providers/s3; to add it:\n go get github.com/knadh/listmonk/listmonk_app/internal/media/providers/s3\ncmd/init.go:14:2: no required module provides package",
+    "source_kind": "issue",
+    "score": 0.8277010321617126,
+    "source_id": "issue:knadh/listmonk#563"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#1796#0",
+    "text": "Multiple Users connecting on dashboard\n**Is your feature request related to a problem? Please describe.**\nas a tech lead for a french NPO i need to have multiple accounts on dashboard to permit my commercial team to send mailing list\n**Describe the solution you'd like**\nI would like my team to have their own account on the app instead of using the admin account\nRegards",
+    "source_kind": "issue",
+    "score": 0.8246268033981323,
+    "source_id": "issue:knadh/listmonk#1796"
+   },
+   {
+    "id": "chunk:commit:knadh/listmonk@ffd43cec6ca9#0",
+    "text": "Rename 'runner.Runner' to 'manager.Manager'",
+    "source_kind": "commit",
+    "score": 0.8242984414100647,
+    "source_id": "commit:knadh/listmonk@ffd43cec6ca9"
+   }
+  ],
+  "note": "vector-only, no graph: no supersession, no confidence"
+ },
+ "at_iso": null,
+ "intent": "who_to_ask"
+}
