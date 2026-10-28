@@ -1,0 +1,1719 @@
+{
+ "question": "what changed in docker-compose.yml?",
+ "repo": "knadh/listmonk",
+ "mode": "both",
+ "answer": "`docker-compose.yml` has one recorded decision: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।, set in the handover call 'Listmonk handover: campaign manager and config' by Rohan Mehta on 20 Oct 2026 [dec:knadh/listmonk:kt:54bfab88d0a8]. The latest commit touching it is commit db19a7c 'Fix Mailhog port not being available inside the dev container.' by Kailash Nadh on 20 Oct 2026 [commit:knadh/listmonk@db19a7c02931]. Person to ask: Kailash Nadh, who authored 11 of 25 commits on docker-compose.yml, reviewed 1 of 13 PRs touching it, left 1 review comment on it, stated 115 recorded decisions about it.",
+ "refused": false,
+ "confidence": {
+  "score": 0.7,
+  "label": "medium",
+  "reasons": [
+   "2 independent sources",
+   "backed by a handover call",
+   "decision is active",
+   "entity matched exactly (docker-compose.yml)",
+   "decided within the last year",
+   "stated by a named person"
+  ]
+ },
+ "evidence_chain": [
+  {
+   "role": "decision",
+   "id": "dec:knadh/listmonk:kt:54bfab88d0a8",
+   "title": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:37Z",
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "title": "handover call 'Listmonk handover: campaign manager and config'",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+   "title": "handover call, S1",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": "CI बनाता है, Dockerfile root में है। एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "person",
+   "id": "person:email:rohan.mehta@example.com",
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": "Rohan Mehta",
+   "why": "stated the decision",
+   "iso": null
+  },
+  {
+   "role": "date",
+   "id": null,
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": "2026-10-20T04:35:37Z"
+  }
+ ],
+ "supersession": [
+  {
+   "newer": "dec:knadh/listmonk:config_value:077614c13476",
+   "older": "dec:knadh/listmonk:config_value:b069981bf4db",
+   "at_iso": "2026-10-20T09:27:45Z",
+   "signal": "config_diff",
+   "older_text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000`",
+   "newer_text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:2650b22d78da",
+   "older": "dec:knadh/listmonk:config_value:074b98aec652",
+   "at_iso": "2026-10-20T09:27:45Z",
+   "signal": "config_diff",
+   "older_text": "`services.mailhog.ports` in `dev/docker-compose.yml` is `127.0.0.1:1025:1025, 127.0.0.1:8025:8025`",
+   "newer_text": "`services.mailhog.ports` was removed from `dev/docker-compose.yml`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:5c44ea022381",
+   "older": "dec:knadh/listmonk:config_value:cd6b4a22b4cd",
+   "at_iso": "2026-10-20T09:27:45Z",
+   "signal": "config_diff",
+   "older_text": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://mailhog:8025`",
+   "newer_text": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://localhost:8025`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+   "older": "dec:knadh/listmonk:config_value:cddf4286491d",
+   "at_iso": "2026-10-20T09:27:45Z",
+   "signal": "config_diff",
+   "older_text": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `mailhog`",
+   "newer_text": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `localhost`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:074b98aec652",
+   "older": "dec:knadh/listmonk:config_value:c78125d62d9c",
+   "at_iso": "2026-10-10T18:10:00Z",
+   "signal": "config_diff",
+   "older_text": "`services.mailhog.ports` in `dev/docker-compose.yml` is `1025:1025, 8025:8025`",
+   "newer_text": "`services.mailhog.ports` in `dev/docker-compose.yml` is `127.0.0.1:1025:1025, 127.0.0.1:8025:8025`"
+  }
+ ],
+ "citations": {
+  "dec:knadh/listmonk:kt:54bfab88d0a8": {
+   "kind": "decision",
+   "title": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "url": null,
+   "excerpt": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+  },
+  "commit:knadh/listmonk@db19a7c02931": {
+   "kind": "commit",
+   "title": "commit db19a7c Fix Mailhog port not being available inside the dev container.",
+   "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3",
+   "excerpt": ""
+  }
+ },
+ "entities": [
+  {
+   "id": "file:knadh/listmonk:docker-compose.yml",
+   "label": "File",
+   "name": "docker-compose.yml",
+   "path": "docker-compose.yml",
+   "key": null
+  },
+  {
+   "id": "file:knadh/listmonk:dev/docker-compose.yml",
+   "label": "File",
+   "name": "docker-compose.yml",
+   "path": "dev/docker-compose.yml",
+   "key": null
+  },
+  {
+   "id": "cfg:knadh/listmonk:docker-compose.yml::version",
+   "label": "ConfigKey",
+   "name": "version",
+   "path": "docker-compose.yml",
+   "key": "version"
+  },
+  {
+   "id": "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+   "label": "ConfigKey",
+   "name": "networks.listmonk",
+   "path": "docker-compose.yml",
+   "key": "networks.listmonk"
+  },
+  {
+   "id": "cfg:knadh/listmonk:dev/docker-compose.yml::version",
+   "label": "ConfigKey",
+   "name": "version",
+   "path": "dev/docker-compose.yml",
+   "key": "version"
+  }
+ ],
+ "why": {
+  "route": "entity_what_changed",
+  "cypher": [
+   {
+    "name": "30_resolve_entities",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "docker^3 OR compose^3 OR yml^3 OR changed",
+     "exact": [
+      "docker-compose.yml",
+      "docker-compose"
+     ],
+     "limit": 25
+    },
+    "rows": 25,
+    "ms": 9.6
+   },
+   {
+    "name": "31_decisions_about",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "file:knadh/listmonk:docker-compose.yml",
+      "file:knadh/listmonk:dev/docker-compose.yml",
+      "cfg:knadh/listmonk:docker-compose.yml::version",
+      "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+      "cfg:knadh/listmonk:dev/docker-compose.yml::version"
+     ],
+     "terms": [
+      "docker",
+      "compose",
+      "yml",
+      "changed"
+     ],
+     "limit": 12,
+     "chain_limit": 60
+    },
+    "rows": 17,
+    "ms": 13.6
+   },
+   {
+    "name": "35_decision_search",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "docker^3 OR compose^3 OR yml^3 OR changed",
+     "limit": 6,
+     "chain_limit": 24
+    },
+    "rows": 6,
+    "ms": 8.9
+   },
+   {
+    "name": "36_prs_about_entity",
+    "params": {
+     "ids": [
+      "file:knadh/listmonk:docker-compose.yml",
+      "file:knadh/listmonk:dev/docker-compose.yml",
+      "cfg:knadh/listmonk:docker-compose.yml::version",
+      "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+      "cfg:knadh/listmonk:dev/docker-compose.yml::version"
+     ],
+     "limit": 6
+    },
+    "rows": 6,
+    "ms": 8.1
+   },
+   {
+    "name": "38_recent_commits_about",
+    "params": {
+     "ids": [
+      "file:knadh/listmonk:docker-compose.yml",
+      "file:knadh/listmonk:dev/docker-compose.yml",
+      "cfg:knadh/listmonk:docker-compose.yml::version",
+      "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+      "cfg:knadh/listmonk:dev/docker-compose.yml::version"
+     ],
+     "limit": 6
+    },
+    "rows": 6,
+    "ms": 9.5
+   },
+   {
+    "name": "34_person_to_ask",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "file:knadh/listmonk:docker-compose.yml",
+      "file:knadh/listmonk:dev/docker-compose.yml",
+      "cfg:knadh/listmonk:docker-compose.yml::version",
+      "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+      "cfg:knadh/listmonk:dev/docker-compose.yml::version"
+     ],
+     "now": 1793203434256,
+     "limit": 4
+    },
+    "rows": 4,
+    "ms": 8.7
+   },
+   {
+    "name": "37_neighbourhood",
+    "params": {
+     "ids": [
+      "dec:knadh/listmonk:kt:54bfab88d0a8",
+      "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+      "person:email:rohan.mehta@example.com",
+      "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+      "dec:knadh/listmonk:config_value:b069981bf4db",
+      "commit:knadh/listmonk@9ca898c286b9",
+      "person:gh:knadh",
+      "dec:knadh/listmonk:config_value:077614c13476",
+      "commit:knadh/listmonk@db19a7c02931",
+      "file:knadh/listmonk:docker-compose.yml",
+      "file:knadh/listmonk:dev/docker-compose.yml",
+      "cfg:knadh/listmonk:docker-compose.yml::version",
+      "... +4"
+     ],
+     "per_seed": 5,
+     "limit": 60
+    },
+    "rows": 1,
+    "ms": 29.5
+   },
+   {
+    "name": "50_vector_chunks",
+    "params": {
+     "q": "<vector dim=384>",
+     "k": 500,
+     "repo": "knadh/listmonk",
+     "limit": 8
+    },
+    "rows": 8,
+    "ms": 12.3
+   }
+  ],
+  "subgraph": {
+   "nodes": [
+    {
+     "id": "dec:knadh/listmonk:kt:54bfab88d0a8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470937000,
+      "kind": "kt",
+      "name": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+      "status": "active",
+      "text": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000`",
+      "object": "127.0.0.1:9000:9000",
+      "status": "superseded",
+      "text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:077614c13476",
+     "label": "Decision",
+     "props": {
+      "at": 1792488465000,
+      "kind": "config_value",
+      "name": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025`",
+      "object": "127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025",
+      "status": "active",
+      "text": "`services.dev.ports` in `dev/docker-compose.yml` is `127.0.0.1:9000:9000, 127.0.0.1:1025:1025, 127.0.0.1:8025:8025`"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "props": {
+      "name": "docker-compose.yml",
+      "path": "docker-compose.yml"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:dev/docker-compose.yml",
+     "label": "File",
+     "props": {
+      "name": "docker-compose.yml",
+      "path": "dev/docker-compose.yml"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:docker-compose.yml::version",
+     "label": "ConfigKey",
+     "props": {
+      "name": "version",
+      "path": "docker-compose.yml"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+     "label": "ConfigKey",
+     "props": {
+      "name": "networks.listmonk",
+      "path": "docker-compose.yml"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::version",
+     "label": "ConfigKey",
+     "props": {
+      "name": "version",
+      "path": "dev/docker-compose.yml"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#3097",
+     "label": "PullRequest",
+     "props": {
+      "at": 1781862320000,
+      "name": "Fix dev environment when `$GOPATH` is not set",
+      "number": 3097,
+      "text": "We now default to `~/go`, ensuring that we don't try to mount `/pkg/mod/cache` (which isn't allowed)",
+      "url": "https://github.com/knadh/listmonk/pull/3097"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#2787",
+     "label": "PullRequest",
+     "props": {
+      "at": 1764316801000,
+      "name": "Change LISTMONK_db__host from 'listmonk_db' to 'db'",
+      "number": 2787,
+      "text": "As the db host is in the same network the  service db is just fine,  using teh container name  works but when using docker-dompose.yml in  Coolify, coolify auto",
+      "url": "https://github.com/knadh/listmonk/pull/2787"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@9ca898c286b9",
+     "label": "Commit",
+     "props": {
+      "at": 1791655800000,
+      "name": "Refactor and simply dev docker environment. Closes #3102.",
+      "text": "Refactor and simply dev docker environment. Closes #3102.",
+      "url": "https://github.com/knadh/listmonk/commit/9ca898c286b9353d00f3b71e9f125f8097617c5c"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@db19a7c02931",
+     "label": "Commit",
+     "props": {
+      "at": 1792488465000,
+      "name": "Fix Mailhog port not being available inside the dev container.",
+      "text": "Fix Mailhog port not being available inside the dev container.",
+      "url": "https://github.com/knadh/listmonk/commit/db19a7c029313f3cfb6c0cab99157234f38ad5c3"
+     }
+    },
+    {
+     "id": "person:email:rohan.mehta@example.com",
+     "label": "Person",
+     "props": {
+      "kind": "speaker",
+      "name": "Rohan Mehta"
+     }
+    },
+    {
+     "id": "person:gh:knadh",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Kailash Nadh"
+     }
+    },
+    {
+     "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "label": "Meeting",
+     "props": {
+      "at": 1793202323268,
+      "name": "Listmonk handover: campaign manager and config"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "label": "Utterance",
+     "props": {
+      "text": "CI बनाता है, Dockerfile root में है। एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:14c41ad4cfbb",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`services.app.networks` in `docker-compose.yml` is `listmonk`",
+      "object": "listmonk",
+      "status": "active",
+      "text": "`services.app.networks` in `docker-compose.yml` is `listmonk`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:24a113721e68",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`services.app.image` in `docker-compose.yml` is `knadh/listmonk:latest`",
+      "object": "knadh/listmonk:latest",
+      "status": "superseded",
+      "text": "`services.app.image` in `docker-compose.yml` is `knadh/listmonk:latest`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:3c41da3286ca",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`version` in `docker-compose.yml` is `3.7`",
+      "object": "3.7",
+      "status": "superseded",
+      "text": "`version` in `docker-compose.yml` is `3.7`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:3d02a11c43c3",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`volumes.listmonk-data` in `docker-compose.yml` is `null`",
+      "object": "null",
+      "status": "active",
+      "text": "`volumes.listmonk-data` in `docker-compose.yml` is `null`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:600b1e4446ea",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`services.db.networks` in `docker-compose.yml` is `listmonk`",
+      "object": "listmonk",
+      "status": "active",
+      "text": "`services.db.networks` in `docker-compose.yml` is `listmonk`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:09828e034d47",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`services.backend.depends_on` in `dev/docker-compose.yml` is `db`",
+      "object": "db",
+      "status": "superseded",
+      "text": "`services.backend.depends_on` in `dev/docker-compose.yml` is `db`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0dd4e53b94a6",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`services.backend.volumes` in `dev/docker-compose.yml` is `../:/app, $GOPATH/pkg/mod/cache:/go/pkg/mod/cache`",
+      "object": "../:/app, $GOPATH/pkg/mod/cache:/go/pkg/mod/cache",
+      "status": "superseded",
+      "text": "`services.backend.volumes` in `dev/docker-compose.yml` is `../:/app, $GOPATH/pkg/mod/cache:/go/pkg/mod/cache`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:1ecb5346cfa4",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`services.front.build.context` in `dev/docker-compose.yml` is `../`",
+      "object": "../",
+      "status": "superseded",
+      "text": "`services.front.build.context` in `dev/docker-compose.yml` is `../`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:21c7c0f06c9c",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`services.backend.networks` in `dev/docker-compose.yml` is `listmonk-dev`",
+      "object": "listmonk-dev",
+      "status": "superseded",
+      "text": "`services.backend.networks` in `dev/docker-compose.yml` is `listmonk-dev`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:22c134632d8e",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`services.front.depends_on` in `dev/docker-compose.yml` is `db`",
+      "object": "db",
+      "status": "superseded",
+      "text": "`services.front.depends_on` in `dev/docker-compose.yml` is `db`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:e5d0acc15a02",
+     "label": "Decision",
+     "props": {
+      "at": 1728017902000,
+      "kind": "config_value",
+      "name": "`version` was removed from `docker-compose.yml`",
+      "object": "removed",
+      "status": "active",
+      "text": "`version` was removed from `docker-compose.yml`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:94d8a6c8b349",
+     "label": "Decision",
+     "props": {
+      "at": 1562896473000,
+      "kind": "config_value",
+      "name": "`networks.listmonk` in `docker-compose.yml` is `null`",
+      "object": "null",
+      "status": "active",
+      "text": "`networks.listmonk` in `docker-compose.yml` is `null`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:e5a600ef9b50",
+     "label": "Decision",
+     "props": {
+      "at": 1638380834000,
+      "kind": "config_value",
+      "name": "`version` in `dev/docker-compose.yml` is `3`",
+      "object": "3",
+      "status": "superseded",
+      "text": "`version` in `dev/docker-compose.yml` is `3`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`version` was removed from `dev/docker-compose.yml`",
+      "object": "removed",
+      "status": "active",
+      "text": "`version` was removed from `dev/docker-compose.yml`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:change:6d8efd38a420",
+     "label": "Decision",
+     "props": {
+      "at": 1781862320000,
+      "kind": "change",
+      "name": "PR #3097: Fix dev environment when `$GOPATH` is not set",
+      "object": "Fix dev environment when `$GOPATH` is not set",
+      "status": "active",
+      "text": "PR #3097: Fix dev environment when `$GOPATH` is not set"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "label": "Decision",
+     "props": {
+      "at": 1781862319000,
+      "kind": "config_value",
+      "name": "`services.backend.volumes` in `dev/docker-compose.yml` is `../:/app, ${GOPATH:-${HOME}/go}/pkg/mod/cache:/go/pkg/mod/cache`",
+      "object": "../:/app, ${GOPATH:-${HOME}/go}/pkg/mod/cache:/go/pkg/mod/cache",
+      "status": "superseded",
+      "text": "`services.backend.volumes` in `dev/docker-compose.yml` is `../:/app, ${GOPATH:-${HOME}/go}/pkg/mod/cache:/go/pkg/mod/cache`"
+     }
+    },
+    {
+     "id": "person:gh:dfabulich",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Dan Fabulich"
+     }
+    },
+    {
+     "id": "pr:knadh/listmonk#726",
+     "label": "PullRequest",
+     "props": {
+      "at": 1647754697000,
+      "name": "Bump prismjs from 1.25.0 to 1.27.0 in /frontend",
+      "number": 726,
+      "text": "Bumps [prismjs](https://github.com/PrismJS/prism) from 1.25.0 to 1.27.0.\n<details>\n<summary>Release notes</summary>\n<p><em>Sourced from <a href=\"https://github.",
+      "url": "https://github.com/knadh/listmonk/pull/726"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@08b49b1333df",
+     "label": "Commit",
+     "props": {
+      "at": 1781862319000,
+      "name": "Fix dev environment when `$GOPATH` is not set (#3097)",
+      "text": "Fix dev environment when `$GOPATH` is not set (#3097)\n\nWe now default to `~/go`, ensuring that we don't try to mount `/pkg/mod/cache` (which isn't allowed)",
+      "url": "https://github.com/knadh/listmonk/commit/08b49b1333df7893bceb43cee51edf7669afa0ca"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:change:dfaf0632c995",
+     "label": "Decision",
+     "props": {
+      "at": 1764316801000,
+      "kind": "change",
+      "name": "PR #2787: Change LISTMONK_db__host from 'listmonk_db' to 'db'",
+      "object": "Change LISTMONK_db__host from 'listmonk_db' to 'db'",
+      "status": "active",
+      "text": "PR #2787: Change LISTMONK_db__host from 'listmonk_db' to 'db'"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:d507eaf8c261",
+     "label": "Decision",
+     "props": {
+      "at": 1764316801000,
+      "kind": "config_value",
+      "name": "`services.app.environment.LISTMONK_db__host` in `docker-compose.yml` is `db`",
+      "object": "db",
+      "status": "active",
+      "text": "`services.app.environment.LISTMONK_db__host` in `docker-compose.yml` is `db`"
+     }
+    },
+    {
+     "id": "person:gh:alanef",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Alan Fuller"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@c108a61b32b1",
+     "label": "Commit",
+     "props": {
+      "at": 1764316801000,
+      "name": "Change LISTMONK_db__host from 'listmonk_db' to 'db' (#2787)",
+      "text": "Change LISTMONK_db__host from 'listmonk_db' to 'db' (#2787)",
+      "url": "https://github.com/knadh/listmonk/commit/c108a61b32b14432314ebe261b67734c9526ad19"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0051db8ddb0d",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`volumes.go-mod` in `dev/docker-compose.yml` is `null`",
+      "object": "null",
+      "status": "active",
+      "text": "`volumes.go-mod` in `dev/docker-compose.yml` is `null`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:10e48516b49a",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`services.db.healthcheck.retries` in `dev/docker-compose.yml` is `30`",
+      "object": "30",
+      "status": "active",
+      "text": "`services.db.healthcheck.retries` in `dev/docker-compose.yml` is `30`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:15969ff7cc6d",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`services.db.healthcheck.interval` in `dev/docker-compose.yml` is `2s`",
+      "object": "2s",
+      "status": "active",
+      "text": "`services.db.healthcheck.interval` in `dev/docker-compose.yml` is `2s`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:356ac574ec7d",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`volumes.node-modules` in `dev/docker-compose.yml` is `null`",
+      "object": "null",
+      "status": "active",
+      "text": "`volumes.node-modules` in `dev/docker-compose.yml` is `null`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:371a8226c680",
+     "label": "Decision",
+     "props": {
+      "at": 1791655800000,
+      "kind": "config_value",
+      "name": "`volumes.admin-dist` in `dev/docker-compose.yml` is `null`",
+      "object": "null",
+      "status": "active",
+      "text": "`volumes.admin-dist` in `dev/docker-compose.yml` is `null`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:119767ab143a",
+     "label": "Decision",
+     "props": {
+      "at": 1792488465000,
+      "kind": "config_value",
+      "name": "`services.mailhog.network_mode` in `dev/docker-compose.yml` is `service:dev`",
+      "object": "service:dev",
+      "status": "active",
+      "text": "`services.mailhog.network_mode` in `dev/docker-compose.yml` is `service:dev`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+     "label": "Decision",
+     "props": {
+      "at": 1792488465000,
+      "kind": "config_value",
+      "name": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `localhost`",
+      "object": "localhost",
+      "status": "active",
+      "text": "`services.dev.environment.MAILHOG_SMTP_HOST` in `dev/docker-compose.yml` is `localhost`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:5c44ea022381",
+     "label": "Decision",
+     "props": {
+      "at": 1792488465000,
+      "kind": "config_value",
+      "name": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://localhost:8025`",
+      "object": "http://localhost:8025",
+      "status": "active",
+      "text": "`services.dev.environment.MAILHOG_URL` in `dev/docker-compose.yml` is `http://localhost:8025`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:2650b22d78da",
+     "label": "Decision",
+     "props": {
+      "at": 1792488465000,
+      "kind": "config_value",
+      "name": "`services.mailhog.ports` was removed from `dev/docker-compose.yml`",
+      "object": "removed",
+      "status": "active",
+      "text": "`services.mailhog.ports` was removed from `dev/docker-compose.yml`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:507117e52193",
+     "label": "Decision",
+     "props": {
+      "at": 1792470628000,
+      "kind": "kt",
+      "name": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:554978c865c8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470648000,
+      "kind": "kt",
+      "name": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470687000,
+      "kind": "kt",
+      "name": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "label": "Decision",
+     "props": {
+      "at": 1792470709000,
+      "kind": "kt",
+      "name": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:84400718b7e9",
+     "label": "Decision",
+     "props": {
+      "at": 1792470731000,
+      "kind": "kt",
+      "name": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "2",
+      "status": "active",
+      "text": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0841100ecf28",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`smtp.postal.send_timeout` in `config.toml.sample` is `5000`",
+      "object": "5000",
+      "status": "superseded",
+      "text": "`smtp.postal.send_timeout` in `config.toml.sample` is `5000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0f60f283441b",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`theme_color` in `frontend/my/public/manifest.json` is `#000000`",
+      "object": "#000000",
+      "status": "active",
+      "text": "`theme_color` in `frontend/my/public/manifest.json` is `#000000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:110525325d2e",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`name` in `frontend/my/public/manifest.json` is `Create React App Sample`",
+      "object": "Create React App Sample",
+      "status": "active",
+      "text": "`name` in `frontend/my/public/manifest.json` is `Create React App Sample`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:145a76a7d8a3",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`db.port` in `config.toml.sample` is `5432`",
+      "object": "5432",
+      "status": "active",
+      "text": "`db.port` in `config.toml.sample` is `5432`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:18cf80a785c5",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`smtp.postal.max_conns` in `config.toml.sample` is `10`",
+      "object": "10",
+      "status": "superseded",
+      "text": "`smtp.postal.max_conns` in `config.toml.sample` is `10`"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "label": "ConfigKey",
+     "props": {
+      "name": "services.dev.ports",
+      "path": "dev/docker-compose.yml"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "label": "Utterance",
+     "props": {
+      "text": "ठीक है। कोई और gotcha?"
+     }
+    }
+   ],
+   "edges": [
+    {
+     "from": "dec:knadh/listmonk:kt:54bfab88d0a8",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:54bfab88d0a8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:54bfab88d0a8",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:54bfab88d0a8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "to": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "dec:knadh/listmonk:config_value:b069981bf4db",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:077614c13476",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "cfg:knadh/listmonk:docker-compose.yml::version",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "SET_IN"
+    },
+    {
+     "from": "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "SET_IN"
+    },
+    {
+     "from": "cfg:knadh/listmonk:dev/docker-compose.yml::version",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "SET_IN"
+    },
+    {
+     "from": "pr:knadh/listmonk#3097",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "pr:knadh/listmonk#2787",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@9ca898c286b9",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@db19a7c02931",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "type": "HAS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "SPOKEN_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "type": "NEXT"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:14c41ad4cfbb",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:24a113721e68",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3c41da3286ca",
+     "to": "cfg:knadh/listmonk:docker-compose.yml::version",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3c41da3286ca",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3d02a11c43c3",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:600b1e4446ea",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:09828e034d47",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0dd4e53b94a6",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:1ecb5346cfa4",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:21c7c0f06c9c",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:22c134632d8e",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:e5d0acc15a02",
+     "to": "dec:knadh/listmonk:config_value:3c41da3286ca",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:e5d0acc15a02",
+     "to": "cfg:knadh/listmonk:docker-compose.yml::version",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:e5d0acc15a02",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:94d8a6c8b349",
+     "to": "cfg:knadh/listmonk:docker-compose.yml::networks.listmonk",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:94d8a6c8b349",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:e5a600ef9b50",
+     "to": "cfg:knadh/listmonk:dev/docker-compose.yml::version",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:e5a600ef9b50",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "dec:knadh/listmonk:config_value:e5a600ef9b50",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "cfg:knadh/listmonk:dev/docker-compose.yml::version",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:6d0a270f9dd4",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:6d8efd38a420",
+     "to": "commit:knadh/listmonk@08b49b1333df",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:6d8efd38a420",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:6d8efd38a420",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:6d8efd38a420",
+     "to": "person:gh:dfabulich",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "to": "dec:knadh/listmonk:config_value:0dd4e53b94a6",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "to": "commit:knadh/listmonk@08b49b1333df",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5eb7e57ec075",
+     "to": "person:gh:dfabulich",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:dfabulich",
+     "to": "commit:knadh/listmonk@08b49b1333df",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:dfabulich",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "OPENED"
+    },
+    {
+     "from": "pr:knadh/listmonk#726",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "commit:knadh/listmonk@08b49b1333df",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@08b49b1333df",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "PART_OF"
+    },
+    {
+     "from": "commit:knadh/listmonk@08b49b1333df",
+     "to": "pr:knadh/listmonk#3097",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:dfaf0632c995",
+     "to": "commit:knadh/listmonk@c108a61b32b1",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:dfaf0632c995",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:dfaf0632c995",
+     "to": "pr:knadh/listmonk#2787",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:change:dfaf0632c995",
+     "to": "person:gh:alanef",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d507eaf8c261",
+     "to": "commit:knadh/listmonk@c108a61b32b1",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d507eaf8c261",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d507eaf8c261",
+     "to": "pr:knadh/listmonk#2787",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d507eaf8c261",
+     "to": "person:gh:alanef",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "person:gh:alanef",
+     "to": "commit:knadh/listmonk@c108a61b32b1",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:alanef",
+     "to": "pr:knadh/listmonk#2787",
+     "type": "OPENED"
+    },
+    {
+     "from": "commit:knadh/listmonk@c108a61b32b1",
+     "to": "file:knadh/listmonk:docker-compose.yml",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@c108a61b32b1",
+     "to": "pr:knadh/listmonk#2787",
+     "type": "PART_OF"
+    },
+    {
+     "from": "commit:knadh/listmonk@c108a61b32b1",
+     "to": "pr:knadh/listmonk#2787",
+     "type": "REFERENCES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0051db8ddb0d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0051db8ddb0d",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0051db8ddb0d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0051db8ddb0d",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:10e48516b49a",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:10e48516b49a",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:10e48516b49a",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:10e48516b49a",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:15969ff7cc6d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:15969ff7cc6d",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:15969ff7cc6d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:15969ff7cc6d",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:356ac574ec7d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:356ac574ec7d",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:356ac574ec7d",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:356ac574ec7d",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:371a8226c680",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:371a8226c680",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:371a8226c680",
+     "to": "commit:knadh/listmonk@9ca898c286b9",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:371a8226c680",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:119767ab143a",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:119767ab143a",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:119767ab143a",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:119767ab143a",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4d234d9cc4c0",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5c44ea022381",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5c44ea022381",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5c44ea022381",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:5c44ea022381",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2650b22d78da",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2650b22d78da",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2650b22d78da",
+     "to": "commit:knadh/listmonk@db19a7c02931",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2650b22d78da",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0841100ecf28",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0f60f283441b",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:110525325d2e",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:145a76a7d8a3",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:18cf80a785c5",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "cfg:knadh/listmonk:dev/docker-compose.yml::services.dev.ports",
+     "to": "file:knadh/listmonk:dev/docker-compose.yml",
+     "type": "SET_IN"
+    }
+   ]
+  },
+  "llm": {
+   "backend": "fake",
+   "model": "fake",
+   "used": false
+  }
+ },
+ "baseline": {
+  "answer": "Closest passages by embedding similarity, best first: (1) pr: Update docker-compose.yml why is my server telling me this ERROR: Version in \"./docker-compose.yml\" is unsupported. You might be seeing this error because you're using the wrong Compose file version.… [chunk:pr:knadh/listmonk#868#0] (2) commit: Add `docker-compose.override.yml` to .gitignore (#2917) [chunk:commit:knadh/listmonk@97de0b14ea5c#0] (3) issue: Docker not Working ``` ubuntu@ip-172-31-41-241:~/listmonk$ docker-compose up -d app db ERROR: Version in \"./docker-compose.yml\" is unsupported. You might be seeing this error because you're using the… [chunk:issue:knadh/listmonk#142#0] (4) commit: fix: docker-compose command [chunk:commit:knadh/listmonk@93dd4f0f0a52#0] (5) pr: ignore docker compose override docker-compose.override.yml is the official solution to environment-specific and intended for local customization (ports, volumes, debug flags, credentials, experimenta… [chunk:pr:knadh/listmonk#2917#0]",
+  "chunks": [
+   {
+    "id": "chunk:pr:knadh/listmonk#868#0",
+    "text": "Update docker-compose.yml\nwhy is my server telling me this\nERROR: Version in \"./docker-compose.yml\" is unsupported. You might be seeing this error because you're using the wrong Compose file version. Either specify a supported version (e.g \"2.2\" or \"3.3\") and place your service definitions under the `services` key, or omit the `version` key and place your service definitions at the root of the file to use version 1.\nFor more on the Compose file format versions, see https://docs.docker.com/compose/compose-file/\n[root@dmxtest listmonk]#",
+    "source_kind": "pr",
+    "score": 0.9340183138847351,
+    "source_id": "pr:knadh/listmonk#868"
+   },
+   {
+    "id": "chunk:commit:knadh/listmonk@97de0b14ea5c#0",
+    "text": "Add `docker-compose.override.yml` to .gitignore (#2917)",
+    "source_kind": "commit",
+    "score": 0.9229411482810974,
+    "source_id": "commit:knadh/listmonk@97de0b14ea5c"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#142#0",
+    "text": "Docker not Working\n```\nubuntu@ip-172-31-41-241:~/listmonk$ docker-compose up -d app db\nERROR: Version in \"./docker-compose.yml\" is unsupported. You might be seeing this error because you're using the wrong Compose file version. Either specify a supported version (e.g \"2.2\" or \"3.3\") and place your service definitions under the `services` key, or omit the `version` key and place your service definitions at the root of the file to use version 1.\nFor more on the Compose file format versions, see https://docs.docker.com/compose/compose-file/\n```",
+    "source_kind": "issue",
+    "score": 0.9206599593162537,
+    "source_id": "issue:knadh/listmonk#142"
+   },
+   {
+    "id": "chunk:commit:knadh/listmonk@93dd4f0f0a52#0",
+    "text": "fix: docker-compose command",
+    "source_kind": "commit",
+    "score": 0.9185018539428711,
+    "source_id": "commit:knadh/listmonk@93dd4f0f0a52"
+   },
+   {
+    "id": "chunk:pr:knadh/listmonk#2917#0",
+    "text": "ignore docker compose override\ndocker-compose.override.yml is the official solution to environment-specific and intended for local customization (ports, volumes, debug flags, credentials, experimental services).\nReasons to ignore it:\n- Prevent committing machine-specific \n- Avoid leaking local paths.\n- Keep the base docker-compose.yml reproducible across environments.\n- Allow each developer to override services without affecting others.\n- Reduce merge conflicts from personal adjustments.\nThe base compose file stays versioned. Overrides remain local.",
+    "source_kind": "pr",
+    "score": 0.9162085056304932,
+    "source_id": "pr:knadh/listmonk#2917"
+   },
+   {
+    "id": "chunk:pr:knadh/listmonk#2915#0",
+    "text": "add docker-compose.override.yml to .gitignore\ndocker-compose.override.yml is typically environment-specific and intended for local customization (ports, volumes, debug flags, credentials, experimental services).\nReasons to ignore it:\n- Prevent committing machine-specific configuration.\n- Avoid leaking local paths or secrets.\n- Keep the base docker-compose.yml reproducible across environments.\n- Allow each developer to override services without affecting others.\n- Reduce merge conflicts from personal adjustments.\nThe base compose file stays versioned. Overrides remain local.",
+    "source_kind": "pr",
+    "score": 0.9136255979537964,
+    "source_id": "pr:knadh/listmonk#2915"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#1634#2",
+    "text": "docker-compose.yml\n```\n# NOTE: This docker-compose.yml is meant to be just an example guideline\n# on how you can achieve the same. It is not intented to run out of the box\n# and you must edit the below configurations to suit your needs.\nversion: \"3.7\"\nx-app-defaults: &app-defaults\n restart: unless-stopped\n image: listmonk/listmonk:latest\n ports:\n - \"9000:9000\"\n networks:\n - listmonk\n environment:\n - TZ=Etc/UTC\nx-db-defaults: &db-defaults\n image: postgres:13-alpine\n ports:\n - \"9432:5432\"\n networks:\n - listmonk\n environment:\n - POSTGRES_PASSWORD=listmonk\n - POSTGRES_USER=listmonk\n - POSTGRES_DB=listmonk\n restart: unless-stopped\n healthcheck:\n test: [\"CMD-SHELL\", \"pg_isready -U listmonk\"]\n interval: 10s\n timeout: 5s\n retries: 6",
+    "source_kind": "issue",
+    "score": 0.9121651649475098,
+    "source_id": "issue:knadh/listmonk#1634"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#2132#1",
+    "text": "1. After SSHing into the appropriate hardware I cd into the directory there listmonk's docker-compose.yml is located\n2. docker-compose down (or in my case, I fire up Portainer and shut down the Listmonk containers)\n3. docker-compose pull && docker-compose run --rm app ./listmonk --upgrade\nHere are my results:\n![Untitled-1](https://github.com/user-attachments/assets/60f3ef69-2892-4c71-b14b-c18acd513624)\nAnd, here is my (redacted) docker-compose.yml. Any detailed instructions on how to actually accomplish the upgrade would be very appreciated.",
+    "source_kind": "issue",
+    "score": 0.9114992022514343,
+    "source_id": "issue:knadh/listmonk#2132"
+   }
+  ],
+  "note": "vector-only, no graph: no supersession, no confidence"
+ },
+ "at_iso": null,
+ "intent": "what_changed"
+}

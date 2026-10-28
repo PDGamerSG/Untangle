@@ -1,0 +1,1213 @@
+{
+ "question": "why is app.concurrency set the way it is?",
+ "repo": "knadh/listmonk",
+ "mode": "both",
+ "answer": "`app.concurrency` in `schema.sql` is 10 [dec:knadh/listmonk:config_value:1746b14b6895]. It was set in commit 942eb7c 'Add settings UI and \"hot reload\" support to the app.' by Kailash Nadh on 8 Jul 2020 [commit:knadh/listmonk@942eb7c3d86e]. A recorded handover call confirms it and gives the reason: SES का rate limit hit हो रहा था [dec:knadh/listmonk:kt:507117e52193]. Before it moved to `schema.sql`, `config.toml.sample` had it at 5 (2 Apr 2020) [dec:knadh/listmonk:config_value:ffd03841ed0f] and earlier 100 (25 Oct 2018) [dec:knadh/listmonk:config_value:d3c44eb38b14], until it was removed there on 8 Jul 2020 [dec:knadh/listmonk:config_value:599023a9f988]. Person to ask: Kailash Nadh, who authored 114 of 133 commits on app.concurrency, reviewed 5 of 21 PRs touching it, left 3 review comments on it, stated 5 recorded decisions about it.",
+ "refused": false,
+ "confidence": {
+  "score": 0.69,
+  "label": "medium",
+  "reasons": [
+   "2 independent sources",
+   "backed by a commit message",
+   "decision is active",
+   "a recorded handover call confirms it",
+   "entity matched exactly (app.concurrency in schema.sql)",
+   "the decision is 6 years old",
+   "stated by a named person"
+  ]
+ },
+ "evidence_chain": [
+  {
+   "role": "decision",
+   "id": "dec:knadh/listmonk:config_value:1746b14b6895",
+   "title": "`app.concurrency` in `schema.sql` is `10`",
+   "status": "active",
+   "valid_from_iso": "2020-07-08T11:00:14Z",
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "commit:knadh/listmonk@942eb7c3d86e",
+   "title": "commit 942eb7c Add settings UI and \"hot reload\" support to the app.",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "discussion",
+   "id": "dec:knadh/listmonk:kt:507117e52193",
+   "title": "Handover call confirms this: 10",
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": "SES का rate limit hit हो रहा था",
+   "name": null,
+   "why": null,
+   "iso": null
+  },
+  {
+   "role": "person",
+   "id": "person:gh:knadh",
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": "Kailash Nadh",
+   "why": "stated the decision and authored 114 of 133 commits on app.concurrency, reviewed 5 of 21 PRs touching it, left 3 review comments on it, stated 5 recorded decisions about it",
+   "iso": null
+  },
+  {
+   "role": "date",
+   "id": null,
+   "title": null,
+   "status": null,
+   "valid_from_iso": null,
+   "valid_to_iso": null,
+   "url": null,
+   "excerpt": null,
+   "name": null,
+   "why": null,
+   "iso": "2020-07-08T11:00:14Z"
+  }
+ ],
+ "supersession": [
+  {
+   "newer": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+   "older": "dec:knadh/listmonk:config_value:87ab95030d1b",
+   "at_iso": "2020-08-01T11:15:29Z",
+   "signal": "config_diff",
+   "older_text": "`app.concurrency` in `config-demo.toml` is `5`",
+   "newer_text": "`app.concurrency` was removed from `config-demo.toml`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:599023a9f988",
+   "older": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+   "at_iso": "2020-07-08T11:00:14Z",
+   "signal": "config_diff",
+   "older_text": "`app.concurrency` in `config.toml.sample` is `5`",
+   "newer_text": "`app.concurrency` was removed from `config.toml.sample`"
+  },
+  {
+   "newer": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+   "older": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+   "at_iso": "2020-04-02T12:52:27Z",
+   "signal": "config_diff",
+   "older_text": "`app.concurrency` in `config.toml.sample` is `100`",
+   "newer_text": "`app.concurrency` in `config.toml.sample` is `5`"
+  }
+ ],
+ "citations": {
+  "dec:knadh/listmonk:config_value:1746b14b6895": {
+   "kind": "decision",
+   "title": "`app.concurrency` in `schema.sql` is `10`",
+   "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+   "excerpt": "Add settings UI and \"hot reload\" support to the app."
+  },
+  "commit:knadh/listmonk@942eb7c3d86e": {
+   "kind": "commit",
+   "title": "commit 942eb7c Add settings UI and \"hot reload\" support to the app.",
+   "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+   "excerpt": ""
+  },
+  "dec:knadh/listmonk:kt:507117e52193": {
+   "kind": "decision",
+   "title": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "url": null,
+   "excerpt": "SES का rate limit hit हो रहा था"
+  },
+  "dec:knadh/listmonk:config_value:ffd03841ed0f": {
+   "kind": "decision",
+   "title": "`app.concurrency` in `config.toml.sample` is `5`",
+   "url": "https://github.com/knadh/listmonk/commit/894ede561a45a5e8218613e0c68e1e557f665b6f",
+   "excerpt": "Add support for message throughput rate limiting"
+  },
+  "dec:knadh/listmonk:config_value:d3c44eb38b14": {
+   "kind": "decision",
+   "title": "`app.concurrency` in `config.toml.sample` is `100`",
+   "url": "https://github.com/knadh/listmonk/commit/3ab21383b1c2a3c490146b7c88d1d49ec616acd4",
+   "excerpt": "Fresh start"
+  },
+  "dec:knadh/listmonk:config_value:599023a9f988": {
+   "kind": "decision",
+   "title": "`app.concurrency` was removed from `config.toml.sample`",
+   "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+   "excerpt": "Add settings UI and \"hot reload\" support to the app."
+  }
+ },
+ "entities": [
+  {
+   "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+   "label": "ConfigKey",
+   "name": "app.concurrency",
+   "path": "schema.sql",
+   "key": "app.concurrency"
+  },
+  {
+   "id": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+   "label": "ConfigKey",
+   "name": "app.concurrency",
+   "path": "config.toml.sample",
+   "key": "app.concurrency"
+  },
+  {
+   "id": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+   "label": "ConfigKey",
+   "name": "app.concurrency",
+   "path": "config-demo.toml",
+   "key": "app.concurrency"
+  }
+ ],
+ "why": {
+  "route": "entity_why",
+  "cypher": [
+   {
+    "name": "30_resolve_entities",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "app^3 OR concurrency^3 OR set",
+     "exact": [
+      "app.concurrency"
+     ],
+     "limit": 25
+    },
+    "rows": 25,
+    "ms": 9.0
+   },
+   {
+    "name": "31_decisions_about",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "cfg:knadh/listmonk:schema.sql::app.concurrency",
+      "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+      "cfg:knadh/listmonk:config-demo.toml::app.concurrency"
+     ],
+     "terms": [
+      "app",
+      "concurrency",
+      "set"
+     ],
+     "limit": 12,
+     "chain_limit": 60
+    },
+    "rows": 8,
+    "ms": 10.1
+   },
+   {
+    "name": "35_decision_search",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "app^3 OR concurrency^3 OR set",
+     "limit": 6,
+     "chain_limit": 24
+    },
+    "rows": 11,
+    "ms": 15.9
+   },
+   {
+    "name": "34_person_to_ask",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "cfg:knadh/listmonk:schema.sql::app.concurrency",
+      "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+      "cfg:knadh/listmonk:config-demo.toml::app.concurrency"
+     ],
+     "now": 1793203433829,
+     "limit": 4
+    },
+    "rows": 4,
+    "ms": 8.5
+   },
+   {
+    "name": "37_neighbourhood",
+    "params": {
+     "ids": [
+      "dec:knadh/listmonk:config_value:1746b14b6895",
+      "commit:knadh/listmonk@942eb7c3d86e",
+      "person:gh:knadh",
+      "dec:knadh/listmonk:kt:868a18bdeb39",
+      "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+      "person:email:rohan.mehta@example.com",
+      "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+      "cfg:knadh/listmonk:schema.sql::app.concurrency",
+      "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+      "cfg:knadh/listmonk:config-demo.toml::app.concurrency"
+     ],
+     "per_seed": 5,
+     "limit": 60
+    },
+    "rows": 1,
+    "ms": 28.3
+   },
+   {
+    "name": "50_vector_chunks",
+    "params": {
+     "q": "<vector dim=384>",
+     "k": 500,
+     "repo": "knadh/listmonk",
+     "limit": 8
+    },
+    "rows": 8,
+    "ms": 17.7
+   }
+  ],
+  "subgraph": {
+   "nodes": [
+    {
+     "id": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`app.concurrency` in `schema.sql` is `10`",
+      "object": "10",
+      "status": "active",
+      "text": "`app.concurrency` in `schema.sql` is `10`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:868a18bdeb39",
+     "label": "Decision",
+     "props": {
+      "at": 1792470957000,
+      "kind": "kt",
+      "name": "schema.sql::app.concurrency constraint: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा।",
+      "status": "active",
+      "text": "schema.sql::app.concurrency constraint: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। "
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "props": {
+      "name": "app.concurrency",
+      "path": "schema.sql"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "label": "ConfigKey",
+     "props": {
+      "name": "app.concurrency",
+      "path": "config.toml.sample"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "label": "ConfigKey",
+     "props": {
+      "name": "app.concurrency",
+      "path": "config-demo.toml"
+     }
+    },
+    {
+     "id": "commit:knadh/listmonk@942eb7c3d86e",
+     "label": "Commit",
+     "props": {
+      "at": 1594206014000,
+      "name": "Add settings UI and \"hot reload\" support to the app.",
+      "text": "Add settings UI and \"hot reload\" support to the app.\n\nThis is a major breaking change that moves away from having the\nentire app configuration in external TOML ",
+      "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd"
+     }
+    },
+    {
+     "id": "person:gh:knadh",
+     "label": "Person",
+     "props": {
+      "kind": "contributor",
+      "name": "Kailash Nadh"
+     }
+    },
+    {
+     "id": "person:email:rohan.mehta@example.com",
+     "label": "Person",
+     "props": {
+      "kind": "speaker",
+      "name": "Rohan Mehta"
+     }
+    },
+    {
+     "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "label": "Meeting",
+     "props": {
+      "at": 1793202323268,
+      "name": "Listmonk handover: campaign manager and config"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "label": "Utterance",
+     "props": {
+      "text": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हम"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:507117e52193",
+     "label": "Decision",
+     "props": {
+      "at": 1792470628000,
+      "kind": "kt",
+      "name": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:schema.sql",
+     "label": "File",
+     "props": {
+      "name": "schema.sql",
+      "path": "schema.sql"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "label": "Utterance",
+     "props": {
+      "text": "हमने app.concurrency को 10 पे रखा है क्योंकि SES का rate limit hit हो रहा था। जब ये 25 था तो Amazon SES से 454 throttling errors आते थे और campaign बीच में अटक "
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`app.concurrency` in `config.toml.sample` is `100`",
+      "object": "100",
+      "status": "superseded",
+      "text": "`app.concurrency` in `config.toml.sample` is `100`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "label": "Decision",
+     "props": {
+      "at": 1585831947000,
+      "kind": "config_value",
+      "name": "`app.concurrency` in `config.toml.sample` is `5`",
+      "object": "5",
+      "status": "superseded",
+      "text": "`app.concurrency` in `config.toml.sample` is `5`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:599023a9f988",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`app.concurrency` was removed from `config.toml.sample`",
+      "object": "removed",
+      "status": "active",
+      "text": "`app.concurrency` was removed from `config.toml.sample`"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:config.toml.sample",
+     "label": "File",
+     "props": {
+      "name": "config.toml.sample",
+      "path": "config.toml.sample"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:87ab95030d1b",
+     "label": "Decision",
+     "props": {
+      "at": 1594228111000,
+      "kind": "config_value",
+      "name": "`app.concurrency` in `config-demo.toml` is `5`",
+      "object": "5",
+      "status": "superseded",
+      "text": "`app.concurrency` in `config-demo.toml` is `5`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+     "label": "Decision",
+     "props": {
+      "at": 1596280529000,
+      "kind": "config_value",
+      "name": "`app.concurrency` was removed from `config-demo.toml`",
+      "object": "removed",
+      "status": "active",
+      "text": "`app.concurrency` was removed from `config-demo.toml`"
+     }
+    },
+    {
+     "id": "file:knadh/listmonk:config-demo.toml",
+     "label": "File",
+     "props": {
+      "name": "config-demo.toml",
+      "path": "config-demo.toml"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:010c2949a8ac",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`upload.s3.bucket_path` in `schema.sql` is `/`",
+      "object": "/",
+      "status": "active",
+      "text": "`upload.s3.bucket_path` in `schema.sql` is `/`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`app.max_send_errors` in `schema.sql` is `1000`",
+      "object": "1000",
+      "status": "active",
+      "text": "`app.max_send_errors` in `schema.sql` is `1000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:2781ce7238b1",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`upload.s3.aws_access_key_id` in `schema.sql` is ``",
+      "status": "active",
+      "text": "`upload.s3.aws_access_key_id` in `schema.sql` is ``"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:3fc5bd637186",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`app.notify_emails` in `schema.sql` is `admin1@mysite.com, admin2@mysite.com`",
+      "object": "admin1@mysite.com, admin2@mysite.com",
+      "status": "superseded",
+      "text": "`app.notify_emails` in `schema.sql` is `admin1@mysite.com, admin2@mysite.com`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:40805dfdf924",
+     "label": "Decision",
+     "props": {
+      "at": 1594206014000,
+      "kind": "config_value",
+      "name": "`app.logo_url` in `schema.sql` is `http://localhost:9000/public/static/logo.png`",
+      "object": "http://localhost:9000/public/static/logo.png",
+      "status": "superseded",
+      "text": "`app.logo_url` in `schema.sql` is `http://localhost:9000/public/static/logo.png`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0841100ecf28",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`smtp.postal.send_timeout` in `config.toml.sample` is `5000`",
+      "object": "5000",
+      "status": "superseded",
+      "text": "`smtp.postal.send_timeout` in `config.toml.sample` is `5000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:0f60f283441b",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`theme_color` in `frontend/my/public/manifest.json` is `#000000`",
+      "object": "#000000",
+      "status": "active",
+      "text": "`theme_color` in `frontend/my/public/manifest.json` is `#000000`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:110525325d2e",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`name` in `frontend/my/public/manifest.json` is `Create React App Sample`",
+      "object": "Create React App Sample",
+      "status": "active",
+      "text": "`name` in `frontend/my/public/manifest.json` is `Create React App Sample`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:145a76a7d8a3",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`db.port` in `config.toml.sample` is `5432`",
+      "object": "5432",
+      "status": "active",
+      "text": "`db.port` in `config.toml.sample` is `5432`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:config_value:18cf80a785c5",
+     "label": "Decision",
+     "props": {
+      "at": 1540475507000,
+      "kind": "config_value",
+      "name": "`smtp.postal.max_conns` in `config.toml.sample` is `10`",
+      "object": "10",
+      "status": "superseded",
+      "text": "`smtp.postal.max_conns` in `config.toml.sample` is `10`"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:554978c865c8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470648000,
+      "kind": "kt",
+      "name": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "10",
+      "status": "active",
+      "text": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "label": "Decision",
+     "props": {
+      "at": 1792470687000,
+      "kind": "kt",
+      "name": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "label": "Decision",
+     "props": {
+      "at": 1792470709000,
+      "kind": "kt",
+      "name": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "1000",
+      "status": "active",
+      "text": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:84400718b7e9",
+     "label": "Decision",
+     "props": {
+      "at": 1792470731000,
+      "kind": "kt",
+      "name": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "2",
+      "status": "active",
+      "text": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")"
+     }
+    },
+    {
+     "id": "dec:knadh/listmonk:kt:3ada84b1d737",
+     "label": "Decision",
+     "props": {
+      "at": 1792470957000,
+      "kind": "kt",
+      "name": "schema.sql::app.message_rate constraint: दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+      "object": "दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+      "status": "active",
+      "text": "schema.sql::app.message_rate constraint: दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है। (said by Roh"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0035",
+     "label": "Utterance",
+     "props": {
+      "text": "समझ गई। मैं ये सब एक doc में लिख दूँगी और config.toml.sample में comments भी add करूँगी।"
+     }
+    },
+    {
+     "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "label": "Utterance",
+     "props": {
+      "text": "ठीक है। कोई और gotcha?"
+     }
+    },
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "props": {
+      "name": "app.message_rate",
+      "path": "schema.sql"
+     }
+    }
+   ],
+   "edges": [
+    {
+     "from": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "to": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:868a18bdeb39",
+     "to": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:868a18bdeb39",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:868a18bdeb39",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:868a18bdeb39",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "SET_IN"
+    },
+    {
+     "from": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "SET_IN"
+    },
+    {
+     "from": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "to": "file:knadh/listmonk:config-demo.toml",
+     "type": "SET_IN"
+    },
+    {
+     "from": "commit:knadh/listmonk@942eb7c3d86e",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "commit:knadh/listmonk@942eb7c3d86e",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "TOUCHED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "AUTHORED"
+    },
+    {
+     "from": "person:gh:knadh",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "COMMITTED"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "type": "HAS"
+    },
+    {
+     "from": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0035",
+     "type": "HAS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "SPOKEN_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0035",
+     "type": "NEXT"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "to": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "to": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:507117e52193",
+     "to": "dec:knadh/listmonk:config_value:1746b14b6895",
+     "type": "CONFIRMS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "SPOKEN_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+     "to": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+     "to": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "to": "dec:knadh/listmonk:config_value:d3c44eb38b14",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "to": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "dec:knadh/listmonk:config_value:ffd03841ed0f",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "cfg:knadh/listmonk:config.toml.sample::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:599023a9f988",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:87ab95030d1b",
+     "to": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:87ab95030d1b",
+     "to": "file:knadh/listmonk:config-demo.toml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+     "to": "dec:knadh/listmonk:config_value:87ab95030d1b",
+     "type": "SUPERSEDES"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+     "to": "cfg:knadh/listmonk:config-demo.toml::app.concurrency",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+     "to": "file:knadh/listmonk:config-demo.toml",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:4fdd77ff4d9f",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:010c2949a8ac",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:010c2949a8ac",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:010c2949a8ac",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:010c2949a8ac",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2781ce7238b1",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2781ce7238b1",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2781ce7238b1",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:2781ce7238b1",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3fc5bd637186",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3fc5bd637186",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3fc5bd637186",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:3fc5bd637186",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:40805dfdf924",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "IMPLEMENTED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:40805dfdf924",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:40805dfdf924",
+     "to": "commit:knadh/listmonk@942eb7c3d86e",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:40805dfdf924",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0841100ecf28",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0841100ecf28",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:0f60f283441b",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:110525325d2e",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:145a76a7d8a3",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:145a76a7d8a3",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:18cf80a785c5",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:config_value:18cf80a785c5",
+     "to": "person:gh:knadh",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:554978c865c8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:e0f967c7ce94",
+     "to": "dec:knadh/listmonk:config_value:23752b0a64fa",
+     "type": "CONFIRMS"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:84400718b7e9",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:3ada84b1d737",
+     "to": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "type": "ABOUT"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:3ada84b1d737",
+     "to": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+     "type": "DECIDED_IN"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:3ada84b1d737",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "type": "EVIDENCED_BY"
+    },
+    {
+     "from": "dec:knadh/listmonk:kt:3ada84b1d737",
+     "to": "person:email:rohan.mehta@example.com",
+     "type": "STATED_BY"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0035",
+     "to": "file:knadh/listmonk:config.toml.sample",
+     "type": "MENTIONS"
+    },
+    {
+     "from": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+     "to": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+     "type": "NEXT"
+    },
+    {
+     "from": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "to": "file:knadh/listmonk:schema.sql",
+     "type": "SET_IN"
+    }
+   ]
+  },
+  "llm": {
+   "backend": "fake",
+   "model": "fake",
+   "used": false
+  }
+ },
+ "baseline": {
+  "answer": "Closest passages by embedding similarity, best first: (1) comment: Your last comment in that issue also makes it sound like this current help text is incorrect: >If concurrency = 10 and message_rate = 10, then up to 10x10=100 messages may be pushed out every second… [chunk:comment:knadh/listmonk:pr_review_comment:1828762181#0] (2) comment: This isn't correct. Max conns can be anything and don't need to be message_rate x concurrency. [chunk:comment:knadh/listmonk:pr_review_comment:1828231655#0] (3) issue: Is it possibly a settings issue? My current settings are - - Concurrency - 2 - Message Rate - 7 - Batch Size - 1000 - Maximum Error Threshold - 500 **Screenshots:** ![184541166-e7c80156-e778-4a4a-8f4… [chunk:issue:knadh/listmonk#905#2] (4) utterance: Rohan Mehta: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बद… [chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034#0] (5) utterance: Rohan Mehta: हाँ, और env var का naming LISTMONK_app__concurrency जैसा है, double underscore। ये deployment में लोग अक्सर गलत करते हैं। [chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0025#0]",
+  "chunks": [
+   {
+    "id": "chunk:comment:knadh/listmonk:pr_review_comment:1828762181#0",
+    "text": "Your last comment in that issue also makes it sound like this current help text is incorrect:\n>If concurrency = 10 and message_rate = 10, then up to 10x10=100 messages may be pushed out every second\nPer your comment, it sounds like \"Message rate\" is the actual limit, and \"Concurrency\" just enables it.\nSo I think the help text for each of the performance settings needs some tweaking/clarification.",
+    "source_kind": "comment",
+    "score": 0.8806469440460205,
+    "source_id": "comment:knadh/listmonk:pr_review_comment:1828762181"
+   },
+   {
+    "id": "chunk:comment:knadh/listmonk:pr_review_comment:1828231655#0",
+    "text": "This isn't correct. Max conns can be anything and don't need to be message_rate x concurrency.",
+    "source_kind": "comment",
+    "score": 0.8751990795135498,
+    "source_id": "comment:knadh/listmonk:pr_review_comment:1828231655"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#905#2",
+    "text": "Is it possibly a settings issue? My current settings are -\n- Concurrency - 2\n- Message Rate - 7\n- Batch Size - 1000\n- Maximum Error Threshold - 500\n**Screenshots:**\n![184541166-e7c80156-e778-4a4a-8f41-503328f77397](https://user-images.githubusercontent.com/26274190/184541361-be748498-1579-4978-80d2-4225f7c56594.png)",
+    "source_kind": "issue",
+    "score": 0.8672592639923096,
+    "source_id": "issue:knadh/listmonk#905"
+   },
+   {
+    "id": "chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034#0",
+    "text": "Rohan Mehta: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+    "source_kind": "utterance",
+    "score": 0.8649309873580933,
+    "source_id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034"
+   },
+   {
+    "id": "chunk:utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0025#0",
+    "text": "Rohan Mehta: हाँ, और env var का naming LISTMONK_app__concurrency जैसा है, double underscore। ये deployment में लोग अक्सर गलत करते हैं।",
+    "source_kind": "utterance",
+    "score": 0.8648827075958252,
+    "source_id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0025"
+   },
+   {
+    "id": "chunk:pr:knadh/listmonk#1171#0",
+    "text": "Concurrency-safe template caching",
+    "source_kind": "pr",
+    "score": 0.8613981008529663,
+    "source_id": "pr:knadh/listmonk#1171"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#49#1",
+    "text": "Do I am something wrong, or does the application need more planning time in the future? I am only waiting minutes for executing tasks in the future.\nIf I can assist you in any way, please tell me.\nThanks!",
+    "source_kind": "issue",
+    "score": 0.8613605499267578,
+    "source_id": "issue:knadh/listmonk#49"
+   },
+   {
+    "id": "chunk:comment:knadh/listmonk:pr_comment:2637523506#0",
+    "text": "@knadh I would disagree. The main advantage here is that we don't need to pass the `app` object through middleware to access it in the handlers. Instead, we can directly use the struct field. For example, see this implementation: https://github.com/lcd1232/listmonk/blob/ce392e06a95ee94d34087297b31dabe65c890a1c/cmd/admin.go#L57",
+    "source_kind": "comment",
+    "score": 0.8595418930053711,
+    "source_id": "comment:knadh/listmonk:pr_comment:2637523506"
+   }
+  ],
+  "note": "vector-only, no graph: no supersession, no confidence"
+ },
+ "at_iso": null,
+ "intent": "why"
+}

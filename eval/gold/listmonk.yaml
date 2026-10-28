@@ -1,0 +1,179 @@
+# Gold questions for knadh/listmonk. Format: src/untangle/eval/gold.py.
+# `cites_any` entries are substrings matched against cited ids (decision ids are content hashes, so we match on the
+# id prefix: `dec:knadh/listmonk:config_value`, `commit:knadh/listmonk@`, `pr:knadh/listmonk#`, `utt:`, `mtg:`).
+# Values under [app] in config.toml.sample (concurrency 10, message_rate 10, batch_size 1000, max_send_errors 1000),
+# the file paths and the go.mod dependencies were checked against the public repository. Everything that depends on
+# the *history* of a value, on who touched a file most, or on what a PR said, is marked `unverified: true` and is
+# reported separately by the harness.
+repo: knadh/listmonk
+name: listmonk
+questions:
+  # ---- answerable: config keys, files, dependencies (10) ----
+  - id: cfg-concurrency-why
+    question: "Why is app.concurrency set to 10 in config.toml?"
+    intent: config_value
+    expect:
+      entities_any: [app.concurrency, concurrency]
+      answer_contains_any: ["10"]
+      cites_any: ["dec:knadh/listmonk:"]
+  - id: cfg-message-rate
+    question: "What is app.message_rate and why is it 10?"
+    intent: config_value
+    expect:
+      entities_any: [app.message_rate, message_rate]
+      answer_contains_any: ["10"]
+      cites_any: ["dec:knadh/listmonk:"]
+  - id: cfg-batch-size
+    question: "Why is app.batch_size 1000?"
+    intent: config_value
+    expect:
+      entities_any: [app.batch_size, batch_size]
+      answer_contains_any: ["1000"]
+      cites_any: ["dec:knadh/listmonk:"]
+  - id: cfg-max-send-errors
+    question: "What does app.max_send_errors do and what is it set to?"
+    intent: config_value
+    expect:
+      entities_any: [app.max_send_errors, max_send_errors]
+      answer_contains_any: ["1000"]
+      cites_any: ["dec:knadh/listmonk:"]
+  - id: cfg-concurrency-history
+    question: "Has app.concurrency ever had a different value? What is the current one?"
+    intent: supersession
+    note: "Verified against git history: 100 in 3ab2138 (2018-10-25), 5 in 894ede5 (2020-04-02), removed from config.toml.sample and seeded as 10 in schema.sql by 942eb7c (2020-07-08)."
+    expect:
+      entities_any: [app.concurrency]
+      answer_contains_any: ["10"]
+      superseded: true
+  - id: file-manager
+    question: "Why does internal/manager/manager.go exist and what were the last decisions about it?"
+    intent: entity_why
+    unverified: true
+    expect:
+      entities_any: [internal/manager/manager.go, manager.go]
+      cites_any: ["commit:knadh/listmonk@", "pr:knadh/listmonk#", "dec:knadh/listmonk:"]
+  - id: file-queries-sql
+    question: "Why does listmonk keep raw SQL in queries.sql instead of using an ORM?"
+    intent: entity_why
+    unverified: true
+    expect:
+      entities_any: [queries.sql]
+      answer_contains_any: ["SQL", "ORM"]
+      cites_any: ["dec:knadh/listmonk:", "commit:knadh/listmonk@", "pr:knadh/listmonk#", "utt:"]
+  - id: file-campaigns-go
+    question: "What decisions have been made about cmd/campaigns.go?"
+    intent: entity_why
+    unverified: true
+    expect:
+      entities_any: [cmd/campaigns.go, campaigns.go]
+      cites_any: ["dec:knadh/listmonk:", "commit:knadh/listmonk@", "pr:knadh/listmonk#"]
+  - id: dep-lib-pq
+    question: "Which Postgres driver does listmonk use?"
+    intent: dependency
+    expect:
+      entities_any: [github.com/lib/pq, lib/pq]
+      answer_contains_any: ["lib/pq"]
+      cites_any: ["dec:knadh/listmonk:", "dep:knadh/listmonk:", "commit:knadh/listmonk@"]
+  - id: dep-echo
+    question: "Why does listmonk use github.com/labstack/echo/v4 for HTTP?"
+    intent: dependency
+    unverified: true
+    note: "That echo is a dependency is verified; a recorded reason for choosing it is not."
+    expect:
+      entities_any: [github.com/labstack/echo/v4, echo]
+      answer_contains_any: ["echo"]
+      cites_any: ["dec:knadh/listmonk:", "dep:knadh/listmonk:", "commit:knadh/listmonk@"]
+
+  # ---- must be refused: things listmonk never decided (5) ----
+  - id: refuse-mongodb
+    question: "Why does listmonk use MongoDB?"
+    intent: refuse
+    expect: { refuse: true }
+  - id: refuse-kafka
+    question: "Why was the Kafka queue removed from listmonk?"
+    intent: refuse
+    expect: { refuse: true }
+  - id: refuse-rust
+    question: "Who decided to rewrite listmonk in Rust?"
+    intent: refuse
+    expect: { refuse: true }
+  - id: refuse-graphql
+    question: "Why is the GraphQL API rate limited to 50 requests per minute?"
+    intent: refuse
+    expect: { refuse: true }
+  - id: refuse-redis
+    question: "What is the Redis cache TTL for subscriber lookups?"
+    intent: refuse
+    expect: { refuse: true }
+
+  # ---- who to ask (5) ----
+  - id: who-manager
+    question: "Who should I ask about internal/manager?"
+    intent: who_to_ask
+    expect:
+      entities_any: [internal/manager]
+      person_any: [knadh, Kailash]
+  - id: who-queries
+    question: "Who knows the most about queries.sql?"
+    intent: who_to_ask
+    expect:
+      entities_any: [queries.sql]
+      person_any: [knadh, Kailash]
+  - id: who-campaigns
+    question: "Who should I talk to about cmd/campaigns.go?"
+    intent: who_to_ask
+    expect:
+      entities_any: [cmd/campaigns.go]
+      person_any: [knadh, Kailash]
+  - id: who-frontend
+    question: "Who owns the frontend directory?"
+    intent: who_to_ask
+    unverified: true
+    note: "The frontend has had other active contributors; the top person was not checked."
+    expect:
+      entities_any: [frontend]
+      person_any: [knadh, Kailash]
+  - id: who-dockerfile
+    question: "Who should I ask about the Dockerfile and the Docker image build?"
+    intent: who_to_ask
+    unverified: true
+    expect:
+      entities_any: [Dockerfile]
+      person_any: [knadh, Kailash]
+
+  # ---- the sample handover call (data/kt/listmonk-kt-sample.json) (5) ----
+  - id: kt-concurrency
+    question: "What did the handover call say about app.concurrency?"
+    intent: kt
+    expect:
+      entities_any: [app.concurrency]
+      answer_contains_any: ["10", "SES"]
+      cites_any: ["utt:", "dec:knadh/listmonk:kt", "mtg:"]
+  - id: kt-max-send-errors
+    question: "According to the KT call, why is max_send_errors 1000?"
+    intent: kt
+    expect:
+      entities_any: [max_send_errors, app.max_send_errors]
+      answer_contains_any: ["1000"]
+      cites_any: ["utt:", "dec:knadh/listmonk:kt"]
+  - id: kt-owner-manager
+    question: "Who owns internal/manager after Rohan leaves?"
+    intent: who_to_ask
+    expect:
+      entities_any: [internal/manager]
+      person_any: [Priya]
+      cites_any: ["utt:", "dec:knadh/listmonk:kt"]
+  - id: kt-retry-revert
+    question: "Was the campaign retry logic in manager.go ever reverted, and why?"
+    intent: kt
+    expect:
+      entities_any: [manager.go, internal/manager/manager.go]
+      answer_contains_any: ["revert", "duplicate"]
+      cites_any: ["utt:", "dec:knadh/listmonk:kt"]
+  - id: kt-queries-sql
+    question: "Why does queries.sql keep raw SQL according to the handover call?"
+    intent: kt
+    expect:
+      entities_any: [queries.sql]
+      answer_contains_any: ["SQL", "ORM", "query plans"]
+      cites_any: ["utt:", "dec:knadh/listmonk:kt"]

@@ -1,0 +1,1452 @@
+{
+ "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+ "repo": "knadh/listmonk",
+ "title": "Listmonk handover: campaign manager and config",
+ "started_at_iso": "2026-10-20T04:30:00Z",
+ "duration_ms": 412000,
+ "language": "hi-IN",
+ "source": "transcript-json",
+ "audio_uri": null,
+ "summary": "SYNTHETIC transcript written for the Untangle demo. The three people are fictional; nothing here was said by any real listmonk contributor. The repository, file paths, config keys and dependency names are real (knadh/listmonk); the reasons given for them are plausible demo content, not statements of fact about the project.",
+ "utterance_count": 40,
+ "speaker_count": 3,
+ "decision_count": 15,
+ "utterances": [
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0000",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 0,
+   "text": "ठीक है, recording शुरू हो गई है। ये Rohan की listmonk handover call है, Priya campaign manager और config ownership ले रही है। Rohan, तुम शुरू करो।",
+   "text_en": null,
+   "start_ms": 0,
+   "end_ms": 9000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0001",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 1,
+   "text": "हाँ। मैं पहले config.toml के [app] section से शुरू करता हूँ, क्योंकि production में सबसे ज़्यादा सवाल वहीं से आते हैं।",
+   "text_en": null,
+   "start_ms": 10000,
+   "end_ms": 22000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:dev/config.toml",
+     "label": "File",
+     "name": "config.toml"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0002",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 2,
+   "text": "ठीक है, मैं notes बना रही हूँ।",
+   "text_en": null,
+   "start_ms": 23000,
+   "end_ms": 27000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0003",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 3,
+   "text": "हमने app.concurrency को 10 पे रखा है क्योंकि SES का rate limit hit हो रहा था। जब ये 25 था तो Amazon SES से 454 throttling errors आते थे और campaign बीच में अटक जाती थी।",
+   "text_en": null,
+   "start_ms": 28000,
+   "end_ms": 41000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0004",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 4,
+   "text": "मतलब concurrency का मतलब parallel workers है, per campaign?",
+   "text_en": null,
+   "start_ms": 42000,
+   "end_ms": 47000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0005",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 5,
+   "text": "हाँ, internal/manager में उतने ही goroutines messages push करते हैं। और message_rate को भी 10 रखा है, मतलब हर worker एक second में 10 messages से ज़्यादा push नहीं करेगा। दोनों मिलाकर 100 messages per second, SES की limit उससे ऊपर है इसलिए safe है।",
+   "text_en": null,
+   "start_ms": 48000,
+   "end_ms": 62000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0006",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 6,
+   "text": "ये numbers कहाँ documented हैं? मुझे याद है एक incident ticket था।",
+   "text_en": null,
+   "start_ms": 63000,
+   "end_ms": 68000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0007",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 7,
+   "text": "incident ticket है, और जो PR इसे 25 से 10 पे लाया उसकी description में भी लिखा है। लेकिन README में नहीं है, इसलिए ये call record हो रही है।",
+   "text_en": null,
+   "start_ms": 69000,
+   "end_ms": 80000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0008",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 8,
+   "text": "और app.batch_size? वो 1000 क्यों है?",
+   "text_en": null,
+   "start_ms": 82000,
+   "end_ms": 86000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.batch_size",
+     "label": "ConfigKey",
+     "name": "app.batch_size"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0009",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 9,
+   "text": "app.batch_size 1000 इसलिए है क्योंकि Postgres से subscribers 1000-1000 के batch में निकलते हैं, एक साथ पूरी list memory में नहीं आती। sliding window के साथ ये number well tested है, इसे बढ़ाने से DB पे load बढ़ता है, फायदा कुछ नहीं।",
+   "text_en": null,
+   "start_ms": 87000,
+   "end_ms": 103000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.batch_size",
+     "label": "ConfigKey",
+     "name": "app.batch_size"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0010",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 10,
+   "text": "ठीक है। max_send_errors का क्या scene है?",
+   "text_en": null,
+   "start_ms": 104000,
+   "end_ms": 108000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.max_send_errors",
+     "label": "ConfigKey",
+     "name": "app.max_send_errors"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0011",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 11,
+   "text": "max_send_errors को 1000 रखा है ताकि एक गलत SMTP config पूरी list burn ना करे, 1000 से ज़्यादा send errors पे manager campaign को pause कर देता है।",
+   "text_en": null,
+   "start_ms": 109000,
+   "end_ms": 125000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.max_send_errors",
+     "label": "ConfigKey",
+     "name": "app.max_send_errors"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0012",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 12,
+   "text": "ये SMTP settings कहाँ हैं, [smtp] block में?",
+   "text_en": null,
+   "start_ms": 126000,
+   "end_ms": 130000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0013",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 13,
+   "text": "हाँ, config.toml में [smtp] block है, वहाँ max_conns और max_msg_retries हैं। max_msg_retries 2 ही रहने दो, ज़्यादा retries से duplicate deliveries का risk है।",
+   "text_en": null,
+   "start_ms": 131000,
+   "end_ms": 145000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_conns",
+     "label": "ConfigKey",
+     "name": "smtp.my0.max_conns"
+    },
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "label": "ConfigKey",
+     "name": "smtp.my0.max_msg_retries"
+    },
+    {
+     "id": "file:knadh/listmonk:dev/config.toml",
+     "label": "File",
+     "name": "config.toml"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0014",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 14,
+   "text": "Priya, ये सब note कर लो। Rohan, अब campaign retry वाला इतिहास बताओ।",
+   "text_en": null,
+   "start_ms": 146000,
+   "end_ms": 152000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0015",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 15,
+   "text": "हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ। दो हफ्ते बाद duplicate sends की complaints आईं, क्योंकि SMTP timeout के बाद message actually deliver हो चुका होता था। तो हमने वो commit revert कर दिया।",
+   "text_en": null,
+   "start_ms": 153000,
+   "end_ms": 172000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0016",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 16,
+   "text": "तो अभी retry बिल्कुल नहीं है?",
+   "text_en": null,
+   "start_ms": 173000,
+   "end_ms": 178000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0017",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 17,
+   "text": "SMTP level पे max_msg_retries है, वो connection retry है, message retry नहीं। manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है।",
+   "text_en": null,
+   "start_ms": 179000,
+   "end_ms": 192000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "label": "ConfigKey",
+     "name": "smtp.my0.max_msg_retries"
+    },
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0018",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 18,
+   "text": "Good. अब code structure, Priya के लिए।",
+   "text_en": null,
+   "start_ms": 193000,
+   "end_ms": 197000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0019",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 19,
+   "text": "cmd/ में सारे HTTP handlers हैं, cmd/campaigns.go में campaign के endpoints हैं। internal/manager/manager.go campaign runner है, वही workers spawn करता है और messages बनाता है। internal/messenger में SMTP और postback messengers हैं।",
+   "text_en": null,
+   "start_ms": 198000,
+   "end_ms": 214000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go"
+    },
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "name": "campaigns.go"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0020",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 20,
+   "text": "और queries? मैंने देखा कोई ORM नहीं है।",
+   "text_en": null,
+   "start_ms": 215000,
+   "end_ms": 220000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0021",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 21,
+   "text": "हाँ, queries.sql में हमने raw SQL रखा है, ORM नहीं, क्योंकि query plans predictable रहते हैं और Postgres के jsonb और array features सीधे use होते हैं। goyesql उस file को parse करके named queries देता है, और sqlx से scan होता है। कोई ORM introduce मत करना, upstream maintainers का भी यही stand है।",
+   "text_en": null,
+   "start_ms": 221000,
+   "end_ms": 240000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:queries.sql",
+     "label": "File",
+     "name": "queries.sql"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0022",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 22,
+   "text": "dependencies के बारे में कुछ जो Priya को पता होना चाहिए?",
+   "text_en": null,
+   "start_ms": 241000,
+   "end_ms": 246000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0023",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 23,
+   "text": "Database driver के लिए हम github.com/lib/pq ही use करते हैं। pgx पे switch करने का plan था पर हमने नहीं किया क्योंकि sqlx के साथ lib/pq stable है और कोई performance issue नहीं था। HTTP के लिए github.com/labstack/echo/v4 है, config के लिए github.com/knadh/koanf।",
+   "text_en": null,
+   "start_ms": 247000,
+   "end_ms": 266000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq"
+    },
+    {
+     "id": "dep:knadh/listmonk:go:github.com/knadh/koanf",
+     "label": "Dependency",
+     "name": "github.com/knadh/koanf"
+    },
+    {
+     "id": "dep:knadh/listmonk:go:github.com/labstack/echo/v4",
+     "label": "Dependency",
+     "name": "github.com/labstack/echo/v4"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0024",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 24,
+   "text": "koanf से ही config.toml और env vars दोनों load होते हैं?",
+   "text_en": null,
+   "start_ms": 267000,
+   "end_ms": 272000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:dev/config.toml",
+     "label": "File",
+     "name": "config.toml"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0025",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 25,
+   "text": "हाँ, और env var का naming LISTMONK_app__concurrency जैसा है, double underscore। ये deployment में लोग अक्सर गलत करते हैं।",
+   "text_en": null,
+   "start_ms": 273000,
+   "end_ms": 284000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0026",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 26,
+   "text": "ownership पे आते हैं। तुम्हारे जाने के बाद internal/manager कौन देखेगा?",
+   "text_en": null,
+   "start_ms": 285000,
+   "end_ms": 290000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0027",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 27,
+   "text": "अब से internal/manager का owner Priya है। मैं exit के बाद Slack पे available नहीं रहूँगा, तो reviews भी Priya ही करेगी।",
+   "text_en": null,
+   "start_ms": 291000,
+   "end_ms": 302000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0028",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 28,
+   "text": "ठीक है, मैं ले रही हूँ।",
+   "text_en": null,
+   "start_ms": 303000,
+   "end_ms": 307000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0029",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 29,
+   "text": "और cmd/campaigns.go और messenger वाला हिस्सा? वो भी Priya?",
+   "text_en": null,
+   "start_ms": 308000,
+   "end_ms": 316000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "name": "campaigns.go"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0030",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 30,
+   "text": "cmd/campaigns.go Priya देखेगी, internal/messenger अभी के लिए Arjun की team देखेगी जब तक नया hire नहीं आता।",
+   "text_en": null,
+   "start_ms": 317000,
+   "end_ms": 330000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "name": "campaigns.go"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0031",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 31,
+   "text": "deploy का क्या? Docker image कौन बनाता है?",
+   "text_en": null,
+   "start_ms": 331000,
+   "end_ms": 336000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0032",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 32,
+   "text": "CI बनाता है, Dockerfile root में है। एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+   "text_en": null,
+   "start_ms": 337000,
+   "end_ms": 350000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0033",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 33,
+   "text": "ठीक है। कोई और gotcha?",
+   "text_en": null,
+   "start_ms": 351000,
+   "end_ms": 356000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0034",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 34,
+   "text": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+   "text_en": null,
+   "start_ms": 357000,
+   "end_ms": 372000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency"
+    },
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0035",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 35,
+   "text": "समझ गई। मैं ये सब एक doc में लिख दूँगी और config.toml.sample में comments भी add करूँगी।",
+   "text_en": null,
+   "start_ms": 373000,
+   "end_ms": 380000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": [
+    {
+     "id": "file:knadh/listmonk:config.toml.sample",
+     "label": "File",
+     "name": "config.toml.sample"
+    }
+   ]
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0036",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 36,
+   "text": "अच्छा idea है। Rohan, last question: कोई ऐसी चीज़ जो तुम बदलना चाहते थे पर नहीं कर पाए?",
+   "text_en": null,
+   "start_ms": 381000,
+   "end_ms": 388000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0037",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 37,
+   "text": "हाँ, sliding window rate limiting को proper token bucket बनाना था, और messenger को plugin interface देना था। दोनों backlog में हैं, कोई decision नहीं हुआ।",
+   "text_en": null,
+   "start_ms": 389000,
+   "end_ms": 402000,
+   "speaker_label": "S1",
+   "speaker": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0038",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 38,
+   "text": "ठीक है, ये backlog में है। Thanks Rohan, thanks Priya। Recording बंद कर रहा हूँ।",
+   "text_en": null,
+   "start_ms": 403000,
+   "end_ms": 408000,
+   "speaker_label": "S3",
+   "speaker": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  },
+  {
+   "id": "utt:mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020#0039",
+   "meeting_id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+   "seq": 39,
+   "text": "Thanks Rohan!",
+   "text_en": null,
+   "start_ms": 409000,
+   "end_ms": 412000,
+   "speaker_label": "S2",
+   "speaker": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   },
+   "language": "hi-IN",
+   "mentions": []
+  }
+ ],
+ "decisions": [
+  {
+   "id": "dec:knadh/listmonk:kt:507117e52193",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.concurrency|config_value",
+   "subject": "schema.sql::app.concurrency",
+   "predicate": "config_value",
+   "object": "10",
+   "text": "schema.sql::app.concurrency is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "SES का rate limit hit हो रहा था",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:30:28Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "schema.sql",
+     "key": "app.concurrency"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:554978c865c8",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.message_rate|config_value",
+   "subject": "schema.sql::app.message_rate",
+   "predicate": "config_value",
+   "object": "10",
+   "text": "schema.sql::app.message_rate is 10 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:30:48Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate",
+     "path": "schema.sql",
+     "key": "app.message_rate"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:c8f3d954d3b8",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.batch_size|config_value",
+   "subject": "schema.sql::app.batch_size",
+   "predicate": "config_value",
+   "object": "1000",
+   "text": "schema.sql::app.batch_size is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "Postgres से subscribers 1000-1000 के batch में निकलते हैं, एक साथ पूरी list memory में नहीं आती",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:31:27Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.batch_size",
+     "label": "ConfigKey",
+     "name": "app.batch_size",
+     "path": "schema.sql",
+     "key": "app.batch_size"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:e0f967c7ce94",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.max_send_errors|config_value",
+   "subject": "schema.sql::app.max_send_errors",
+   "predicate": "config_value",
+   "object": "1000",
+   "text": "schema.sql::app.max_send_errors is 1000 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "एक गलत SMTP config पूरी list burn ना करे, 1000 से ज़्यादा send errors पे manager campaign को pause कर देता है",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:31:49Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.max_send_errors",
+     "label": "ConfigKey",
+     "name": "app.max_send_errors",
+     "path": "schema.sql",
+     "key": "app.max_send_errors"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:84400718b7e9",
+   "kind": "kt",
+   "key": "kt|config.toml.sample::smtp.my0.max_msg_retries|config_value",
+   "subject": "config.toml.sample::smtp.my0.max_msg_retries",
+   "predicate": "config_value",
+   "object": "2",
+   "text": "config.toml.sample::smtp.my0.max_msg_retries is 2 (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:11Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries",
+     "label": "ConfigKey",
+     "name": "smtp.my0.max_msg_retries",
+     "path": "config.toml.sample",
+     "key": "smtp.my0.max_msg_retries"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:eae9696d9977",
+   "kind": "kt",
+   "key": "kt|internal/manager/manager.go|kt_said",
+   "subject": "internal/manager/manager.go",
+   "predicate": "kt_said",
+   "object": "हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ।",
+   "text": "internal/manager/manager.go: हाँ, वो important है। manager.go में हमने एक बार per-message retry logic add किया था, PR merge भी हुआ। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:33Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go",
+     "path": "internal/manager/manager.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:c8ec299a889f",
+   "kind": "kt",
+   "key": "kt|internal/manager/manager.go|constraint",
+   "subject": "internal/manager/manager.go",
+   "predicate": "constraint",
+   "object": "manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है।",
+   "text": "internal/manager/manager.go constraint: manager.go में application level retry दोबारा add मत करना जब तक idempotency key ना हो, ये हमारी constraint है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:32:59Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:internal/manager/manager.go",
+     "label": "File",
+     "name": "manager.go",
+     "path": "internal/manager/manager.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:855231fc063f",
+   "kind": "kt",
+   "key": "kt|queries.sql|chose",
+   "subject": "queries.sql",
+   "predicate": "chose",
+   "object": "postgres",
+   "text": "queries.sql: chose postgres (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "query plans predictable रहते हैं और Postgres के jsonb और array features सीधे use होते हैं",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:33:41Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:queries.sql",
+     "label": "File",
+     "name": "queries.sql",
+     "path": "queries.sql",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:441e001034cf",
+   "kind": "kt",
+   "key": "kt|github.com/lib/pq|chose",
+   "subject": "github.com/lib/pq",
+   "predicate": "chose",
+   "object": "Database driver के लिए हम github.com/lib/pq ही use करते हैं।",
+   "text": "github.com/lib/pq: chose Database driver के लिए हम github.com/lib/pq ही use करते हैं। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:07Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+     "label": "Dependency",
+     "name": "github.com/lib/pq",
+     "path": null,
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:9bdb4d959edc",
+   "kind": "kt",
+   "key": "kt|sqlx|chose",
+   "subject": "sqlx",
+   "predicate": "chose",
+   "object": "lib/pq",
+   "text": "sqlx: chose lib/pq (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": "sqlx के साथ lib/pq stable है और कोई performance issue नहीं था",
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:07Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:06f225d4b2c5",
+   "kind": "kt",
+   "key": "kt|internal/manager|owner",
+   "subject": "internal/manager",
+   "predicate": "owner",
+   "object": "Priya Nair",
+   "text": "internal/manager is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:34:51Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "module:knadh/listmonk:internal/manager",
+     "label": "Module",
+     "name": "manager",
+     "path": "internal/manager",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:c827a0678f54",
+   "kind": "kt",
+   "key": "kt|cmd/campaigns.go|owner",
+   "subject": "cmd/campaigns.go",
+   "predicate": "owner",
+   "object": "Priya Nair",
+   "text": "cmd/campaigns.go is owned by Priya Nair (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:17Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:cmd/campaigns.go",
+     "label": "File",
+     "name": "campaigns.go",
+     "path": "cmd/campaigns.go",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:54bfab88d0a8",
+   "kind": "kt",
+   "key": "kt|docker-compose.yml|constraint",
+   "subject": "docker-compose.yml",
+   "predicate": "constraint",
+   "object": "एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना।",
+   "text": "docker-compose.yml constraint: एक चीज़: docker-compose.yml वाला Postgres सिर्फ dev के लिए है, production में managed Postgres है, उसे compose से मत चलाना। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:37Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "file:knadh/listmonk:docker-compose.yml",
+     "label": "File",
+     "name": "docker-compose.yml",
+     "path": "docker-compose.yml",
+     "key": null
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:868a18bdeb39",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.concurrency|constraint",
+   "subject": "schema.sql::app.concurrency",
+   "predicate": "constraint",
+   "object": "हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा।",
+   "text": "schema.sql::app.concurrency constraint: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:57Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+     "label": "ConfigKey",
+     "name": "app.concurrency",
+     "path": "schema.sql",
+     "key": "app.concurrency"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  },
+  {
+   "id": "dec:knadh/listmonk:kt:3ada84b1d737",
+   "kind": "kt",
+   "key": "kt|schema.sql::app.message_rate|constraint",
+   "subject": "schema.sql::app.message_rate",
+   "predicate": "constraint",
+   "object": "दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है।",
+   "text": "schema.sql::app.message_rate constraint: दूसरा: message_rate और concurrency को हमेशा साथ में बदलो, एक को बदलकर दूसरे को भूल जाना common mistake है। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+   "rationale": null,
+   "status": "active",
+   "valid_from_iso": "2026-10-20T04:35:57Z",
+   "valid_to_iso": null,
+   "confidence": 0.5,
+   "signal": "heuristic_kt",
+   "about": [
+    {
+     "id": "cfg:knadh/listmonk:schema.sql::app.message_rate",
+     "label": "ConfigKey",
+     "name": "app.message_rate",
+     "path": "schema.sql",
+     "key": "app.message_rate"
+    }
+   ],
+   "decided_in": {
+    "id": "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020",
+    "kind": "Meeting",
+    "title": "Listmonk handover: campaign manager and config",
+    "url": null,
+    "number": null,
+    "created_at_iso": "2026-10-20T04:30:00Z",
+    "excerpt": null,
+    "author": null,
+    "at_iso": "2026-10-20T04:30:00Z"
+   },
+   "stated_by": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta",
+    "login": null,
+    "why": null,
+    "score": null
+   }
+  }
+ ],
+ "speakers": [
+  {
+   "label": "S3",
+   "person": {
+    "id": "person:email:arjun.rao@example.com",
+    "name": "Arjun Rao"
+   }
+  },
+  {
+   "label": "S1",
+   "person": {
+    "id": "person:email:rohan.mehta@example.com",
+    "name": "Rohan Mehta"
+   }
+  },
+  {
+   "label": "S2",
+   "person": {
+    "id": "person:email:priya.nair@example.com",
+    "name": "Priya Nair"
+   }
+  }
+ ]
+}

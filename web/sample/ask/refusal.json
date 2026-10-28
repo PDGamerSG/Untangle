@@ -1,0 +1,167 @@
+{
+ "question": "why does listmonk use MongoDB?",
+ "repo": "knadh/listmonk",
+ "mode": "both",
+ "answer": "Untangle found nothing in the graph that answers that. Closest related: resetDB (Symbol), initDB (Symbol), manager_db.go (File). Person to ask: Kailash Nadh, who authored 130 of 145 commits on that, reviewed 4 of 22 PRs touching it, left 1 review comment on it.",
+ "refused": true,
+ "confidence": {
+  "score": 0.0,
+  "label": "refuse",
+  "reasons": [
+   "no decision or evidence is anchored on an entity the question names"
+  ]
+ },
+ "evidence_chain": [],
+ "supersession": [],
+ "citations": {},
+ "entities": [
+  {
+   "id": "sym:knadh/listmonk:tests/helpers.js::resetDB",
+   "label": "Symbol",
+   "name": "resetDB",
+   "path": "tests/helpers.js",
+   "key": null
+  },
+  {
+   "id": "sym:knadh/listmonk:cmd/init.go::initDB",
+   "label": "Symbol",
+   "name": "initDB",
+   "path": "cmd/init.go",
+   "key": null
+  },
+  {
+   "id": "file:knadh/listmonk:manager_db.go",
+   "label": "File",
+   "name": "manager_db.go",
+   "path": "manager_db.go",
+   "key": null
+  }
+ ],
+ "why": {
+  "route": "refuse",
+  "cypher": [
+   {
+    "name": "30_resolve_entities",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "mongo^3 OR db^3 OR use",
+     "exact": [
+      "MongoDB"
+     ],
+     "limit": 25
+    },
+    "rows": 25,
+    "ms": 8.6
+   },
+   {
+    "name": "35_decision_search",
+    "params": {
+     "repo": "knadh/listmonk",
+     "q": "mongo^3 OR db^3 OR use",
+     "limit": 6,
+     "chain_limit": 24
+    },
+    "rows": 9,
+    "ms": 10.6
+   },
+   {
+    "name": "34_person_to_ask",
+    "params": {
+     "repo": "knadh/listmonk",
+     "ids": [
+      "sym:knadh/listmonk:tests/helpers.js::resetDB",
+      "sym:knadh/listmonk:cmd/init.go::initDB"
+     ],
+     "now": 1793203434362,
+     "limit": 4
+    },
+    "rows": 4,
+    "ms": 6.6
+   },
+   {
+    "name": "50_vector_chunks",
+    "params": {
+     "q": "<vector dim=384>",
+     "k": 500,
+     "repo": "knadh/listmonk",
+     "limit": 8
+    },
+    "rows": 8,
+    "ms": 10.8
+   }
+  ],
+  "subgraph": {
+   "nodes": [],
+   "edges": []
+  },
+  "llm": {
+   "backend": "fake",
+   "model": "fake",
+   "used": false
+  }
+ },
+ "baseline": {
+  "answer": "Closest passages by embedding similarity, best first: (1) issue: Support for other Databases **Is your feature request related to a problem? Please describe.** listmonk doesn't provide support for other dbms, I have a single VM in google cloud, I don't want to cre… [chunk:issue:knadh/listmonk#1747#0] (2) issue: hardcoded 'listmonk' database name in get-db-info query in queries.sql **Version:** - listmonk: 2.5.1 - OS: all **Description of the bug and steps to reproduce:** When using custom database name, sta… [chunk:issue:knadh/listmonk#1477#0] (3) issue: Repository: https://codeberg.org/maloma/listmonk-sdk [chunk:issue:knadh/listmonk#2848#1] (4) issue: volumes: listmonk-data:` Please advice on how to resolve this issue. [chunk:issue:knadh/listmonk#1969#3] (5) comment: `listmonk accepts the secret via query parameter ?code=... or via the configured header name.` I think this is unnecessary technical detail in the UI. [chunk:comment:knadh/listmonk:pr_review_comment:3243214767#0]",
+  "chunks": [
+   {
+    "id": "chunk:issue:knadh/listmonk#1747#0",
+    "text": "Support for other Databases\n**Is your feature request related to a problem? Please describe.**\nlistmonk doesn't provide support for other dbms, I have a single VM in google cloud, I don't want to create more VM's because its costly\n**Describe the solution you'd like**\nI use MongoDb in production, I would love it if listmonk would allow you to configure it in a single mongo database, I think database code should be abstracted, support for configuring multiple databases should be provided",
+    "source_kind": "issue",
+    "score": 0.9091484546661377,
+    "source_id": "issue:knadh/listmonk#1747"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#1477#0",
+    "text": "hardcoded 'listmonk' database name in get-db-info query in queries.sql\n**Version:**\n - listmonk: 2.5.1\n - OS: all\n**Description of the bug and steps to reproduce:**\nWhen using custom database name, startup logs shows:\ninit.go:712: WARNING: error getting database version: pq: database \"listmonk\" does not exist\nAbove error is due to hardcoded 'listmonk' database name in get-db-info query in queries.sql",
+    "source_kind": "issue",
+    "score": 0.9017351865768433,
+    "source_id": "issue:knadh/listmonk#1477"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#2848#1",
+    "text": "Repository: https://codeberg.org/maloma/listmonk-sdk",
+    "source_kind": "issue",
+    "score": 0.9009075164794922,
+    "source_id": "issue:knadh/listmonk#2848"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#1969#3",
+    "text": "volumes:\n listmonk-data:`\nPlease advice on how to resolve this issue.",
+    "source_kind": "issue",
+    "score": 0.9006950259208679,
+    "source_id": "issue:knadh/listmonk#1969"
+   },
+   {
+    "id": "chunk:comment:knadh/listmonk:pr_review_comment:3243214767#0",
+    "text": "`listmonk accepts the secret via query parameter ?code=... or via the configured header name.`\nI think this is unnecessary technical detail in the UI.",
+    "source_kind": "comment",
+    "score": 0.9000803232192993,
+    "source_id": "comment:knadh/listmonk:pr_review_comment:3243214767"
+   },
+   {
+    "id": "chunk:comment:knadh/listmonk:pr_comment:1374907034#0",
+    "text": "Related: https://github.com/knadh/listmonk/issues/641",
+    "source_kind": "comment",
+    "score": 0.8986703753471375,
+    "source_id": "comment:knadh/listmonk:pr_comment:1374907034"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#287#0",
+    "text": "Listmonk not reading from database\nI've got Listmonk installed with EKS & Fargate on AWS. I've setup my config.toml according to the sample and it successfully connects to the RDS Postgres database. Listmonk seems to save changes to the database, but doesn't want to read them.\nIf I were to set the Root URL, it's saved in the database. But when the app reloads, those changes don't appear on the UI and it's reset to the default back in the database. Or when I create a list, the lists are successfully created and are visible in the database, but don't appear on the UI.\nAny ideas? Thanks in advance.\nEdit: I should mention there are no errors in the logs. I'm running version `v0.9.0-beta (e90fb1d 2021-02-13T12:41:40Z)`",
+    "source_kind": "issue",
+    "score": 0.8972159028053284,
+    "source_id": "issue:knadh/listmonk#287"
+   },
+   {
+    "id": "chunk:issue:knadh/listmonk#1681#1",
+    "text": "The only reference I can find is here but nothing seems to have come from it: https://github.com/knadh/listmonk/issues/995#issuecomment-1287776197",
+    "source_kind": "issue",
+    "score": 0.8971089124679565,
+    "source_id": "issue:knadh/listmonk#1681"
+   }
+  ],
+  "note": "vector-only, no graph: no supersession, no confidence"
+ },
+ "at_iso": null,
+ "intent": "why"
+}

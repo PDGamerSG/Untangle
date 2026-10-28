@@ -1,0 +1,18 @@
+[
+ {
+  "id": 601,
+  "pull_request_review_id": 501,
+  "user": {
+   "login": "bob",
+   "id": 40965,
+   "type": "User",
+   "html_url": "https://github.com/bob"
+  },
+  "body": "Pin to v1.10.9 please, v1.10.0 has the timeout bug.",
+  "path": "go.mod",
+  "line": 7,
+  "original_line": 7,
+  "created_at": "2024-02-28T11:00:00Z",
+  "html_url": "https://github.com/acme/demo/pull/7#discussion_r601"
+ }
+]

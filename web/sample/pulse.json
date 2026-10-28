@@ -1,0 +1,269 @@
+{
+  "repo": "knadh/listmonk",
+  "generated_at_iso": "2026-10-29T12:00:00Z",
+  "summary": {
+    "active_decisions": 18,
+    "risks": 3,
+    "critical": 1,
+    "coverage": 0.833,
+    "contradictions": 1,
+    "drift": 1,
+    "ownership_gaps": 1
+  },
+  "risks": [
+    {
+      "id": "risk:sample-contradiction",
+      "category": "contradiction",
+      "score": 0.88,
+      "reasons": [
+        "Handover call contradicts the active code decision",
+        "Related code changed after this decision was recorded"
+      ],
+      "entity": {
+        "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+        "label": "ConfigKey",
+        "name": "app.concurrency",
+        "path": "schema.sql",
+        "key": "app.concurrency"
+      },
+      "decision": {
+        "id": "dec:knadh/listmonk:config_value:1746b14b6895",
+        "kind": "config_value",
+        "key": "schema.sql::app.concurrency|config_value",
+        "subject": "schema.sql::app.concurrency",
+        "predicate": "config_value",
+        "object": "10",
+        "text": "`app.concurrency` in `schema.sql` is `10`",
+        "rationale": "Add settings UI and \"hot reload\" support to the app.",
+        "status": "active",
+        "valid_from_iso": "2020-07-08T11:00:14Z",
+        "valid_to_iso": null,
+        "confidence": 0.95,
+        "signal": "config_diff",
+        "about": [
+          {
+            "id": "cfg:knadh/listmonk:schema.sql::app.concurrency",
+            "label": "ConfigKey",
+            "name": "app.concurrency",
+            "path": "schema.sql",
+            "key": "app.concurrency"
+          },
+          {
+            "id": "file:knadh/listmonk:schema.sql",
+            "label": "File",
+            "name": "schema.sql",
+            "path": "schema.sql",
+            "key": null
+          }
+        ],
+        "decided_in": {
+          "id": "commit:knadh/listmonk@942eb7c3d86e",
+          "kind": "Commit",
+          "title": "Add settings UI and \"hot reload\" support to the app.",
+          "url": "https://github.com/knadh/listmonk/commit/942eb7c3d86e925de5d9f7d0b6b40f7b8a9323fd",
+          "number": null,
+          "created_at_iso": "2020-07-08T11:00:14Z",
+          "excerpt": null,
+          "author": null,
+          "at_iso": "2020-07-08T11:00:14Z"
+        },
+        "stated_by": {
+          "id": "person:gh:knadh",
+          "name": "Kailash Nadh",
+          "login": "knadh",
+          "why": null,
+          "score": null
+        }
+      },
+      "owner": {
+        "id": "person:gh:knadh",
+        "name": "Kailash Nadh",
+        "login": "knadh",
+        "why": null,
+        "score": null
+      },
+      "evidence": [
+        {
+          "id": "commit:knadh/listmonk@942eb7c3d86e",
+          "kind": "Commit",
+          "title": "Add settings UI and \"hot reload\" support to the app.",
+          "url": null,
+          "number": null,
+          "created_at_iso": "2020-07-08T11:00:14Z",
+          "excerpt": null,
+          "author": null
+        }
+      ],
+      "contradictions": [
+        {
+          "id": "dec:knadh/listmonk:kt:868a18bdeb39",
+          "kind": "Decision",
+          "title": "Handover constraint: keep app.concurrency at 10",
+          "url": null,
+          "number": null,
+          "created_at_iso": "2026-10-20T04:30:00Z",
+          "excerpt": "schema.sql::app.concurrency constraint: हाँ, दो। पहला: app.concurrency को 10 से ऊपर मत बढ़ाना जब तक SES quota बढ़वा ना लो, वरना वही 454 वाला incident दोहराएगा। (said by Rohan Mehta in KT \"Listmonk handover: campaign manager and config\")",
+          "author": null
+        }
+      ],
+      "last_touched_iso": "2026-10-22T09:30:00Z",
+      "owner_last_active_iso": "2026-10-20T04:30:00Z"
+    },
+    {
+      "id": "risk:sample-owner-gap",
+      "category": "ownership_gap",
+      "score": 0.14,
+      "reasons": [
+        "No recent owner is attached to this decision"
+      ],
+      "entity": {
+        "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+        "label": "Dependency",
+        "name": "github.com/lib/pq",
+        "path": null,
+        "key": null
+      },
+      "decision": {
+        "id": "dec:knadh/listmonk:dependency:22e0cfa31295",
+        "kind": "dependency",
+        "key": "dep|github.com/lib/pq|dependency_version",
+        "subject": "github.com/lib/pq",
+        "predicate": "dependency_version",
+        "object": "v1.12.3",
+        "text": "`github.com/lib/pq` (go) is at `v1.12.3` in `go.mod`",
+        "rationale": null,
+        "status": "active",
+        "valid_from_iso": "2026-10-06T10:29:38Z",
+        "valid_to_iso": null,
+        "confidence": 0.95,
+        "signal": "lockfile_diff",
+        "about": [
+          {
+            "id": "dep:knadh/listmonk:go:github.com/lib/pq",
+            "label": "Dependency",
+            "name": "github.com/lib/pq",
+            "path": null,
+            "key": null
+          },
+          {
+            "id": "file:knadh/listmonk:go.mod",
+            "label": "File",
+            "name": "go.mod",
+            "path": "go.mod",
+            "key": null
+          }
+        ],
+        "decided_in": {
+          "id": "commit:knadh/listmonk@8ff79d489168",
+          "kind": "Commit",
+          "title": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+          "url": "https://github.com/knadh/listmonk/commit/8ff79d489168047802b5c964e2586df9441e0810",
+          "number": null,
+          "created_at_iso": "2026-10-06T10:29:38Z",
+          "excerpt": null,
+          "author": null,
+          "at_iso": "2026-10-06T10:29:38Z"
+        },
+        "stated_by": {
+          "id": "person:gh:knadh",
+          "name": "Kailash Nadh",
+          "login": "knadh",
+          "why": null,
+          "score": null
+        }
+      },
+      "owner": null,
+      "evidence": [
+        {
+          "id": "commit:knadh/listmonk@8ff79d489168",
+          "kind": "Commit",
+          "title": "Update Go deps (and incorporate breaking changes in the `cron` package).",
+          "url": null,
+          "number": null,
+          "created_at_iso": "2026-10-06T10:29:38Z",
+          "excerpt": null,
+          "author": null
+        }
+      ],
+      "contradictions": [],
+      "last_touched_iso": "2026-10-06T10:29:38Z",
+      "owner_last_active_iso": null
+    },
+    {
+      "id": "risk:sample-drift",
+      "category": "drift",
+      "score": 0.27,
+      "reasons": [
+        "Related code changed after this decision was recorded",
+        "The active decision has no recorded rationale or evidence"
+      ],
+      "entity": {
+        "id": "cfg:knadh/listmonk:docker-compose.yml::x-app-defaults.networks",
+        "label": "ConfigKey",
+        "name": "x-app-defaults.networks",
+        "path": "docker-compose.yml",
+        "key": "x-app-defaults.networks"
+      },
+      "decision": {
+        "id": "dec:knadh/listmonk:config_value:246e09f7755f",
+        "kind": "config_value",
+        "key": "docker-compose.yml::x-app-defaults.networks|config_value",
+        "subject": "docker-compose.yml::x-app-defaults.networks",
+        "predicate": "config_value",
+        "object": "removed",
+        "text": "`x-app-defaults.networks` was removed from `docker-compose.yml`",
+        "rationale": null,
+        "status": "active",
+        "valid_from_iso": "2024-10-27T10:05:28Z",
+        "valid_to_iso": null,
+        "confidence": 0.95,
+        "signal": "config_diff",
+        "about": [
+          {
+            "id": "cfg:knadh/listmonk:docker-compose.yml::x-app-defaults.networks",
+            "label": "ConfigKey",
+            "name": "x-app-defaults.networks",
+            "path": "docker-compose.yml",
+            "key": "x-app-defaults.networks"
+          },
+          {
+            "id": "file:knadh/listmonk:docker-compose.yml",
+            "label": "File",
+            "name": "docker-compose.yml",
+            "path": "docker-compose.yml",
+            "key": null
+          }
+        ],
+        "decided_in": {
+          "id": "commit:knadh/listmonk@7fcc6f71e29b",
+          "kind": "Commit",
+          "title": "Simplify and refactor docker-compose.yml and remove install scripts.",
+          "url": "https://github.com/knadh/listmonk/commit/7fcc6f71e29b0e0866bc8cc746430064b572cb71",
+          "number": null,
+          "created_at_iso": "2024-10-27T10:05:28Z",
+          "excerpt": null,
+          "author": null,
+          "at_iso": "2024-10-27T10:05:28Z"
+        },
+        "stated_by": {
+          "id": "person:gh:knadh",
+          "name": "Kailash Nadh",
+          "login": "knadh",
+          "why": null,
+          "score": null
+        }
+      },
+      "owner": {
+        "id": "person:gh:knadh",
+        "name": "Kailash Nadh",
+        "login": "knadh",
+        "why": null,
+        "score": null
+      },
+      "evidence": [],
+      "contradictions": [],
+      "last_touched_iso": "2026-10-28T08:15:00Z",
+      "owner_last_active_iso": "2026-10-27T10:05:28Z"
+    }
+  ]
+}
