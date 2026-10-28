@@ -1,5 +1,5 @@
-"""`kyun ingest owner/name [--max-commits N] [--since YYYY-MM-DD] [--max-prs N] [--no-github] [--no-embed]
-[--llm-prs N] [--reset] [--json]` (CONTRACTS §5). `kyun.cli` imports `register` and adds it to its subparsers."""
+"""`untangle ingest owner/name [--max-commits N] [--since YYYY-MM-DD] [--max-prs N] [--no-github] [--no-embed]
+[--llm-prs N] [--reset] [--json]` (CONTRACTS §5). `untangle.cli` imports `register` and adds it to its subparsers."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import logging
 import sys
 from typing import Any
 
-from kyun.graph.db import GraphUnavailable, connect
+from untangle.graph.db import GraphUnavailable, connect
 
 
 def register(subparsers: Any) -> None:
@@ -27,7 +27,7 @@ def register(subparsers: Any) -> None:
 
 
 def run(args: argparse.Namespace) -> int:
-    from kyun.ingest.pipeline import ingest_repo
+    from untangle.ingest.pipeline import ingest_repo
 
     if not logging.getLogger().handlers:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")

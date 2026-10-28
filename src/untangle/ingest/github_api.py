@@ -25,9 +25,9 @@ from urllib.parse import urlencode
 
 import httpx
 
-from kyun.config import PROJECT_ROOT, settings
+from untangle.config import PROJECT_ROOT, settings
 
-log = logging.getLogger("kyun.ingest.github")
+log = logging.getLogger("untangle.ingest.github")
 
 API = "https://api.github.com"
 PER_PAGE = 100
@@ -203,7 +203,7 @@ class GitHubClient:
         self.workers = max(1, workers)
         self.base_url = base_url.rstrip("/")
         self._sleep = sleep
-        headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "kyun-ingest/0.1"}
+        headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "untangle-ingest/0.1"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         self._client = httpx.Client(headers=headers, timeout=httpx.Timeout(30.0), transport=transport, follow_redirects=True)

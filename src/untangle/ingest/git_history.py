@@ -13,9 +13,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from kyun.config import settings
+from untangle.config import settings
 
-log = logging.getLogger("kyun.ingest.git")
+log = logging.getLogger("untangle.ingest.git")
 
 _RS, _US = "\x1e", "\x1f"
 _LOG_FORMAT = f"format:{_RS}%H{_US}%P{_US}%an{_US}%ae{_US}%cn{_US}%ce{_US}%at{_US}%ct{_US}%s{_US}%B{_US}"

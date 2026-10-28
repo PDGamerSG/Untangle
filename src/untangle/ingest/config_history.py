@@ -12,11 +12,11 @@ import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from kyun import ids
-from kyun.ingest.decisions import DecisionRow, closes_numbers, make_decision
-from kyun.ingest.git_history import CommitRecord, GitRepo
-from kyun.ingest.github_api import PullRecord
-from kyun.ingest.symbols import (
+from untangle import ids
+from untangle.ingest.decisions import DecisionRow, closes_numbers, make_decision
+from untangle.ingest.git_history import CommitRecord, GitRepo
+from untangle.ingest.github_api import PullRecord
+from untangle.ingest.symbols import (
     config_format,
     is_noisy_config,
     manifest_ecosystem,
@@ -25,7 +25,7 @@ from kyun.ingest.symbols import (
     should_skip,
 )
 
-log = logging.getLogger("kyun.ingest.config_history")
+log = logging.getLogger("untangle.ingest.config_history")
 
 MAX_COMMITS_PER_FILE = 250
 MAX_CHANGES_PER_VERSION = 150  # a reformat that rewrites everything is not 300 decisions

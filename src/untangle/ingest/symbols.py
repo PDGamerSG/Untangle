@@ -1,6 +1,6 @@
 """Regex extraction of symbols, configuration keys and declared dependencies from file contents.
 
-No parser per language is needed for the questions Kyun answers ("why is `retry_limit` 3?", "who owns
+No parser per language is needed for the questions Untangle answers ("why is `retry_limit` 3?", "who owns
 `Mailer`?"): a top-level declaration regex per language, a flattener for YAML/TOML/JSON/.env/INI files and
 a handful of manifest readers. Everything is pure: callers pass `(path, text)`, nothing touches the disk."""
 
@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 
-log = logging.getLogger("kyun.ingest.symbols")
+log = logging.getLogger("untangle.ingest.symbols")
 
 MAX_SYMBOLS_PER_FILE = 400
 MAX_KEYS_PER_FILE = 300

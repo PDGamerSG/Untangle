@@ -12,11 +12,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
-from kyun import ids
-from kyun.ingest.decisions import DecisionRow, make_decision
-from kyun.ingest.symbols import is_doc_path, should_skip
+from untangle import ids
+from untangle.ingest.decisions import DecisionRow, make_decision
+from untangle.ingest.symbols import is_doc_path, should_skip
 
-log = logging.getLogger("kyun.ingest.docs")
+log = logging.getLogger("untangle.ingest.docs")
 
 MAX_DOCS = 300
 MAX_DOC_CHARS = 40_000

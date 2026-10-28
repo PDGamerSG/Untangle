@@ -1,5 +1,5 @@
 """Row shaping and batched `UNWIND $rows` MERGE writes through the numbered Cypher statements (`cypher/10_*` …
-`17_*`, `21`–`23`). Everything here is idempotent: ids come from `kyun.ids`, nodes are MERGEd on `id` and
+`17_*`, `21`–`23`). Everything here is idempotent: ids come from `untangle.ids`, nodes are MERGEd on `id` and
 properties SET, so re-running an ingestion rewrites the same graph.
 
 `People` resolves identities: one Person per GitHub login when it is known (a PR's commit list reveals
@@ -14,17 +14,17 @@ from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import Any
 
-from kyun import ids
-from kyun.graph.db import Graph
-from kyun.graph.queries import load_cypher
-from kyun.ingest.config_history import KeyState
-from kyun.ingest.decisions import DecisionRow, closes_numbers, mentioned_numbers
-from kyun.ingest.docs import DocumentRecord
-from kyun.ingest.git_history import CommitRecord
-from kyun.ingest.github_api import GitHubData, PullRecord
-from kyun.ingest.symbols import ConfigKeyRecord, DependencyRecord, SymbolRecord, is_config_path, is_doc_path
+from untangle import ids
+from untangle.graph.db import Graph
+from untangle.graph.queries import load_cypher
+from untangle.ingest.config_history import KeyState
+from untangle.ingest.decisions import DecisionRow, closes_numbers, mentioned_numbers
+from untangle.ingest.docs import DocumentRecord
+from untangle.ingest.git_history import CommitRecord
+from untangle.ingest.github_api import GitHubData, PullRecord
+from untangle.ingest.symbols import ConfigKeyRecord, DependencyRecord, SymbolRecord, is_config_path, is_doc_path
 
-log = logging.getLogger("kyun.ingest.loader")
+log = logging.getLogger("untangle.ingest.loader")
 
 BATCH = 500
 CHUNK_BATCH = 200

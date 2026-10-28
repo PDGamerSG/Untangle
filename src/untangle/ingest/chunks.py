@@ -1,5 +1,5 @@
 """Chunk rows for the vector-only baseline and chunk recall: ~800-character windows over commit messages,
-PR and issue title+body, comment bodies and document sections, embedded with `kyun.embed.make_embedder()`.
+PR and issue title+body, comment bodies and document sections, embedded with `untangle.embed.make_embedder()`.
 
 Chunks are the only nodes that carry vectors; `--no-embed` leaves `embedding` null, and the vector index
 simply has nothing to return (the graph answer path never needs it)."""
@@ -12,13 +12,13 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
-from kyun import ids
-from kyun.embed import Embedder
-from kyun.ingest.docs import DocumentRecord
-from kyun.ingest.git_history import CommitRecord
-from kyun.ingest.github_api import IssueRecord, PullRecord
+from untangle import ids
+from untangle.embed import Embedder
+from untangle.ingest.docs import DocumentRecord
+from untangle.ingest.git_history import CommitRecord
+from untangle.ingest.github_api import IssueRecord, PullRecord
 
-log = logging.getLogger("kyun.ingest.chunks")
+log = logging.getLogger("untangle.ingest.chunks")
 
 CHUNK_CHARS = 800
 MIN_CHUNK_CHARS = 20

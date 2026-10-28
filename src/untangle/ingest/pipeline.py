@@ -13,17 +13,17 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from kyun import ids
-from kyun.embed import Embedder, make_embedder
-from kyun.graph.db import Graph, connect
-from kyun.ingest import chunks as chunking
-from kyun.ingest import docs as documents
-from kyun.ingest.config_history import config_history, history_paths
-from kyun.ingest.decisions import DecisionRow, explicit_supersessions, pr_change_decisions, revert_decisions
-from kyun.ingest.extract_llm import extract_pr_rationales
-from kyun.ingest.git_history import GitRepo, clone_or_fetch
-from kyun.ingest.github_api import GitHubClient, GitHubData, GitHubError
-from kyun.ingest.loader import (
+from untangle import ids
+from untangle.embed import Embedder, make_embedder
+from untangle.graph.db import Graph, connect
+from untangle.ingest import chunks as chunking
+from untangle.ingest import docs as documents
+from untangle.ingest.config_history import config_history, history_paths
+from untangle.ingest.decisions import DecisionRow, explicit_supersessions, pr_change_decisions, revert_decisions
+from untangle.ingest.extract_llm import extract_pr_rationales
+from untangle.ingest.git_history import GitRepo, clone_or_fetch
+from untangle.ingest.github_api import GitHubClient, GitHubData, GitHubError
+from untangle.ingest.loader import (
     Loader,
     People,
     commit_rows,
@@ -35,7 +35,7 @@ from kyun.ingest.loader import (
     revert_rows,
     symbol_rows,
 )
-from kyun.ingest.symbols import (
+from untangle.ingest.symbols import (
     MAX_FILE_BYTES,
     config_format,
     extract_config_keys,
@@ -46,9 +46,9 @@ from kyun.ingest.symbols import (
     parse_dependencies,
     should_skip,
 )
-from kyun.llm import LLM
+from untangle.llm import LLM
 
-log = logging.getLogger("kyun.ingest.pipeline")
+log = logging.getLogger("untangle.ingest.pipeline")
 Progress = Callable[[str], None]
 
 

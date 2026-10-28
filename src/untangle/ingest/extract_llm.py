@@ -1,4 +1,4 @@
-"""Optional rationale extraction from the most-discussed merged pull requests with `kyun.llm.make_llm()`.
+"""Optional rationale extraction from the most-discussed merged pull requests with `untangle.llm.make_llm()`.
 
 The model reads a PR's title, body, reviews and comments and returns decisions as strict JSON. Every decision
 must quote the thread verbatim; the quote is located in the PR body or a comment and that node becomes the
@@ -13,12 +13,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
-from kyun import ids
-from kyun.ingest.decisions import DecisionRow, make_decision
-from kyun.ingest.github_api import PullRecord
-from kyun.llm import LLM, LLMUnavailable, make_llm
+from untangle import ids
+from untangle.ingest.decisions import DecisionRow, make_decision
+from untangle.ingest.github_api import PullRecord
+from untangle.llm import LLM, LLMUnavailable, make_llm
 
-log = logging.getLogger("kyun.ingest.extract_llm")
+log = logging.getLogger("untangle.ingest.extract_llm")
 
 MAX_PROMPT_CHARS = 14_000
 MAX_BODY_CHARS = 3000

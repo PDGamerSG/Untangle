@@ -14,11 +14,11 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-from kyun import ids
-from kyun.ingest.git_history import CommitRecord
-from kyun.ingest.github_api import PullRecord
+from untangle import ids
+from untangle.ingest.git_history import CommitRecord
+from untangle.ingest.github_api import PullRecord
 
-log = logging.getLogger("kyun.ingest.decisions")
+log = logging.getLogger("untangle.ingest.decisions")
 
 MAX_ABOUT_FILES = 10
 MAX_RATIONALE_CHARS = 2000
