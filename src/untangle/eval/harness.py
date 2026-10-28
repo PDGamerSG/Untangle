@@ -1,9 +1,9 @@
-"""`run_eval`: every gold question through `kyun.answer.service.ask` in each mode (`graph`, `baseline`), scored
+"""`run_eval`: every gold question through `untangle.answer.service.ask` in each mode (`graph`, `baseline`), scored
 against the expectations, summarised per mode and written as Markdown (+ JSON next to it).
 
 The answer service is imported lazily and duck-typed: any object or dict with the `AskResponse` attributes of
 CONTRACTS §6 (`answer`, `refused`, `citations`, `evidence_chain`, `entities`, `supersession`, `confidence`,
-`baseline`) works, so the harness runs against a fake `ask` in tests and against the real one in `kyun eval`.
+`baseline`) works, so the harness runs against a fake `ask` in tests and against the real one in `untangle eval`.
 
 Metrics (per mode, verified and unverified questions reported separately):
 
@@ -30,9 +30,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from kyun.eval.gold import GoldQuestion, GoldSet, load_gold
+from untangle.eval.gold import GoldQuestion, GoldSet, load_gold
 
-log = logging.getLogger("kyun.eval")
+log = logging.getLogger("untangle.eval")
 
 DEFAULT_MODES: tuple[str, ...] = ("graph", "baseline")
 _BRACKET_ID = re.compile(r"\[([a-z]+:[^\]\s]+)\]")
@@ -65,7 +65,7 @@ class QuestionRun:
 
 
 def default_ask() -> AskFn:
-    from kyun.answer.service import ask  # lazy: written by another module; only needed for the real run
+    from untangle.answer.service import ask  # lazy: written by another module; only needed for the real run
 
     return ask
 
@@ -261,7 +261,7 @@ def run_eval(
     gold: GoldSet | None = None,
 ) -> dict[str, Any]:
     """Run the gold set; returns the report dict (also written to `out` as Markdown and `<out>.json`)."""
-    from kyun.eval.report import write_report
+    from untangle.eval.report import write_report
 
     gold = gold or load_gold(gold_path)
     repo = repo or gold.repo

@@ -1,5 +1,5 @@
-"""`kyun eval --repo owner/name --gold eval/gold/<name>.yaml [--out eval/out/<name>.md] [--modes graph,baseline]`.
-The CLI owner imports `register(subparsers)`; `python -m kyun.eval.cli` runs it standalone."""
+"""`untangle eval --repo owner/name --gold eval/gold/<name>.yaml [--out eval/out/<name>.md] [--modes graph,baseline]`.
+The CLI owner imports `register(subparsers)`; `python -m untangle.eval.cli` runs it standalone."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ import logging
 import sys
 from pathlib import Path
 
-from kyun.eval.harness import DEFAULT_MODES, run_eval
+from untangle.eval.harness import DEFAULT_MODES, run_eval
 
-log = logging.getLogger("kyun.eval.cli")
+log = logging.getLogger("untangle.eval.cli")
 
 
 def run(args: argparse.Namespace) -> int:
@@ -47,7 +47,7 @@ def register(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    parser = argparse.ArgumentParser(prog="kyun")
+    parser = argparse.ArgumentParser(prog="untangle")
     register(parser.add_subparsers(dest="command", required=True))
     args = parser.parse_args(argv)
     return int(args.func(args))

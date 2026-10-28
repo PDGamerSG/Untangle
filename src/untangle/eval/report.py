@@ -51,12 +51,12 @@ def _summary_table(summary: dict[str, Any], modes: list[str], bucket: str) -> li
 def render_markdown(report: dict[str, Any]) -> str:
     modes = list(report["modes"])
     lines = [
-        f"# Kyun eval: {report['name']} ({report['repo']})",
+        f"# Untangle eval: {report['name']} ({report['repo']})",
         "",
         f"Generated {report['generated_at']} from `{report['gold_path']}`: {report['questions']} questions "
         f"({report['verified']} verified, {report['unverified']} unverified), modes {', '.join(modes)}.",
         "",
-        "`graph` is Kyun's answer from the decision graph; `baseline` is vector-only retrieval over the same text "
+        "`graph` is Untangle's answer from the decision graph; `baseline` is vector-only retrieval over the same text "
         "(no decisions, no supersession, no refusal logic). An expectation marked *unverified* was written without "
         "checking the repository's history, so those rows are scored but reported apart.",
         "",
