@@ -23,12 +23,12 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from kyun import ids
-from kyun.embed import Embedder, make_embedder
-from kyun.graph.db import Graph, Neo4jError
-from kyun.graph.queries import load_cypher
-from kyun.kt.extract import Extraction, KtDecision, extract_decisions
-from kyun.kt.transcript import (
+from untangle import ids
+from untangle.embed import Embedder, make_embedder
+from untangle.graph.db import Graph, Neo4jError
+from untangle.graph.queries import load_cypher
+from untangle.kt.extract import Extraction, KtDecision, extract_decisions
+from untangle.kt.transcript import (
     Utterance,
     as_utterances,
     clean_label,
@@ -37,9 +37,9 @@ from kyun.kt.transcript import (
     has_devanagari,
     parse_started_at,
 )
-from kyun.llm import LLM
+from untangle.llm import LLM
 
-log = logging.getLogger("kyun.kt.pipeline")
+log = logging.getLogger("untangle.kt.pipeline")
 
 MENTION_LABELS = ("File", "Symbol", "ConfigKey", "Dependency")
 ABOUT_LABELS = (*MENTION_LABELS, "Module")
@@ -330,7 +330,7 @@ def ingest_kt(
     catalogue_limit: int = CATALOGUE_LIMIT,
     now: int | None = None,
 ) -> dict[str, Any]:
-    """Load one call. `utterances` are normalised rows (`kyun.kt.transcript`); `speakers` maps labels to
+    """Load one call. `utterances` are normalised rows (`untangle.kt.transcript`); `speakers` maps labels to
     `{name, login, email}` (or a bare name); `started_at` is epoch ms or ISO-8601; `sarvam` is a `SarvamClient`
     (or anything with `translate(text, ...)` / `identify_language(text)`) used for `text_en` and language id when
     given. Returns a summary dict with the meeting id, counts and the recorded decisions."""

@@ -1,13 +1,13 @@
-"""Service layer for handover calls, used by the CLI (`kyun kt ...`) and the API (`/meetings`, `/kt/ingest`).
+"""Service layer for handover calls, used by the CLI (`untangle kt ...`) and the API (`/meetings`, `/kt/ingest`).
 
 * `meetings(repo)` / `meeting(id)` read the graph (`45_kt_meetings`, `46_kt_meeting_detail`).
-* `ingest_transcript(repo, path)` loads a Kyun / Sarvam / plain-text transcript and runs `ingest_kt`.
+* `ingest_transcript(repo, path)` loads a Untangle / Sarvam / plain-text transcript and runs `ingest_kt`.
 * `ingest_audio(repo, title, path)` transcribes with Sarvam first: the synchronous endpoint for WAV clips of at
   most 30 s, the batch job for everything longer (and for compressed formats whose duration is unknown), and the
   28 s window fallback through the short endpoint when the batch API is not available on the account.
 
 The Sarvam client, LLM, embedder and graph are injectable so everything runs offline against fakes; the defaults
-come from `kyun.config.settings()` (`SARVAM_API_KEY`, `LLM_BACKEND`, `EMBED_BACKEND`, `NEO4J_*`)."""
+come from `untangle.config.settings()` (`SARVAM_API_KEY`, `LLM_BACKEND`, `EMBED_BACKEND`, `NEO4J_*`)."""
 
 from __future__ import annotations
 
@@ -20,15 +20,15 @@ from typing import Any
 
 import httpx
 
-from kyun.config import Settings, settings
-from kyun.embed import Embedder
-from kyun.graph.db import Graph, connect
-from kyun.kt.pipeline import ingest_kt, keyterms_for_repo
-from kyun.kt.sarvam import SHORT_LIMIT_SECONDS, SarvamClient, SarvamError, wav_duration_seconds
-from kyun.kt.transcript import Transcript, from_sarvam, load_transcript
-from kyun.llm import LLM, make_llm
+from untangle.config import Settings, settings
+from untangle.embed import Embedder
+from untangle.graph.db import Graph, connect
+from untangle.kt.pipeline import ingest_kt, keyterms_for_repo
+from untangle.kt.sarvam import SHORT_LIMIT_SECONDS, SarvamClient, SarvamError, wav_duration_seconds
+from untangle.kt.transcript import Transcript, from_sarvam, load_transcript
+from untangle.llm import LLM, make_llm
 
-log = logging.getLogger("kyun.kt.service")
+log = logging.getLogger("untangle.kt.service")
 
 SHORT_FILE_BYTES = 1_000_000  # a compressed file this small is almost certainly under 30 s
 
@@ -141,7 +141,7 @@ def ingest_transcript(
     embedder: Embedder | None = None,
     sarvam: SarvamClient | None = None,
 ) -> dict[str, Any]:
-    """Load a transcript file (Kyun JSON, Sarvam JSON or `Speaker: text` lines) into the graph."""
+    """Load a transcript file (Untangle JSON, Sarvam JSON or `Speaker: text` lines) into the graph."""
     t = load_transcript(path, title=title, language=language)
     client = sarvam if sarvam is not None else (sarvam_client() if translate else None)
     with _graph(graph) as g:

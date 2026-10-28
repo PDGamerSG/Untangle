@@ -2,7 +2,7 @@
 
 Two extractors behind one shape (`KtDecision`):
 
-* **LLM** (`extract_with_llm`): sarvam-105b, Claude or any OpenAI-compatible model through `kyun.llm.LLM`, asked for
+* **LLM** (`extract_with_llm`): sarvam-105b, Claude or any OpenAI-compatible model through `untangle.llm.LLM`, asked for
   strict JSON that pydantic validates. Utterances are sent in windows with their `seq` numbers and the repository's
   keyterms so the model can anchor every decision on utterances that exist and on identifiers the graph knows.
   Signal `llm_kt`, confidence clamped to 0.5–0.8 (CONTRACTS §3).
@@ -27,10 +27,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
-from kyun.kt.transcript import Utterance, clean_text, split_sentences
-from kyun.llm import LLM, LLMUnavailable
+from untangle.kt.transcript import Utterance, clean_text, split_sentences
+from untangle.llm import LLM, LLMUnavailable
 
-log = logging.getLogger("kyun.kt.extract")
+log = logging.getLogger("untangle.kt.extract")
 
 PREDICATES = ("chose", "constraint", "workaround_for", "deprecated", "owner", "config_value", "kt_said")
 Predicate = Literal["chose", "constraint", "workaround_for", "deprecated", "owner", "config_value", "kt_said"]

@@ -1,10 +1,10 @@
-"""`kyun kt ...` subcommands. The CLI owner imports `register(subparsers)`; the parser sets `func` so the
-dispatcher can call `args.func(args)`. `python -m kyun.kt.cli` runs it standalone.
+"""`untangle kt ...` subcommands. The CLI owner imports `register(subparsers)`; the parser sets `func` so the
+dispatcher can call `args.func(args)`. `python -m untangle.kt.cli` runs it standalone.
 
-    kyun kt ingest --repo owner/name (--audio file.mp3 | --transcript file.json) [--title "..."] [--speakers 3]
+    untangle kt ingest --repo owner/name (--audio file.mp3 | --transcript file.json) [--title "..."] [--speakers 3]
                    [--language hi-IN] [--no-translate] [--json]
-    kyun kt list --repo owner/name
-    kyun kt show <meeting-id>"""
+    untangle kt list --repo owner/name
+    untangle kt show <meeting-id>"""
 
 from __future__ import annotations
 
@@ -15,10 +15,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from kyun.kt import service
-from kyun.kt.sarvam import SarvamError
+from untangle.kt import service
+from untangle.kt.sarvam import SarvamError
 
-log = logging.getLogger("kyun.kt.cli")
+log = logging.getLogger("untangle.kt.cli")
 
 
 def _emit(obj: Any) -> None:
@@ -112,7 +112,7 @@ def register(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     ing.add_argument("--repo", required=True, help="owner/name the call is about")
     src = ing.add_mutually_exclusive_group(required=True)
     src.add_argument("--audio", help="recording (wav/mp3/m4a/...): <= 30 s WAV uses the REST endpoint, longer files the batch job")
-    src.add_argument("--transcript", help="Kyun transcript JSON, Sarvam response JSON, or 'Speaker: text' lines")
+    src.add_argument("--transcript", help="Untangle transcript JSON, Sarvam response JSON, or 'Speaker: text' lines")
     ing.add_argument("--title", help="meeting title (defaults to the transcript's title or the file name)")
     ing.add_argument("--speakers", type=int, help="number of speakers, when known (helps diarisation)")
     ing.add_argument("--language", help="BCP-47 code such as hi-IN or en-IN; omit to auto-detect")
@@ -136,7 +136,7 @@ def register(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    parser = argparse.ArgumentParser(prog="kyun")
+    parser = argparse.ArgumentParser(prog="untangle")
     register(parser.add_subparsers(dest="command", required=True))
     args = parser.parse_args(argv)
     return int(args.func(args))

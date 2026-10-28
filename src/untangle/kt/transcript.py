@@ -2,7 +2,7 @@
 
 * Sarvam responses (REST or batch output): `diarized_transcript.entries[{speaker_id, start_time_seconds,
   end_time_seconds, transcript}]`, else `timestamps` chunks, else the bare `transcript`.
-* Kyun's own transcript JSON: `{"title", "language", "started_at", "speakers": {"S1": {"name", "login", "email"}},
+* Untangle's own transcript JSON: `{"title", "language", "started_at", "speakers": {"S1": {"name", "login", "email"}},
   "utterances": [{"speaker": "S1", "start_ms", "end_ms", "text"}]}` (how the sample call in `data/kt/` is written).
 * Plain text: `Speaker: text` lines, optionally prefixed with `[mm:ss]`; continuation lines belong to the previous
   speaker. Timestamps are estimated from text length when absent.
@@ -229,7 +229,7 @@ def as_utterances(rows: Iterable[Utterance | Mapping[str, Any]]) -> list[Utteran
 def from_sarvam(doc: Any, *, offset_ms: int = 0, language: str | None = None, source: str = "sarvam-batch", title: str | None = None) -> Transcript:
     """A Sarvam REST response or batch output document (or a list of them) -> Transcript. `speaker_id` becomes the
     speaker label; chunk-only responses get one speaker."""
-    from kyun.kt.sarvam import entries_from_response  # local import: keeps this module free of httpx
+    from untangle.kt.sarvam import entries_from_response  # local import: keeps this module free of httpx
 
     entries = entries_from_response(doc, offset_ms=offset_ms)
     code = None
@@ -253,8 +253,8 @@ def _speaker_entry(value: Any) -> dict[str, str | None]:
     return {"name": clean_text(value) or None, "login": None, "email": None}
 
 
-def from_kyun_json(obj: Mapping[str, Any]) -> Transcript:
-    """Kyun's transcript JSON (see module docstring and `data/kt/README.md`)."""
+def from_untangle_json(obj: Mapping[str, Any]) -> Transcript:
+    """Untangle's transcript JSON (see module docstring and `data/kt/README.md`)."""
     if not isinstance(obj, Mapping) or not isinstance(obj.get("utterances"), list):
         raise ValueError("transcript JSON needs an 'utterances' list")
     language = clean_text(obj.get("language")) or None
@@ -328,7 +328,7 @@ def name_key_to_name(raw: list[dict[str, Any]], label: str) -> str | None:
 
 
 def load_transcript(path: str | Path, *, title: str | None = None, language: str | None = None) -> Transcript:
-    """Detect the format from the content: Kyun JSON (`utterances`), Sarvam JSON (`diarized_transcript` /
+    """Detect the format from the content: Untangle JSON (`utterances`), Sarvam JSON (`diarized_transcript` /
     `timestamps` / `transcript`, or a list of those), otherwise plain text."""
     path = Path(path)
     text = path.read_text(encoding="utf-8-sig")
@@ -338,7 +338,7 @@ def load_transcript(path: str | Path, *, title: str | None = None, language: str
         except ValueError as exc:
             raise ValueError(f"{path} is not valid JSON: {exc}") from exc
         if isinstance(obj, Mapping) and "utterances" in obj:
-            t = from_kyun_json(obj)
+            t = from_untangle_json(obj)
         elif isinstance(obj, list) or (isinstance(obj, Mapping) and any(k in obj for k in ("diarized_transcript", "timestamps", "transcript"))):
             t = from_sarvam(obj, language=language, source="sarvam-batch", title=title)
         else:
@@ -364,7 +364,7 @@ __all__ = [
     "as_utterances",
     "clean_label",
     "clean_text",
-    "from_kyun_json",
+    "from_untangle_json",
     "from_sarvam",
     "from_text",
     "guess_language",

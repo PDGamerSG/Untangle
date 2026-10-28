@@ -38,7 +38,7 @@ from typing import Any
 
 import httpx
 
-log = logging.getLogger("kyun.kt.sarvam")
+log = logging.getLogger("untangle.kt.sarvam")
 
 DEFAULT_BASE_URL = "https://api.sarvam.ai"
 DEFAULT_STT_MODEL = "saaras:v4"
