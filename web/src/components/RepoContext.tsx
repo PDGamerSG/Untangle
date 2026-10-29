@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useResource, useStoredValue } from "@/lib/hooks";
 import type { RepoSummary } from "@/lib/types";
 
-const STORAGE_KEY = "kyun.repo";
+const STORAGE_KEY = "untangle.repo";
 
 interface RepoState {
   repos: RepoSummary[] | undefined;

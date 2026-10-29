@@ -23,9 +23,9 @@ const tiro = Tiro_Devanagari_Hindi({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Kyun · क्यों", template: "%s · Kyun" },
+  title: { default: "Untangle · क्यों", template: "%s · Untangle" },
   description: "Why is the code like this? Answers from the repository's own history, with a chain of evidence.",
-  applicationName: "Kyun",
+  applicationName: "Untangle",
 };
 
 export const viewport: Viewport = {
