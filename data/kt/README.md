@@ -1,9 +1,9 @@
 # Handover-call (KT) recordings and transcripts
 
-Kyun turns a knowledge-transfer call into graph nodes (`Meeting`, `Utterance`, `Person`), links what was said
+Untangle turns a knowledge-transfer call into graph nodes (`Meeting`, `Utterance`, `Person`), links what was said
 to the repository's files, config keys and dependencies (`MENTIONS`), and records the decisions that were spoken
-as `kt` decisions on the same keys the code history uses, so a reason given on a call confirms or supersedes a
-value found in commits.
+as `kt` decisions on separate `kt|…` keys. Spoken config values are linked to the repository record with
+`CONFIRMS` or `CONTRADICTS`; they never supersede code-history decisions.
 
 ## What is in this folder
 
@@ -22,7 +22,7 @@ A KT call is personal data of everyone on it. Before recording:
    audio leaves your machine) and loaded into a Neo4j graph that other engineers will query.
 2. Get a clear yes from each participant **on the recording** ("recording शुरू हो गई है, सब ठीक है?" and the answers).
 3. Name the repository the call is about so the transcript lands on the right `Repo`.
-4. Anyone can ask for their utterances to be removed later: `kyun kt` writes every node with the meeting id, so a
+4. Anyone can ask for their utterances to be removed later: `untangle kt` writes every node with the meeting id, so a
    meeting can be deleted with one Cypher statement (`MATCH (m:Meeting {id: $id}) OPTIONAL MATCH (m)-[:HAS]->(u) DETACH DELETE u, m`).
 
 Do not record customers, do not record anyone who has not agreed, and do not put secrets (tokens, passwords, keys)
@@ -34,26 +34,26 @@ in a call that will be transcribed.
 - Clips of at most 30 s go through Sarvam's synchronous endpoint; anything longer goes through the batch job API
   (up to a few hours) with speaker diarisation. If the batch API is not enabled on the account, WAV files fall back
   to 28-second windows through the synchronous endpoint (speaker labels are then per window).
-- Say identifiers the way they are written (`app dot concurrency`, `queries dot sql`): Kyun sends the repository's
+- Say identifiers the way they are written (`app dot concurrency`, `queries dot sql`): Untangle sends the repository's
   most-touched file names, config keys, symbols and dependency names to Sarvam as `keyterms`, which biases
   recognition toward them.
 - Give the call a title and, if you know it, the number of speakers:
 
 ```
-kyun kt ingest --repo knadh/listmonk --audio data/kt/call.wav --title "Campaign manager handover" --speakers 3 --language hi-IN
+untangle kt ingest --repo knadh/listmonk --audio data/kt/call.wav --title "Campaign manager handover" --speakers 3 --language hi-IN
 ```
 
 `SARVAM_API_KEY` must be set in `.env`. Without it, transcribe elsewhere and load the transcript:
 
 ```
-kyun kt ingest --repo knadh/listmonk --transcript data/kt/listmonk-kt-sample.json
-kyun kt list --repo knadh/listmonk
-kyun kt show "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020"
+untangle kt ingest --repo knadh/listmonk --transcript data/kt/listmonk-kt-sample.json
+untangle kt list --repo knadh/listmonk
+untangle kt show "mtg:knadh/listmonk:listmonk-handover-campaign-manager-and-config-20261020"
 ```
 
-## Transcript formats `kyun kt ingest --transcript` accepts
+## Transcript formats `untangle kt ingest --transcript` accepts
 
-**Kyun JSON** (this folder's format):
+**Untangle JSON** (this folder's format):
 
 ```jsonc
 {
@@ -85,4 +85,5 @@ speaker continue the previous one. Missing timestamps are estimated from text le
   English or Hinglish that name an identifier the repository knows.
 - Every KT decision is `EVIDENCED_BY` the utterances it came from, `STATED_BY` the speaker, `DECIDED_IN` the
   meeting and `ABOUT` the resolved entity. A `config_value` statement lands on the key
-  `<path>::<key>|config_value`, exactly where `kyun ingest` puts the value it found in commits.
+  `kt|<path>::<key>|config_value`. Reconciliation compares it with the repository's active config decision and
+  records agreement or conflict without replacing that decision.

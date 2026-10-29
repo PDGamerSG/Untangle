@@ -1,6 +1,6 @@
-# Kyun web (क्यों)
+# Untangle web
 
-The web app of Kyun: ask "why is the code like this?" and get an answer with its chain of evidence, supersession, a graph-derived confidence score, the Cypher that ran, and the subgraph it read. Or an honest refusal.
+The web app of Untangle: ask "why is the code like this?" and get an answer with its chain of evidence, supersession, a graph-derived confidence score, the Cypher that ran, and the subgraph it read. Or an honest refusal.
 
 Next.js 16 (App Router, React 19, Tailwind 4, TypeScript strict). No component library; `d3-force` draws the subgraph, `lucide-react` provides icons.
 
@@ -9,32 +9,33 @@ Next.js 16 (App Router, React 19, Tailwind 4, TypeScript strict). No component l
 ```bash
 cd web
 pnpm install
-pnpm dev            # http://localhost:3000, talks to the API at NEXT_PUBLIC_KYUN_API
+pnpm dev            # http://localhost:3000, talks to the API at NEXT_PUBLIC_UNTANGLE_API
 pnpm build && pnpm start
 pnpm lint
 ```
 
-The API is the FastAPI server from the Python package (`kyun serve`, port 8090 by default). CORS must allow `http://localhost:3000` (`CORS_ORIGINS` in the root `.env`).
+The API is the FastAPI server from the Python package (`untangle serve`, port 8090 by default). CORS must allow `http://localhost:3000` (`CORS_ORIGINS` in the root `.env`).
 
 ## Environment variables
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `NEXT_PUBLIC_KYUN_API` | `http://localhost:8090` | Base URL of the Kyun API. |
-| `NEXT_PUBLIC_KYUN_SAMPLE` | unset | Set to `1` to read the fixtures in `web/sample/` instead of calling the API. A "Sample data" banner is shown. |
+| `NEXT_PUBLIC_UNTANGLE_API` | `http://localhost:8090` | Base URL of the Untangle API. |
+| `NEXT_PUBLIC_UNTANGLE_SAMPLE` | unset | Set to `1` to read the fixtures in `web/sample/` instead of calling the API. A "Sample data" banner is shown. |
 
 Both are `NEXT_PUBLIC_*`, so they are inlined at build time: rebuild after changing them. Put them in `web/.env.local` or on the command line:
 
 ```bash
-NEXT_PUBLIC_KYUN_SAMPLE=1 pnpm dev
+NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm dev
 ```
 
 ## Sample mode
 
 `web/sample/*.json` are **snapshots of real API responses** from the live graph of `knadh/listmonk`, written by
-`uv run python scripts/export_sample.py --repo knadh/listmonk` (re-run after re-ingesting). Nothing in them is
-hand-written: the answers, citations, confidence, Cypher calls, subgraphs, the vector-only baseline (asked with
-`mode: both`), the decision pages and the handover call are exactly what Kyun returned.
+`uv run python scripts/export_sample.py --repo knadh/listmonk` (re-run after re-ingesting). The answer and
+decision snapshots preserve evidence, confidence, Cypher calls, subgraphs, and vector-only results (`mode: both`).
+The handover transcript uses fictional speakers and illustrative reasons, as its summary states. Product names in
+the snapshots have been updated to Untangle.
 
 - six recorded questions: why `app.concurrency` is set the way it is (and the same as of 1 Jan 2020), whether
   `github.com/lib/pq` is still used, who to ask about `internal/manager`, what changed in `docker-compose.yml`, and a
@@ -47,7 +48,7 @@ shown, so a visitor sees what was actually asked; anything unrecognised gets the
 (a date before `app.concurrency` changed on 2 Apr 2020 returns the earlier snapshot) and `mode: both`, and computes the
 timeline from the decision cards' `valid_from`/`valid_to`.
 
-`web/sample/pulse.json` contains the listmonk risk queue used by the Pulse dashboard in sample mode, including a code-vs-handover contradiction, an ownership gap, and a drift/rationale warning.
+`web/sample/pulse.json` is a curated demonstration of the risk queue used by the Pulse dashboard in sample mode, including a code-vs-handover contradiction, an ownership gap, and a drift/rationale warning. It is not a fresh live evaluation.
 
 The app never falls back to the sample data when the API fails: errors are shown with a retry button.
 
