@@ -1,6 +1,6 @@
 // 60_pulse: active code decisions whose surrounding graph shows knowledge risk.
 // Params: $repo, $now, $stale_before, $owner_stale_before, $limit.
-// KT decisions are evidence against code decisions, never roots in this queue. Signal weights mirror kyun.pulse.
+// KT decisions are evidence against code decisions, never roots in this queue. Signal weights mirror untangle.pulse.
 MATCH (d:Decision {repo: $repo, status: 'active'})
 WHERE coalesce(d.kind, '') <> 'kt'
 MATCH (d)-[:ABOUT]->(e)

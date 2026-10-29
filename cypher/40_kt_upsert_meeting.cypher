@@ -1,5 +1,5 @@
 // 40_kt_upsert_meeting: MERGE one Meeting and attach it to its Repo. The Repo is created minimally when the repository
-// has not been ingested yet, so a handover call can be loaded before (or without) the code history; `kyun ingest`
+// has not been ingested yet, so a handover call can be loaded before (or without) the code history; `untangle ingest`
 // MERGEs on the same id and fills in the rest.
 // Params: $m = {id, repo, title, started_at, duration_ms, language, source, audio_uri, summary}, $now (epoch ms).
 MERGE (repo:Repo {id: 'repo:' + $m.repo})

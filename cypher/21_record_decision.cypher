@@ -8,7 +8,7 @@
 // A row whose object equals the currently active object for its key is a confirmation: nothing is superseded.
 // Returns the new/updated decision ids with the ids they superseded.
 // One row per key per call: rows sharing a key inside one $rows batch would see each other's half-written state,
-// so callers record same-key rows in chronological rounds (kyun.ingest.loader does; use its helper).
+// so callers record same-key rows in chronological rounds (untangle.ingest.loader does; use its helper).
 UNWIND $rows AS r
 MERGE (d:Decision {id: r.id})
 ON CREATE SET d.created_at = coalesce(r.created_at, $now), d.status = 'active'

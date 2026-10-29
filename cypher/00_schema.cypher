@@ -1,5 +1,5 @@
-// Kyun graph schema. One statement per line; comment lines start with //. Every statement is idempotent.
-// kyun.graph.schema.ensure_schema runs each line, then the unique-id constraints for UNIQUE_ID_LABELS, then
+// Untangle graph schema. One statement per line; comment lines start with //. Every statement is idempotent.
+// untangle.graph.schema.ensure_schema runs each line, then the unique-id constraints for UNIQUE_ID_LABELS, then
 // waits for indexes to come online. {{EMBED_DIM}} is replaced with the configured embedding size.
 // Only features available on AuraDB Free are used: one database, range/full-text/vector indexes, no APOC, no GDS.
 
