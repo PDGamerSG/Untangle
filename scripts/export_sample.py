@@ -1,4 +1,4 @@
-"""Snapshot real answers from the live graph into web/sample/ so the web app's sample mode shows exactly what Kyun
+"""Snapshot real answers from the live graph into web/sample/ so the web app's sample mode shows exactly what Untangle
 produced, never hand-written stand-ins:
 
     uv run python scripts/export_sample.py --repo knadh/listmonk
@@ -15,10 +15,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from kyun.answer import service
-from kyun.api.meetings import detail_out, summary_out
-from kyun.config import PROJECT_ROOT
-from kyun.kt import service as kt_service
+from untangle.answer import service
+from untangle.api.meetings import detail_out, summary_out
+from untangle.config import PROJECT_ROOT
+from untangle.kt import service as kt_service
 
 OUT = PROJECT_ROOT / "web" / "sample"
 

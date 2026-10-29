@@ -3,7 +3,7 @@ laid out on the transcript's own timeline, so the speech-to-text path (Saaras, d
 end to end without a recorded meeting:
 
     uv run python scripts/make_kt_audio.py                       # -> data/kt/listmonk-kt-sample.wav
-    uv run kyun kt ingest --repo knadh/listmonk --audio data/kt/listmonk-kt-sample.wav --speakers 3 --language hi-IN
+    uv run untangle kt ingest --repo knadh/listmonk --audio data/kt/listmonk-kt-sample.wav --speakers 3 --language hi-IN
 
 Needs SARVAM_API_KEY. A synthetic voice is not a real meeting: use it to test the pipeline, and record a real,
 consented handover call for the demo (see data/kt/README.md).
@@ -19,7 +19,7 @@ import sys
 import wave
 from pathlib import Path
 
-from kyun.config import PROJECT_ROOT, settings
+from untangle.config import PROJECT_ROOT, settings
 
 VOICES = ["shubh", "priya", "kavya", "aditya", "ritu"]  # Bulbul v3 speakers; one per transcript speaker label
 RATE = 16_000
