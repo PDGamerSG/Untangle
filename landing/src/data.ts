@@ -7,7 +7,6 @@ export const QUICKSTART_URL = `${REPO_URL}#-quick-start`;
 /** "Why" in the languages of the teams that inherit code. The first entry is the page's own language. */
 export const WHYS = [
   { text: "Why", lang: "en" },
-  { text: "क्यों", lang: "hi" },
   { text: "なぜ", lang: "ja" },
   { text: "¿Por qué", lang: "es" },
   { text: "Warum", lang: "de" },
@@ -95,7 +94,7 @@ export const TRANSCRIPT = [
   {
     at: "0:28",
     speaker: "Rohan Mehta",
-    text: "हमने app.concurrency को 10 पे रखा है क्योंकि SES का rate limit hit हो रहा था।",
+    text: "हमने app.concurrency को 10 पे रखा है … SES का rate limit hit हो रहा था।",
     en: "We kept app.concurrency at 10 because we were hitting the SES rate limit.",
     links: ["app.concurrency"],
   },

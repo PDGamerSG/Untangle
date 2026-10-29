@@ -129,6 +129,11 @@ export class Stage {
     return out.copy(EYE_LOCAL).multiplyScalar(NEEDLE_SCALE).applyQuaternion(quat).add(pos);
   }
 
+  setMaxPixelRatio(r: number) {
+    this.maxPixelRatio = r;
+    this.resize();
+  }
+
   resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
