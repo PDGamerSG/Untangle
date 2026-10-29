@@ -163,6 +163,7 @@ Useful guides:
 - [Graph model](docs/GRAPH_MODEL.md)
 - [Contracts](docs/CONTRACTS.md)
 - [Evaluation](docs/EVAL.md)
+- [Verification record](docs/VERIFICATION.md)
 - [Demo runbook](docs/DEMO.md)
 - [KT guide](data/kt/README.md)
 - [Web guide](web/README.md)
