@@ -1,5 +1,5 @@
 """Loader for `cypher/NN_name.cypher`: every query the product runs lives there, numbered, as the single
-source of truth (a convention carried over from Helium). `load_cypher("why_path")` resolves `32_why_path`."""
+source of truth. `load_cypher("why_path")` resolves `32_why_path`."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ _PKG_DIR = Path(__file__).resolve().parent
 
 def cypher_dirs() -> list[Path]:
     dirs: list[Path] = []
-    env = os.environ.get("KYUN_CYPHER_DIR")
+    env = os.environ.get("UNTANGLE_CYPHER_DIR")
     if env:
         dirs.append(Path(env))
     dirs.append(_PKG_DIR.parents[2] / "cypher")  # <repo>/cypher when running from a checkout

@@ -1,7 +1,7 @@
 """Handover-call (KT) ingestion: Sarvam speech-to-text for Hindi/Hinglish/English recordings, transcript
 normalisation, and the pipeline that turns a call into Meeting/Utterance/Person nodes, MENTIONS links and `kt`
-decisions that share keys with the code-history decisions (so a spoken reason confirms or supersedes a committed
-value)."""
+decisions on separate spoken keys. Config statements confirm or contradict the committed record without
+superseding code-history values."""
 
 from untangle.kt.sarvam import SarvamClient, SarvamError, split_wav_windows
 from untangle.kt.transcript import Transcript, Utterance, from_sarvam, from_text, from_untangle_json, load_transcript

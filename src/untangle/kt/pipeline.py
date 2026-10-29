@@ -3,8 +3,8 @@
 Writes, in order: the `Meeting` (+`ABOUT_REPO`), one `Person` per speaker label (resolved to an existing contributor
 when the transcript gives a GitHub login or an e-mail; `Identity` of kind `speaker` either way), the `Utterance`
 rows with `HAS`, `SPOKEN_BY` and `NEXT`, `MENTIONS` links to the repository's entities, the extracted `kt`
-decisions through `21_record_decision` (same `key` convention as the code-history decisions, so a spoken config
-value confirms or supersedes the committed one) and `22_link_decision` (ABOUT / DECIDED_IN / EVIDENCED_BY /
+decisions through `21_record_decision` (separate `kt|…` keys; spoken config values are reconciled with code
+history as CONFIRMS / CONTRADICTS) and `22_link_decision` (ABOUT / DECIDED_IN / EVIDENCED_BY /
 STATED_BY), and finally one `Chunk` per utterance with an embedding for the vector baseline.
 
 Entity matching is guarded for precision: an utterance MENTIONS an entity only when the text contains one of its
