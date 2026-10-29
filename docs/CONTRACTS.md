@@ -1,25 +1,27 @@
-# Kyun contracts: graph model, module boundaries, CLI and API
+# Untangle contracts: graph model, module boundaries, CLI and API
 
 This is the source of truth every module is written against. Change it here first.
 
 ## 1. Conventions
 
-- Python 3.12, `src/kyun` package, `uv` for everything (`uv sync --all-extras`, `uv run pytest`, `uv run ruff check`).
-- **Every Cypher query lives in `cypher/NN_name.cypher`** and is loaded with `kyun.graph.queries.load_cypher("name")`
+- Python 3.12, `src/untangle` package, `uv` for everything (`uv sync --all-extras`, `uv run pytest`, `uv run ruff check`).
+- **Every Cypher query lives in `cypher/NN_name.cypher`** and is loaded with `untangle.graph.queries.load_cypher("name")`
   (or `Graph.run_named`). Numbering: `00` schema · `10–19` ingestion upserts · `20–29` decisions and supersession ·
   `30–39` answering and retrieval · `40–49` handover calls (KT) · `50–59` baseline and evaluation · `60–69` stats and admin.
-  One file = one statement. Parameters are `$name`. Batch writes take `$rows` (a list of maps) and `UNWIND $rows AS r`.
+  Cypher is bundled under `untangle/graph/cypher/` in wheels. Set `UNTANGLE_CYPHER_DIR` to select a custom
+  query directory before the checkout or bundled copies. Parameters are `$name`. Batch writes take `$rows` (a list of maps) and `UNWIND $rows AS r`.
 - **Timestamps are epoch milliseconds (int)** on every node and relationship (`authored_at`, `created_at`, `valid_from`, …).
   The API renders ISO-8601 strings next to them (`*_iso`). Never store Neo4j temporal types.
-- **Every node carries `repo`** (the GitHub `owner/name`) so one AuraDB database can hold several repositories.
-- Node ids come from `kyun.ids` and are deterministic; ingestion is idempotent (`MERGE` on `id`, `SET` properties).
+- **Repository-scoped nodes carry `repo`** (the GitHub `owner/name`). People and identities can be shared across
+  repositories; query traversal scopes their activity to the requested repository.
+- Node ids come from `untangle.ids` and are deterministic; ingestion is idempotent (`MERGE` on `id`, `SET` properties).
 - Full-text indexes: `entity_search` (File, Module, Symbol, ConfigKey, Dependency on `name|path|key|tokens`),
   `person_search`, `text_search` (Decision, PullRequest, Issue, Comment, Commit, Document, Chunk, Utterance on
   `title|text|body|message`). Query them with `CALL db.index.fulltext.queryNodes('entity_search', $q)`.
-  Lucene syntax: sanitise user text to `term1 OR term2` of plain tokens (see `kyun.ids.tokens`).
+  Lucene syntax: sanitise user text to `term1 OR term2` of plain tokens (see `untangle.ids.tokens`).
 - Vector index: `chunk_embedding` on `Chunk.embedding`, cosine, dimension = `EMBED_DIM` (384 default).
 - Only AuraDB-Free features: no APOC, no GDS, one database. Graph algorithms are plain Cypher.
-- Logging via `logging.getLogger("kyun.<module>")`. No prints outside the CLI.
+- Logging via `logging.getLogger("untangle.<module>")`. No prints outside the CLI.
 - Tests: `tests/` with pytest. Tests that need Neo4j use the `graph` fixture from `tests/conftest.py`, which
   skips when the server does not answer; everything else runs against fakes (`FakeLLM`, `FakeEmbedder`, recorded
   GitHub JSON, a small git fixture repo created in `tmp_path`).
@@ -50,7 +52,7 @@ This is the source of truth every module is written against. Change it here firs
 
 ### Relationships
 
-```
+```text
 (Person)-[:AUTHORED]->(Commit)              (Person)-[:COMMITTED]->(Commit)
 (Commit)-[:TOUCHED {change:'A'|'M'|'D'|'R', additions, deletions}]->(File)
 (File)-[:RENAMED_FROM {at, sha}]->(File)    (File)-[:IN]->(Module)     (Module)-[:IN]->(Module)
@@ -75,11 +77,11 @@ This is the source of truth every module is written against. Change it here firs
 
 ## 3. Decisions and supersession (the core)
 
-```
+```text
 Decision {
   id, repo,
   kind:      'config_value' | 'dependency' | 'adr' | 'revert' | 'change' | 'rationale' | 'kt',
-  key:       lower-cased "subject|predicate" (same key = same question; a new active value supersedes the old),
+  key:       lower-cased "subject|predicate" (code history); "kt|subject|predicate" (spoken decisions),
   subject:   the entity the decision is about (file path, dotted config key, dependency name, ADR title, …),
   predicate: 'config_value' | 'uses_dependency' | 'dependency_version' | 'adr_status' | 'reverted' | 'changed'
              | 'chose' | 'constraint' | 'workaround_for' | 'owner' | 'deprecated' | 'kt_said',
@@ -87,14 +89,15 @@ Decision {
   text:      one readable sentence: "retry_limit in config/app.yaml is 3 (set in PR #812 after incident #790)",
   rationale: the stated reason, verbatim or summarised, nullable,
   status:    'active' | 'superseded' | 'retracted',
-  valid_from, valid_to (nullable), created_at, expired_at (nullable),   -- all epoch ms, bi-temporal like Helium
+  valid_from, valid_to (nullable), created_at, expired_at (nullable),   -- all epoch ms; valid time and graph recording time
   confidence: 0..1 (deterministic signals 0.9+, LLM-extracted 0.5–0.8, KT 0.6),
   signal:    what produced it: 'config_diff' | 'lockfile_diff' | 'adr_status' | 'revert_commit' | 'pr_merge'
-             | 'supersedes_text' | 'llm_pr_thread' | 'llm_kt'
+             | 'supersedes_text' | 'llm_pr_thread' | 'llm_kt' | 'heuristic_kt'
 }
 ```
 
 Rules:
+
 1. A decision is `active` from `valid_from` until a later decision with the **same `key`** and a different `object`
    is recorded; then the old one gets `valid_to = new.valid_from`, `expired_at = now`, `status = 'superseded'`, and
    `(new)-[:SUPERSEDES {at, signal}]->(old)`. Implemented in **one statement** (`cypher/21_record_decision.cypher`:
@@ -108,38 +111,39 @@ Rules:
    they differ. Answers lead with the repository decision and cite the call (agreement adds a source; a conflict is
    named in the answer and lowers confidence).
 2b. Same-key rows must not share one `$rows` batch of `21_record_decision` (rows in one `UNWIND` see each other's
-   half-written state); `kyun.ingest.loader` records them in chronological rounds.
+   half-written state); `untangle.ingest.loader` records them in chronological rounds.
 3. `belief_at(t)`: decisions with `valid_from <= t < coalesce(valid_to, +inf)` and `status <> 'retracted'`.
 4. `why_path(decision_id)`: the decision, its evidence, who stated it, where it was decided (PR/issue/ADR/meeting),
    the entities it is about, the incident that motivated it, and the whole `SUPERSEDES` chain both ways.
 
-## 4. Module ownership
+## 4. Module boundaries
 
-| Package | Owner | Responsibility |
+| Package | Boundary | Responsibility |
 |---|---|---|
-| `kyun.graph.*`, `kyun.ids`, `kyun.config`, `kyun.llm`, `kyun.embed` | foundation (done) | connection, schema, loader, ids, model adapters |
-| `kyun.ingest.*` | agent A | `git_history.py` (clone/fetch, `git log` parsing with renames and numstat), `github_api.py` (PRs, reviews, review comments, issue comments, issues; token or anonymous; on-disk JSON cache under `.cache/github/<repo>/`), `docs.py` (ADRs, design docs, CHANGELOG, README), `symbols.py` (regex symbol + config-key + dependency extraction for Go/Python/TS/JS/Rust/Java and YAML/TOML/JSON/.env/INI), `config_history.py` (config values and dependency versions over time via `git show sha:path`), `decisions.py` (deterministic Decision rows from all signals), `chunks.py` (chunking + embeddings), `loader.py` (batched MERGE writes), `pipeline.py` (`ingest_repo(full_name, …)` orchestration with progress logging) |
-| `kyun.answer.*` | agent B | `router.py` (intent + entity resolution), `retrieve.py` (evidence gathering), `confidence.py`, `compose.py` (LLM with citation validation + template fallback + grounding check), `baseline.py` (vector-only RAG), `service.py` (`ask(question, repo, …) -> Answer`) and `kyun.api.main` (FastAPI) |
-| `kyun.kt.*` | agent D | `sarvam.py` (batch STT with diarization, REST ≤30 s, language id, translate), `transcript.py` (Sarvam JSON → utterances), `pipeline.py` (`ingest_kt(...)`: Meeting/Utterance/Person, keyterms from the repo's entities, MENTIONS links, decision extraction via LLM with strict JSON or the fake path, `21_record_decision` for each) |
-| `kyun.eval.*` | agent D | gold YAML format, `run_eval` (graph vs baseline), report writer |
-| `kyun.cli` | agent B owns the file; others add subcommands by exposing `register(subparsers)` in their package | `kyun schema`, `kyun ingest`, `kyun ask`, `kyun serve`, `kyun kt`, `kyun eval`, `kyun stats` |
-| `web/` | agent C | Next.js app |
+| `untangle.graph.*`, `untangle.ids`, `untangle.config`, `untangle.llm`, `untangle.embed` | shared adapters | connection, schema, loader, ids, model adapters |
+| `untangle.ingest.*` | repository ingestion | `git_history.py` (clone/fetch, `git log` parsing with renames and numstat), `github_api.py` (PRs, reviews, review comments, issue comments, issues; token or anonymous; on-disk JSON cache under `.cache/github/<repo>/`), `docs.py` (ADRs, design docs, CHANGELOG, README), `symbols.py` (regex symbol + config-key + dependency extraction for Go/Python/TS/JS/Rust/Java and YAML/TOML/JSON/.env/INI), `config_history.py` (config values and dependency versions over time via `git show sha:path`), `decisions.py` (deterministic Decision rows from all signals), `chunks.py` (chunking + embeddings), `loader.py` (batched MERGE writes), `pipeline.py` (`ingest_repo(full_name, …)` orchestration with progress logging) |
+| `untangle.answer.*` | evidence and answering | `router.py` (intent + entity resolution), `retrieve.py` (evidence gathering), `confidence.py`, `compose.py` (LLM with citation validation + template fallback + grounding check), `baseline.py` (vector-only RAG), `service.py` (`ask(question, repo, …) -> Answer`) and `untangle.api.main` (FastAPI) |
+| `untangle.kt.*` | handover ingestion | `sarvam.py` (batch STT with diarization, REST ≤30 s, language id, translate), `transcript.py` (Sarvam JSON → utterances), `pipeline.py` (`ingest_kt(...)`: Meeting/Utterance/Person, keyterms from the repo's entities, MENTIONS links, decision extraction via LLM with strict JSON or the fake path, `21_record_decision` for each) |
+| `untangle.eval.*` | evaluation | gold YAML format, `run_eval` (graph vs baseline), report writer |
+| `untangle.cli` | subcommands register through `register(subparsers)` | `untangle schema`, `untangle ingest`, `untangle ask`, `untangle serve`, `untangle kt`, `untangle eval`, `untangle stats` |
+| `web/` | web client | Next.js app |
 
 ## 5. CLI
 
-```
-kyun schema                                   # ensure constraints and indexes
-kyun ingest owner/name [--max-commits N] [--since YYYY-MM-DD] [--no-github] [--no-embed] [--reset]
-kyun ask "why is the retry limit 3?" --repo owner/name [--at 2024-01-01] [--baseline] [--json]
-kyun stats [--repo owner/name]
-kyun kt ingest --repo owner/name (--audio file.mp3 | --transcript file.json) [--title "..."] [--speakers 3] [--language hi-IN]
-kyun eval --repo owner/name --gold eval/gold/<name>.yaml [--out eval/out/<name>.md]
-kyun serve [--port 8090]
+```bash
+untangle schema                                   # ensure constraints and indexes
+untangle ingest owner/name [--max-commits N] [--since YYYY-MM-DD] [--no-github] [--no-embed] [--reset]
+untangle ask "why is the retry limit 3?" --repo owner/name [--at 2024-01-01] [--baseline] [--json]
+untangle stats [--repo owner/name]
+untangle kt ingest --repo owner/name (--audio file.mp3 | --transcript file.json) [--title "..."] [--speakers 3] [--language hi-IN]
+untangle eval --repo owner/name --gold eval/gold/<name>.yaml [--out eval/out/<name>.md]
+untangle serve [--port 8090]
 ```
 
 ## 6. API (FastAPI, JSON; CORS from settings)
 
-- `GET /health` → `{ "ok": true, "neo4j": {version, aura}, "llm": {backend, model}, "embed": {backend, dim} }`
+- `GET /health` → legacy `ok`, `neo4j`, `llm`, `embed`, and `sarvam` fields plus `status` (`ok` or
+  `degraded`), `graph: {ok, version, aura, edition}`, and safe `optional_backends` availability summaries.
 - `GET /repos` → `[{ full_name, head_sha, commit_count, ingested_at_iso, counts: {commits, prs, issues, decisions, meetings} }]`
 - `POST /ask` body `{ "question": str, "repo": str, "at": iso|null, "mode": "graph"|"baseline"|"both" }` → `AskResponse`
 - `GET /decisions/{id}` → `WhyPath`
@@ -147,13 +151,17 @@ kyun serve [--port 8090]
 - `GET /search?repo=&q=` → `{ entities: [EntityHit], people: [PersonHit] }`
 - `GET /timeline?repo=&at=iso` → `{ at_iso, active: [DecisionCard], superseded_since: [DecisionCard] }`
 - `GET /pulse?repo=&limit=24` → `{ repo, generated_at_iso, summary, risks: [PulseRisk] }`; risks are deterministic graph signals, ordered by score. `PulseRisk.category` is `contradiction`, `drift`, `ownership_gap`, `rationale_gap`, or `stale`; `reasons` lists the exact signals that contributed to the score.
-- `GET /meetings?repo=` → `[MeetingSummary]` and `GET /meetings/{id}` → `MeetingDetail` (shaped by `kyun.api.meetings`):
+- `GET /meetings?repo=` → `[MeetingSummary]` and `GET /meetings/{id}` → `MeetingDetail` (shaped by `untangle.api.meetings`):
   `MeetingSummary {id, repo, title, started_at_iso, duration_ms, language, source, audio_uri, summary, utterance_count,
   speaker_count, decision_count}`; `MeetingDetail` adds `utterances: [{id, meeting_id, seq, text, text_en, start_ms,
   end_ms, speaker_label, speaker: PersonCard|null, language, mentions: [EntityRef]}]`, `speakers: [{label, person}]`
   and `decisions: [DecisionCard]` (the same projection as `/decisions/{id}`)
 - `POST /kt/ingest` multipart `{ repo, title, audio | transcript }` → `{ meeting_id, utterances, decisions }`
 - `GET /stats?repo=` → label and relationship counts
+
+Responses carry `x-request-id` and `x-untangle-ms` headers. Handled application errors include `request_id`
+with the same value, so the client can correlate a failure with server logs. FastAPI request validation retains
+its standard `detail` shape; consumers should use the response header for correlation.
 
 ```jsonc
 // AskResponse
@@ -187,14 +195,14 @@ kyun serve [--port 8090]
 `PulseSummary`: `{ active_decisions, risks, critical, coverage, contradictions, drift, ownership_gaps }`.
 `WhyPath`: `{ decision: DecisionCard, evidence: [Ref], older: [DecisionCard], newer: [DecisionCard], motivated_by: [Ref], implemented_by: [Ref], cypher: [...] }`.
 
-## 7. Answering rules (from Helium's answer prompt, adapted)
+## 7. Grounded answering rules
 
 - Use only the evidence given. Cite the id of every decision, commit, PR, issue, comment, document or utterance
   used, in square brackets right after the claim. Only ids present in the evidence may be cited; an answer with
   an unknown or missing citation is replaced by the deterministic template answer.
 - At most five sentences. Tell changes oldest first ("first … then … now"); the current value is the ACTIVE one.
 - For "why" questions give the stated reason and who gave it, where and when; if no reason is recorded, say so.
-- Refuse when no decision or evidence is anchored on a resolved entity: "Kyun found nothing in the graph that
+- Refuse when no decision or evidence is anchored on a resolved entity: "Untangle found nothing in the graph that
   answers that. Closest related: … Person to ask: …" (`refused: true`). Never invent dates, people or reasons.
 - Confidence is computed from graph signals only (never from the model): number of independent evidence nodes,
   source authority (ADR 1.0 > PR review 0.8 > PR body 0.7 > commit message 0.6 > issue comment 0.5 > KT 0.5),
