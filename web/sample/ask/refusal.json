@@ -2,7 +2,7 @@
  "question": "why does listmonk use MongoDB?",
  "repo": "knadh/listmonk",
  "mode": "both",
- "answer": "Kyun found nothing in the graph that answers that. Closest related: resetDB (Symbol), initDB (Symbol), manager_db.go (File). Person to ask: Kailash Nadh, who authored 130 of 145 commits on that, reviewed 4 of 22 PRs touching it, left 1 review comment on it.",
+ "answer": "Untangle found nothing in the graph that answers that. Closest related: resetDB (Symbol), initDB (Symbol), manager_db.go (File). Person to ask: Kailash Nadh, who authored 130 of 145 commits on that, reviewed 4 of 22 PRs touching it, left 1 review comment on it.",
  "refused": true,
  "confidence": {
   "score": 0.0,

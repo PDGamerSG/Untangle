@@ -1,4 +1,4 @@
-# Gold questions for knadh/listmonk. Format: src/kyun/eval/gold.py.
+# Gold questions for knadh/listmonk. Format: src/untangle/eval/gold.py.
 # `cites_any` entries are substrings matched against cited ids (decision ids are content hashes, so we match on the
 # id prefix: `dec:knadh/listmonk:config_value`, `commit:knadh/listmonk@`, `pr:knadh/listmonk#`, `utt:`, `mtg:`).
 # Values under [app] in config.toml.sample (concurrency 10, message_rate 10, batch_size 1000, max_send_errors 1000),

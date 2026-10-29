@@ -8,7 +8,7 @@
   "language": "hi-IN",
   "source": "transcript-json",
   "audio_uri": null,
-  "summary": "SYNTHETIC transcript written for the Kyun demo. The three people are fictional; nothing here was said by any real listmonk contributor. The repository, file paths, config keys and dependency names are real (knadh/listmonk); the reasons given for them are plausible demo content, not statements of fact about the project.",
+  "summary": "SYNTHETIC transcript written for the Untangle demo. The three people are fictional; nothing here was said by any real listmonk contributor. The repository, file paths, config keys and dependency names are real (knadh/listmonk); the reasons given for them are plausible demo content, not statements of fact about the project.",
   "utterance_count": 40,
   "speaker_count": 3,
   "decision_count": 15

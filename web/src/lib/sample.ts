@@ -1,8 +1,8 @@
 /**
  * Sample mode: serves the fixtures in web/sample/*.json instead of the API.
  * Enabled only by NEXT_PUBLIC_UNTANGLE_SAMPLE=1; the API client never falls back to this on failure.
- * The fixtures are snapshots of real API responses from the live graph (scripts/export_sample.py), never
- * hand-written: sample mode shows exactly what Untangle answered, including the real vector-only baseline.
+ * Answers and decision paths are recorded API responses (scripts/export_sample.py). Handover rationale
+ * is synthetic, and Pulse uses a curated queue; sample mode does not perform a fresh graph evaluation.
  */
 import health from "../../sample/health.json";
 import repos from "../../sample/repos.json";
