@@ -1,147 +1,183 @@
 <div align="center">
 
-# 🧭 Untangle
+# 🧶 Untangle
 
-### Ask why the code is like this, and follow the evidence back through time.
+### Ask why the code is like this.
 
-**Repository decisions · supersession · handovers · cited answers**
+**Decision history · evidence chains · handover context**
 
-[![License](https://img.shields.io/badge/license-MIT-1a7f37?style=for-the-badge)](LICENSE)
-![Python](https://img.shields.io/badge/python-3.12%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)
-![Next.js](https://img.shields.io/badge/web-Next.js-111?style=for-the-badge&logo=next.js&logoColor=white)
-![Graph](https://img.shields.io/badge/graph-Neo4j-008cc1?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-open%20source-2f6fde?style=for-the-badge)
+[![CI](https://img.shields.io/github/actions/workflow/status/PDGamerSG/Untangle/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/PDGamerSG/Untangle/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.12%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Neo4j](https://img.shields.io/badge/graph-Neo4j-008cc1?style=for-the-badge&logo=neo4j&logoColor=white)](https://neo4j.com/)
+[![License](https://img.shields.io/github/license/PDGamerSG/Untangle?style=for-the-badge)](LICENSE)
 
 </div>
 
-Untangle turns a repository's history and handover conversations into a searchable decision graph. Ask why a value, dependency, file, or module exists and it traces the answer through commits, pull requests, reviews, issues, documents, and recorded knowledge-transfer calls. Each answer names its evidence, shows which decision is current, and says when the graph does not know.
+Untangle turns repository history and knowledge-transfer recordings into a searchable decision graph. Ask about a
+configuration value, dependency, file, or module and it traces the decision, the discussion, the person, and the date.
+When the graph cannot support an answer, Untangle says so instead of guessing.
 
-## 💡 Why Untangle
+## 💡 Why you'll like it
 
 | | |
 |---|---|
-| 🧵 **Follow the thread** | Connect a decision to the discussion, commit, issue, person, and date that support it. |
-| ⏳ **Respect history** | See the value that was true at a chosen date and which later decision replaced it. |
-| 🗣️ **Keep handovers searchable** | Ingest English or Hinglish calls and link spoken decisions to the code record. |
-| 🔎 **Answer with evidence** | Every answer includes citation ids, a confidence score, and the path the graph followed. |
-| 🚫 **Refuse honestly** | When no decision is recorded, Untangle says so and shows the closest related entities. |
-| 📡 **Spot knowledge risk** | Untangle Pulse ranks contradictions, drift, missing rationale, and ownership gaps before they slow someone down. |
-| 🔒 **Run it yourself** | The default answer path is deterministic and works without a model key. |
+| 🧭 **Follow the why** | Connect a current value to the commit, pull request, issue, document, or handover call that explains it. |
+| ⏳ **See what changed** | Keep superseded decisions visible and ask what was in force on a past date. |
+| 🧾 **Read the receipts** | Every answer exposes citations, the graph route, and the person with the most relevant history. |
+| 🗣️ **Keep handovers searchable** | Link Hinglish transcripts to files, keys, dependencies, and decisions without replacing code history. |
+| 🛑 **Refuse safely** | Unsupported questions get a clear refusal and nearby context instead of an invented explanation. |
+| 🔎 **Compare retrieval** | Put graph reasoning beside vector-only search over the same evidence. |
 
 ## 🚀 Three steps
 
-1. **Ingest a repository.** Untangle reads git history, GitHub discussions, docs, symbols, config changes, and dependencies.
-2. **Ask a question.** The router resolves the named entity, retrieves its decision chain, and gathers the supporting evidence.
-3. **Review the path.** The CLI and web app show the answer, citations, supersession timeline, confidence reasons, and the person to ask.
+1. **Ingest the history.** Load Git, GitHub, documents, configuration changes, and optional handover transcripts.
+2. **Ask a concrete question.** Name a value, dependency, file, module, or date in the CLI or web app.
+3. **Follow the evidence.** Read the decision chain, citations, supersession state, and person to ask.
 
-## 📥 Quick start
+## 📥 Download and run
 
-Prerequisites: Docker, Python 3.12, [uv](https://docs.astral.sh/uv/), Node 20+, and pnpm 10.
+Untangle is self-hosted. [Download the source ZIP](https://github.com/PDGamerSG/Untangle/archive/refs/heads/main.zip),
+or clone it with Git. Start Neo4j, then run the Python and web clients locally.
 
 ```bash
+# 1. Get the source
 git clone https://github.com/PDGamerSG/Untangle.git
 cd Untangle
-cp .env.example .env                    # set NEO4J_PASSWORD for local development
-docker compose up -d neo4j
-uv sync --all-extras
+
+# 2. Prepare the backend
+cp .env.example .env
+# Set NEO4J_PASSWORD. Add GITHUB_TOKEN for a higher GitHub API limit.
+docker compose up -d --wait neo4j
+uv sync --locked --all-extras
+
+# 3. Create the schema and ingest a repository
 uv run untangle schema
 uv run untangle ingest knadh/listmonk
-uv run untangle ask "why is app.concurrency set the way it is?" --repo knadh/listmonk
-uv run untangle serve                       # API: http://127.0.0.1:8090
-
-cd web
-pnpm install
-pnpm dev                                   # web: http://localhost:3000
+uv run untangle kt ingest --repo knadh/listmonk --transcript data/kt/listmonk-kt-sample.json
+uv run untangle serve
 ```
 
-For a zero-service UI walkthrough, run the web app with sample fixtures:
+In a second terminal, start the web client at `http://localhost:3000`:
 
 ```bash
-cd web
+cd Untangle/web
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+For a tour without a running API or database, start the web client in sample mode instead:
+
+```bash
+cd Untangle/web
+pnpm install --frozen-lockfile
 NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm dev
 ```
 
-The sample mode is self-contained and reads the files in `web/sample/`; it does not call Neo4j or the API.
+Sample mode displays a banner and replays fixtures; it never silently replaces a failed live API request.
 
-The project landing page is a separate static site that needs no services at all:
+The repository also includes a separate static landing page. It does not call the API or Neo4j and can be run independently:
 
 ```bash
-cd landing
-pnpm install
-pnpm dev                                   # landing: http://localhost:5180
+cd Untangle/landing
+pnpm install --frozen-lockfile
+pnpm dev                                      # http://localhost:5180
 ```
 
-## 🔍 What it does
+Build it with `pnpm build`; the generated `dist/` directory is deployable to any static host.
+
+| Requirement | Details |
+|---|---|
+| Operating system | macOS, Linux, or Windows with Docker and a shell; CI runs on Ubuntu. |
+| Runtime | Python 3.12–3.13, uv, Node 20.9+ (CI uses 22), pnpm 10, and Neo4j (CI uses 2025.09). |
+| Optional services | GitHub token for large ingests; Sarvam credentials for audio transcription; model or embedding credentials for optional backends. |
+| Not supported | The project does not record audio for you, infer undocumented intent, or guarantee that synthetic sample reasons describe the public fixture repository. |
+
+## 🧪 What it does
 
 | Stage | What happens |
 |---|---|
-| **Ingest** | Clones a repository into a cache, reads commits and renames, fetches GitHub PRs/issues/reviews, parses docs and symbols, and records config/dependency changes. |
-| **Model** | Stores repositories, files, people, discussions, decisions, and handover utterances in Neo4j. A new value supersedes the old one without deleting its history. |
-| **Resolve** | Matches question terms to exact files, modules, config keys, dependencies, and symbols. Generic words and unrelated repository names do not anchor an answer. |
-| **Answer** | Renders a deterministic evidence-backed answer, or optionally asks a configured model to write one that must pass citation and number-grounding checks. |
-| **Compare** | Shows the graph answer beside a vector-only baseline over the same text so the value of temporal structure is visible. |
-| **Pulse** | Ranks knowledge risks and links every warning to the same evidence flow used by Ask. |
+| Ingest | Read commits, renames, config and dependency history, pull requests, reviews, issues, documents, and symbols. |
+| Enrich | Add optional GitHub discussions, embeddings, and Sarvam-transcribed handover utterances. |
+| Record | Store entities, evidence, people, meetings, and bi-temporal decisions in Neo4j. |
+| Answer | Resolve the question, select active evidence, validate citations, and report supersession or refusal. |
+| Explain | Show the same answer through the CLI, FastAPI, Next.js UI, and graph-vs-vector comparison. |
 
-The core flow is:
-
-```text
-Git + GitHub + docs + handover calls
-                    │
-                    ▼
-              Untangle ingest
-                    │
-                    ▼
-             Neo4j decision graph
-              │       │       │
-              ▼       ▼       ▼
-           CLI Ask  FastAPI  Next.js web
-```
-
-## 🧩 Main components
-
-| Folder | Purpose |
-|---|---|
-| `src/untangle/` | Python package for graph access, ingestion, answering, handovers, evaluation, API, and CLI. |
-| `cypher/` | Numbered Cypher statements used by the application. |
-| `web/` | Next.js interface for Ask, Pulse, decisions, timeline, and meetings. |
-| `landing/` | Static, scroll-driven landing page (Three.js) built from the sample fixtures; no backend needed. |
-| `tests/` | Unit, contract, fixture, and optional Neo4j integration tests. |
-| `data/kt/` | Transcript format notes and the synthetic handover sample. |
-| `eval/gold/` | Gold questions for graph-versus-vector evaluation. |
-| `docs/` | API contracts, graph model, demo runbook, and evaluation notes. |
-
-## 🧠 How answers stay grounded
-
-Untangle keeps decisions temporal. Each version has a `valid_from` and optional `valid_to`; a later config, dependency, revert, or explicit supersession links to the prior version. The answer service then builds a path such as:
+## ⚙️ How it works
 
 ```text
-question → entity → decision → discussion → commit / issue / person → date
+Git + GitHub + docs ─┐
+KT transcripts      ├─► ingestion ─► Neo4j ─► answer service ─┬─► untangle CLI
+                    ┘                                      └─► FastAPI ─► web app
 ```
 
-A confidence score comes from graph signals: evidence count, source authority, whether the decision is active, agreement, entity match, recency, and incident links. When a handover contradicts the repository record, the code history stays authoritative and the conflict is shown.
+| Component | Purpose | License |
+|---|---|---|
+| `src/untangle/` | Python CLI, API, graph adapter, ingestion, answers, KT, and evaluation. | MIT |
+| `cypher/` | Numbered Neo4j statements used by the product. | MIT |
+| `web/` | Next.js client with live API and labelled sample mode. | MIT |
+| Neo4j | Graph storage, full-text indexes, and the optional vector baseline. | Neo4j Community/Enterprise terms |
+| Sarvam AI | Optional speech-to-text and language services for KT recordings. | Sarvam terms |
+
+Backend settings live in `.env`; frontend overrides belong in `web/.env.local`. Use `NEXT_PUBLIC_UNTANGLE_API`
+to point the web client at an API other than `http://localhost:8090`. Both public web settings are applied at build time.
+The default `LLM_BACKEND=fake` and `EMBED_BACKEND=fake` require no model credentials.
+
+Decisions are keyed by subject and predicate. A later value links to the older value with `SUPERSEDES` and records
+`valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and
+are reconciled with the active code decision as `CONFIRMS` or `CONTRADICTS`.
+
+## 🛡️ Responsible use
+
+Get clear consent from every person before recording a handover call. Tell participants that audio may leave the
+machine for transcription and that the transcript will be queryable by engineers. Do not record secrets, customer data,
+or people who have not agreed. See [data/kt/README.md](data/kt/README.md) for deletion and transcript guidance.
 
 ## ⚠️ Known limits
 
-- Ingestion needs a reachable Neo4j instance; GitHub history also needs API access and benefits from a token.
-- The default deterministic answer can only repeat rationale that exists in the graph. A model can improve wording, but it cannot add uncited claims.
-- Handover audio transcription and translation require Sarvam credentials; the included transcript is synthetic demo data.
-- The graph describes repository history. It does not execute untrusted repository code or prove that a historical decision was objectively correct.
-- Sample mode uses the checked-in `knadh/listmonk` fixtures and is not a substitute for ingesting your own repository.
-- The web client is designed for current desktop browsers; mobile layouts are usable but less tested.
+- A full GitHub ingest can be slow and can hit anonymous API limits; use `GITHUB_TOKEN` for larger repositories.
+- Neo4j is required for live ingestion and answers. Sample mode is a recorded demonstration, not a live graph.
+- Sarvam transcription requires credentials and audio quality affects diarisation and entity matching.
+- The deterministic answer path refuses when evidence is missing; optional models cannot add unsupported citations.
+- The `knadh/listmonk` repository and the transcript in `data/kt/` are demo fixtures. Fictional speaker explanations are labelled as synthetic.
+- Browser coverage is limited to the current Next.js, React, and pnpm toolchain used by CI.
 
 ## 🛠️ Development
 
+Run the complete local checks from the repository root:
+
 ```bash
-uv sync --all-extras
 uv run ruff check src tests
-uv run pytest
-cd web && pnpm install && pnpm lint && pnpm build
+uv run pytest -q
+cd web
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm build
 ```
 
-Configuration is documented in `.env.example`. The important variables are `NEO4J_*`, `GITHUB_TOKEN`, `UNTANGLE_REPO_CACHE`, `LLM_BACKEND`, `EMBED_BACKEND`, `SARVAM_API_KEY`, `NEXT_PUBLIC_UNTANGLE_API`, and `NEXT_PUBLIC_UNTANGLE_SAMPLE`.
+Python tests that need a reachable Neo4j skip cleanly; the rest use fake model and embedding adapters plus fixture
+repositories. GitHub Actions runs the backend checks with a Neo4j service and builds the web client in production mode.
 
-Every query belongs in `cypher/` and is loaded by name. Keep answer citations and API response fields stable when changing internals; the contract is documented in [docs/CONTRACTS.md](docs/CONTRACTS.md).
+| Folder or file | Contents |
+|---|---|
+| `src/untangle/` | Backend package and public `untangle` CLI. |
+| `cypher/` | Query source of truth, numbered by subsystem. |
+| `data/kt/` | Synthetic transcript, consent notes, and recording instructions. |
+| `eval/gold/` | Gold questions for the graph and vector baseline. |
+| `tests/` | Unit, API, ingestion, graph, and transcript coverage. |
+| `web/` | Next.js routes, components, client library, and sample fixtures. |
+| `docs/` | Contracts, graph model, evaluation notes, and demo runbook. |
+| `scripts/` | Sample export and optional Sarvam audio helpers. |
+
+Useful guides:
+
+- [Graph model](docs/GRAPH_MODEL.md)
+- [Contracts](docs/CONTRACTS.md)
+- [Evaluation](docs/EVAL.md)
+- [Verification record](docs/VERIFICATION.md)
+- [Demo runbook](docs/DEMO.md)
+- [KT guide](data/kt/README.md)
+- [Web guide](web/README.md)
 
 ## 📄 License
 
-[MIT](LICENSE).
+[MIT](LICENSE). Third-party component notices are collected in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

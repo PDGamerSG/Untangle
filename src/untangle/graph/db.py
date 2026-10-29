@@ -2,8 +2,8 @@
 
 `Graph.query` runs a managed write transaction, `Graph.read` a managed read transaction (the server refuses
 writes inside it) with an optional timeout. Results come back as `QueryResult` with `.rows` (lists) and
-`.records` (dicts keyed by column). The handle shape follows Helium's `GraphHandle`; tenancy, CDC and
-multi-database code were dropped because AuraDB Free has none of them."""
+`.records` (dicts keyed by column). The adapter targets a single database and keeps
+query execution separate from result shaping."""
 
 from __future__ import annotations
 

@@ -1,125 +1,87 @@
-# Untangle Migration Implementation Plan
+# Untangle migration implementation plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+**Goal:** Publish a self-contained Untangle application with consistent package, CLI, environment, web, fixture,
+and documentation naming, preserving the existing behavior and required license notices.
 
-**Goal:** Convert the HackFront application snapshot into a self-contained, fully branded Untangle project and publish a README that follows the Make-the-readme reference structure.
+**Architecture:** Python/FastAPI and Next.js share the existing Neo4j decision model. Keep API routes, query
+semantics, sample payload shapes, and dependency versions stable except for the verified distribution and setup fixes.
 
-**Architecture:** Preserve the existing Python/FastAPI/Neo4j and Next.js boundaries. Rename the Python package and public configuration first, then update web consumers, fixtures, docs, and repository metadata. Each numbered task is a small, reviewable commit; the sequence targets 32 meaningful commits.
+**Design:** [Migration design](../specs/2026-10-29-untangle-migration-design.md).
 
-**Tech Stack:** Python 3.12, uv, FastAPI, Neo4j, Cypher, pytest, Ruff, Next.js, React, TypeScript, pnpm.
+## Constraints
 
-**Spec:** `docs/superpowers/specs/2026-10-29-untangle-migration-design.md`
+- Use `Untangle`, `untangle`, and `UNTANGLE` for product identifiers.
+- Keep Hindi language content and the `knadh/listmonk` demo repository intact.
+- Retain original MIT copyright and license notices.
+- Use only the Untangle destination remote; do not import the source Git history.
+- Publish meaningful commits with actual timestamps, real elapsed gaps, and an immediate push to `main`.
+- Finish with 30–40 commits; do not create empty commits to fill the count.
+- Preserve the independent landing-page work in the user's separate branch.
 
-## Global Constraints
+## Published sections
 
-- Preserve existing behavior, API route paths, graph schema, sample fixtures, and test intent.
-- Product identifiers use `Untangle`, `untangle`, and `UNTANGLE` consistently.
-- Hindi language tokens such as `kyunki` remain language content.
-- The sample repository `knadh/listmonk` remains fixture data.
-- The finished checkout has only the Untangle Git remote.
-- Do not add runtime dependencies.
-- Every task ends with a focused check and a commit.
+1. `c11fd58 chore: initialize Untangle repository`
+2. `64d77e6 docs: add Untangle migration design and plan`
+3. `1d1fa6a refactor: rename Python package to untangle`
+4. `dab307b refactor: rename answer imports to untangle`
+5. `8c72e42 refactor: rename graph imports to untangle`
+6. `aeefffd refactor: rename ingestion imports to untangle`
+7. `f6c5266 refactor: rename handover modules to untangle`
+8. `3c12497 refactor: rename evaluation imports to untangle`
+9. `491dd43 refactor: rename core services to untangle`
+10. `795a2b8 refactor: rename API package to untangle`
+11. `129d147 test: update Python imports for untangle`
+12. `9104ab9 docs: update Cypher comments for Untangle`
+13. `771bd47 refactor: update utility scripts for untangle`
+14. `8a495e4 refactor: rename package metadata and cache settings`
+15. `10bbb39 chore: rename Untangle deployment configuration`
+16. `f3598d4 refactor: rename web API settings to Untangle`
+17. `b8941fe refactor: update Untangle web metadata`
+18. `e00ce4d refactor: update Untangle web controls`
+19. `78c8d9d fix: restore CI import ordering after package rename`
+20. `52cba6d docs: update Untangle web and KT guides`
+21. `edf91b4 docs: rewrite Untangle README`
+22. `e7235a0 build: bundle Cypher queries in Python wheels`
+23. `90c1e25 refactor: finish Untangle web identity`
+24. `bdb4c08 docs: align Untangle graph and API contracts`
+25. `8e36607 refactor: finish Untangle runtime naming`
 
-## Commit Map
+## Remaining sections
 
-1. `chore: establish Untangle repository baseline`
-2. `docs: add Untangle migration design`
-3. `docs: add Untangle implementation plan`
-4. `refactor: rename Python package to untangle`
-5. `refactor: rename CLI commands to untangle`
-6. `refactor: rename configuration and cache variables`
-7. `refactor: rename API and logging identifiers`
-8. `refactor: rename answer and evaluation imports`
-9. `refactor: rename ingestion and graph imports`
-10. `refactor: rename KT package imports and transcript helpers`
-11. `refactor: rename test imports and fixtures`
-12. `refactor: rename Cypher and service documentation identifiers`
-13. `chore: rename container and CI configuration`
-14. `refactor: rename web API environment variables`
-15. `refactor: rename web branding and navigation`
-16. `refactor: rename web sample-mode storage and copy`
-17. `refactor: rename web documentation and package metadata`
-18. `docs: rewrite Untangle product README hero`
-19. `docs: document Untangle quick start`
-20. `docs: document Untangle architecture and workflow`
-21. `docs: document Untangle limitations and development`
-22. `docs: update web README for Untangle`
-23. `docs: rewrite data and demo documentation`
-24. `docs: remove source lineage metadata`
-25. `docs: rename existing planning artifacts`
-26. `test: update API and CLI expectations for Untangle`
-27. `test: update integration fixture expectations`
-28. `chore: remove source repository references`
-29. `chore: normalize Untangle naming and URLs`
-30. `test: run backend verification and fix regressions`
-31. `test: run frontend verification and fix regressions`
-32. `chore: perform final independence audit`
+26. `chore: remove stale source planning artifacts`: remove obsolete lineage/planning documents, retain license
+    notices, and make the Untangle design and this plan the current migration record.
+27. `refactor: normalize Untangle sample labels`: update recorded fixture copy, transcript test naming, sample
+    documentation comments, and the remaining public 404 label. Validate fixture schemas and web lint/build.
+28. `docs: refresh Untangle demo and evaluation guides`: document sample/live operation, synthetic context, historical
+    evaluation limits, reproduction commands, and the evaluation package path. Check CLI commands and local links.
+29. `chore: align local setup with CI`: pin local Neo4j to the tested Community image, enforce the Python lockfile in
+    CI, and wait for local Neo4j readiness in setup instructions. Check Compose and locked dependency resolution.
+30. `docs: record Untangle migration verification`: record the completed acceptance checks and verification evidence,
+    then confirm the final push, clean checkout, sole destination remote, and GitHub CI result.
 
-## Task Details
+## Verification
 
-### Task 1: Establish the repository baseline
-
-Copy tracked source files without `.git`, initialize Git on `main`, and set only the Untangle destination remote. Do not copy source history or source remotes. Check with `git remote -v` and `git status --short`.
-
-### Task 2: Add migration design
-
-Commit `docs/superpowers/specs/2026-10-29-untangle-migration-design.md` after checking for placeholders and contradictions.
-
-### Task 3: Add implementation plan
-
-Commit this plan after checking that every commit has a scoped deliverable and validation command.
-
-### Task 4–12: Rename backend boundaries
-
-Use `src/untangle` as the Python package, replace product identifiers in imports, module docstrings, loggers, CLI help, package metadata, public script entry points, configuration keys, cache directories, API metadata, tests, and data instructions. Keep language tokens and `knadh/listmonk` fixture identifiers unchanged. Run targeted import/collection checks after each boundary.
-
-### Task 13: Rename container and CI configuration
-
-Update Neo4j container names, volume names, CI environment values, commands, and sample-mode variable names. Keep service versions and ports unchanged.
-
-### Task 14–17: Rename web configuration and branding
-
-Update API/sample environment variables, client API errors, local storage keys, application metadata, navigation, logo, accessible labels, sample banner, README, and package scripts. Keep route paths and fixture payload shapes stable.
-
-### Task 18–24: Rewrite documentation
-
-Rewrite the root README in the reference structure with truthful Untangle-specific content. Document setup, data flow, architecture, limitations, development commands, and license. Update web/data/demo docs and remove source-specific lineage metadata.
-
-### Task 25: Normalize existing planning artifacts
-
-Remove stale planning/spec artifacts that describe the source project. Keep the new Untangle design and plan as the authoritative docs.
-
-### Task 26–27: Update tests
-
-Update import paths, CLI names, environment variable assertions, API title/header assertions, sample-mode expectations, and fixture comments. Preserve test coverage and semantics.
-
-### Task 28–29: Independence and naming audits
-
-Use `rg` over tracked files to find source project names, source repository URLs, old environment keys, old package paths, and stale GitHub links. Fix only genuine product/repository references; leave runtime GitHub API URLs and sample repository URLs intact.
-
-### Task 30–31: Full verification
-
-Run:
+Run backend lint and tests, frontend lint and production build, distribution builds and the isolated wheel-loading
+check. Tests that need Neo4j may skip locally; confirm the GitHub run with its Neo4j service completes all 190 tests.
 
 ```bash
+uv lock --check
 uv run ruff check src tests
-uv run pytest
-cd web && pnpm lint && pnpm build
+uv run pytest -q
+uv run untangle --version
+uv build
+cd web
+pnpm install --frozen-lockfile
+pnpm lint
+NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm build
 ```
 
-Fix regressions in focused commits if needed, then rerun the failed check.
+Check fixture payloads against the backend response models, relative Markdown links, product/source naming in tracked
+files, `git diff --check`, and `git remote -v`. Review the built wheel outside the checkout so missing Cypher data cannot
+be hidden by source-tree paths. Keep the original copyright and synthetic labels intact.
 
-### Task 32: Final independence audit
+## Review checkpoint
 
-Run `git diff --check`, `git status --short`, `git remote -v`, `git log --oneline -32`, and targeted `rg` searches. Confirm the checkout is self-contained, all required docs are present, and the final commit is clean.
-
-## Review checkpoints
-
-After backend renames, the import graph and Python test collection are checked. After the web rename, the TypeScript build and sample-mode fixtures are checked. The final two commits are reserved for full verification and a clean-tree independence audit.
-
-## Acceptance checks
-
-- `git remote -v` lists only the Untangle destination.
-- No tracked product-facing file uses the old product name or old package path.
-- `uv run pytest`, `uv run ruff check src tests`, `pnpm lint`, and `pnpm build` complete successfully.
-- README setup commands and environment variables match the renamed package and web client.
+An independent read-only review of the migration through web identity plus the pending final edits found no actionable
+regressions. It checked naming, packaging, CI, fixture structure, documentation accuracy, and original license notices.
+The reviewer did not modify the tree or repeat the full test suite.

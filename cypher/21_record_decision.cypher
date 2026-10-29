@@ -1,5 +1,5 @@
 // 21_record_decision: record decisions idempotently and apply key-based supersession in ONE statement
-// (Helium's 11_ingest_fact + 12_supersede_fact folded together, so two writers cannot leave two active values).
+// (recording and superseding are folded together so two writers cannot leave two active values).
 // Params: $rows = [{id, repo, kind, key, subject, predicate, object, text, rationale, valid_from, confidence, signal,
 //                   created_at}], $now (epoch ms).
 // For each row: MERGE the decision by id (re-ingest keeps the original created_at and status), then every OTHER

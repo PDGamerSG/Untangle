@@ -1,6 +1,6 @@
 """Answer composition. Two paths with one contract:
 
-* **model**: the system prompt carries the CONTRACTS §7 rules (and Helium's), the user prompt lists the dossiers
+* **model**: the system prompt carries the grounded answering rules in CONTRACTS §7, the user prompt lists the dossiers
   (numbered, versions oldest to newest, ids in brackets). The reply is accepted only if every `[id]` citation is an
   id present in the evidence, there is at least one, it has at most five sentences, and every number of two or more
   digits appears in a cited source's text, object, title or date renderings. Otherwise, or when no model is
