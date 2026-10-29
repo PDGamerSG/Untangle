@@ -1,8 +1,8 @@
 /**
  * Sample mode: serves the fixtures in web/sample/*.json instead of the API.
- * Enabled only by NEXT_PUBLIC_KYUN_SAMPLE=1; the API client never falls back to this on failure.
+ * Enabled only by NEXT_PUBLIC_UNTANGLE_SAMPLE=1; the API client never falls back to this on failure.
  * The fixtures are snapshots of real API responses from the live graph (scripts/export_sample.py), never
- * hand-written: sample mode shows exactly what Kyun answered, including the real vector-only baseline.
+ * hand-written: sample mode shows exactly what Untangle answered, including the real vector-only baseline.
  */
 import health from "../../sample/health.json";
 import repos from "../../sample/repos.json";

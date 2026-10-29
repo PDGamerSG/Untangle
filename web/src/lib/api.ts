@@ -1,8 +1,8 @@
 import type { AskRequest, AskResponse, Health, MeetingDetail, MeetingSummary, PulseResponse, RepoSummary, Timeline, WhyPath } from "./types";
 import * as sample from "./sample";
 
-export const API_BASE = (process.env.NEXT_PUBLIC_KYUN_API ?? "http://localhost:8090").replace(/\/+$/, "");
-export const SAMPLE_MODE = process.env.NEXT_PUBLIC_KYUN_SAMPLE === "1";
+export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "http://localhost:8090").replace(/\/+$/, "");
+export const SAMPLE_MODE = process.env.NEXT_PUBLIC_UNTANGLE_SAMPLE === "1";
 
 export class ApiError extends Error {
   status: number;
@@ -31,7 +31,7 @@ async function request<T>(path: string, init?: RequestInit & { signal?: AbortSig
     });
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") throw e;
-    throw new ApiError(0, `Cannot reach the Kyun API at ${API_BASE}. Is \`kyun serve\` running? (${errorMessage(e)})`);
+    throw new ApiError(0, `Cannot reach the Untangle API at ${API_BASE}. Is \`untangle serve\` running? (${errorMessage(e)})`);
   }
   const text = await res.text();
   let body: unknown = null;
