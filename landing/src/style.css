@@ -218,20 +218,12 @@ code {
 .brand {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.5rem;
   text-decoration: none;
   margin-right: auto;
 }
 
-.brand__why {
-  font-family: var(--hindi);
-  font-size: 1.6rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
 .brand__name {
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 680;
   font-stretch: 112%;
   letter-spacing: -0.01em;
@@ -919,6 +911,17 @@ code {
   width: 1px;
   height: 0.6rem;
   background: var(--cotton-3);
+}
+
+.lane-tag {
+  font-size: var(--fs-sm);
+  font-stretch: 108%;
+  white-space: nowrap;
+}
+
+.lane-tag strong {
+  margin-left: 0.35rem;
+  font-weight: 700;
 }
 
 .knotmark {

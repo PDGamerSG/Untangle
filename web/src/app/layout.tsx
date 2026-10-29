@@ -23,7 +23,7 @@ const tiro = Tiro_Devanagari_Hindi({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Untangle · क्यों", template: "%s · Untangle" },
+  title: { default: "Untangle", template: "%s · Untangle" },
   description: "Why is the code like this? Answers from the repository's own history, with a chain of evidence.",
   applicationName: "Untangle",
 };

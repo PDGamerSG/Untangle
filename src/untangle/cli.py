@@ -18,7 +18,7 @@ _PLUGINS = ("untangle.ingest.cli", "untangle.kt.cli", "untangle.eval.cli")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="untangle", description="Untangle (क्यों): why is the code like this?")
+    parser = argparse.ArgumentParser(prog="untangle", description="Untangle: why is the code like this?")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="-v for INFO, -vv for DEBUG")
     parser.add_argument("--version", action="version", version=f"untangle {__version__}")
     sub = parser.add_subparsers(dest="command", metavar="command")

@@ -237,7 +237,8 @@ function step(now: number) {
     red.uPull.value = f.pull;
     red.uFray.value = f.fray;
     red.uPluckRed.value = pluck[0];
-    red.uRedRow.value = half;
+    // Weave the red thread a few rows back so it clears the closing line of text.
+    red.uRedRow.value = half + (W.portrait ? 6 : 8);
     red.uLineStart.value.set(W.ball.x, W.lineY, 0);
 
     // Camera.
@@ -272,6 +273,22 @@ function step(now: number) {
 
     labels.update(f, W, stage, laneYs, year, dt);
     stage.render();
+    watchFrameRate(dt, since);
+  }
+}
+
+// If frames stay slow, drop to one device pixel per CSS pixel. Fill rate is
+// the cost that grows fastest on high-density screens.
+let slowFrames = 0;
+let downgraded = false;
+let frameEma = 1 / 60;
+function watchFrameRate(dt: number, since: number) {
+  if (downgraded || !stage || since < 4 || document.hidden) return;
+  frameEma += (dt - frameEma) * 0.05;
+  slowFrames = frameEma > 1 / 38 ? slowFrames + 1 : 0;
+  if (slowFrames > 90 && stage.renderer.getPixelRatio() > 1) {
+    downgraded = true;
+    stage.setMaxPixelRatio(1);
   }
 }
 
