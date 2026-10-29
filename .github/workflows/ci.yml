@@ -12,7 +12,7 @@ jobs:
       neo4j:
         image: neo4j:2025.09
         env:
-          NEO4J_AUTH: neo4j/kyun-dev-password
+          NEO4J_AUTH: neo4j/untangle-dev-password
         ports: ["7687:7687", "7474:7474"]
         options: >-
           --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"
@@ -20,7 +20,7 @@ jobs:
     env:
       NEO4J_URI: bolt://localhost:7687
       NEO4J_USER: neo4j
-      NEO4J_PASSWORD: kyun-dev-password
+      NEO4J_PASSWORD: untangle-dev-password
       LLM_BACKEND: fake
       EMBED_BACKEND: fake
     steps:
@@ -29,7 +29,7 @@ jobs:
       - run: uv python install 3.12
       - run: uv sync --all-extras
       - run: uv run ruff check src tests
-      - run: uv run kyun schema
+      - run: uv run untangle schema
       - run: uv run pytest -q
 
   web:
@@ -51,4 +51,4 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
         env:
-          NEXT_PUBLIC_KYUN_SAMPLE: "1"
+          NEXT_PUBLIC_UNTANGLE_SAMPLE: "1"
