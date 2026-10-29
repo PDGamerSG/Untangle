@@ -28,6 +28,31 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv python install 3.12
       - run: uv sync --all-extras
+      - run: uv build --wheel
+      - name: Check wheel query loading outside the checkout
+        run: |
+          uv run python - <<'PY'
+          import subprocess
+          import sys
+          import tempfile
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          wheel = next(Path("dist").glob("*.whl"))
+          with tempfile.TemporaryDirectory() as target:
+              with ZipFile(wheel) as archive:
+                  archive.extractall(target)
+              subprocess.run(
+                  [sys.executable, "-I", "-c",
+                   "import sys; sys.path.insert(0, sys.argv[1]); "
+                   "from untangle.graph.queries import list_queries, load_cypher, schema_statements; "
+                   "assert load_cypher('why_path'); "
+                   "assert any('`vector.dimensions`: 384' in q for q in schema_statements(384)); "
+                   "assert all(load_cypher(q) for q in list_queries())",
+                   target],
+                  cwd=target, check=True,
+              )
+          PY
       - run: uv run ruff check src tests
       - run: uv run untangle schema
       - run: uv run pytest -q
