@@ -1,8 +1,24 @@
-# Kyun eval: listmonk (knadh/listmonk)
+# Untangle eval: listmonk (knadh/listmonk)
 
-Generated 2026-10-28T15:53:48.764853Z from `eval/gold/listmonk.yaml`: 25 questions (19 verified, 6 unverified), modes graph, baseline.
+Recorded 2026-10-28T15:53:48.764853Z from `eval/gold/listmonk.yaml`: 25 questions (19 verified, 6 unverified), modes graph, baseline.
 
-`graph` is Kyun's answer from the decision graph; `baseline` is vector-only retrieval over the same text (no decisions, no supersession, no refusal logic). An expectation marked *unverified* was written without checking the repository's history, so those rows are scored but reported apart.
+This checked-in report is a historical evaluation snapshot. Product wording has been updated to Untangle; the recorded
+scores and timings have not been recomputed during the rename. The repository is public fixture data, while the
+handover rationale and speaker ownership claims come from a clearly labelled synthetic transcript.
+
+## Reproduce
+
+After ingesting the repository and the sample transcript into a reachable Neo4j database, run:
+
+```bash
+uv run untangle eval --repo knadh/listmonk --gold eval/gold/listmonk.yaml
+```
+
+The harness writes `eval/out/listmonk.md` and the companion JSON report. Results depend on the ingested history,
+selected embedding backend, graph state, and machine. These small-set scores do not measure general answer accuracy;
+read the per-question failures and keep unverified expectations separate.
+
+`graph` is Untangle's answer from the decision graph; `baseline` is vector-only retrieval over the same text (no decisions, no supersession, no refusal logic). An expectation marked *unverified* was written without checking the repository's history, so those rows are scored but reported apart.
 
 ## Summary (verified questions)
 
@@ -50,11 +66,11 @@ Generated 2026-10-28T15:53:48.764853Z from `eval/gold/listmonk.yaml`: 25 questio
 | file-campaigns-go *(unverified)* | entity_why | graph | answered | yes | - | - | yes | 0.70 | 32 ms | 8 decisions are recorded about `cmd/campaigns.go`: 1) cmd/campaigns.go is owned by Priya Nair (said by Rohan Mehta in KT "Listmonk handov... |
 | dep-lib-pq | dependency | graph | answered | NO | - | - | NO | 0.55 | 29 ms | `postgres.user` in `sqlboiler.toml` is removed [dec:knadh/listmonk:config_value:26a1c6c7ba2a]. It was set in commit 7eeb813 'Add embeddin... |
 | dep-echo *(unverified)* | dependency | graph | answered | yes | - | - | yes | 0.66 | 35 ms | `github.com/labstack/echo/v4` is pinned at removed [dec:knadh/listmonk:dependency:e221b1b7ac8a]. It was set in commit 52f80cc 'Upgrade `l... |
-| refuse-mongodb | refuse | graph | refused | - | - | - | - | 0.00 | 18 ms | Kyun found nothing in the graph that answers that. Closest related: resetDB (Symbol), initDB (Symbol), manager_db.go (File). Person to as... |
-| refuse-kafka | refuse | graph | refused | - | - | - | - | 0.00 | 20 ms | Kyun found nothing in the graph that answers that. Closest related: none. Person to ask: Kailash Nadh, who authored 1386 of 2000 commits ... |
-| refuse-rust | refuse | graph | refused | - | - | - | - | 0.00 | 16 ms | Kyun found nothing in the graph that answers that. Closest related: none. Person to ask: Kailash Nadh, who authored 1386 of 2000 commits ... |
-| refuse-graphql | refuse | graph | refused | - | - | - | - | 0.00 | 21 ms | Kyun found nothing in the graph that answers that. Closest related: frontend/src/api (Module), frontend-vue/src/api (Module), api (Symbol... |
-| refuse-redis | refuse | graph | refused | - | - | - | - | 0.00 | 17 ms | Kyun found nothing in the graph that answers that. Closest related: email-templates/subscriber-optin.html (File), static/public/subscribe... |
+| refuse-mongodb | refuse | graph | refused | - | - | - | - | 0.00 | 18 ms | Untangle found nothing in the graph that answers that. Closest related: resetDB (Symbol), initDB (Symbol), manager_db.go (File). Person to as... |
+| refuse-kafka | refuse | graph | refused | - | - | - | - | 0.00 | 20 ms | Untangle found nothing in the graph that answers that. Closest related: none. Person to ask: Kailash Nadh, who authored 1386 of 2000 commits ... |
+| refuse-rust | refuse | graph | refused | - | - | - | - | 0.00 | 16 ms | Untangle found nothing in the graph that answers that. Closest related: none. Person to ask: Kailash Nadh, who authored 1386 of 2000 commits ... |
+| refuse-graphql | refuse | graph | refused | - | - | - | - | 0.00 | 21 ms | Untangle found nothing in the graph that answers that. Closest related: frontend/src/api (Module), frontend-vue/src/api (Module), api (Symbol... |
+| refuse-redis | refuse | graph | refused | - | - | - | - | 0.00 | 17 ms | Untangle found nothing in the graph that answers that. Closest related: email-templates/subscriber-optin.html (File), static/public/subscribe... |
 | who-manager | who_to_ask | graph | answered | - | - | yes | yes | 0.70 | 42 ms | Owner on record: Priya Nair; Rohan Mehta said so in the handover call 'Listmonk handover: campaign manager and config' on 20 Oct 2026 [de... |
 | who-queries | who_to_ask | graph | answered | - | - | yes | yes | 0.70 | 50 ms | Person to ask about `queries.sql`: Kailash Nadh, who authored 174 of 189 commits on queries.sql, reviewed 3 of 18 PRs touching it, left 2... |
 | who-campaigns | who_to_ask | graph | answered | - | - | yes | yes | 0.70 | 45 ms | Owner on record: Priya Nair; Rohan Mehta said so in the handover call 'Listmonk handover: campaign manager and config' on 20 Oct 2026 [de... |
