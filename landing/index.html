@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Untangle: why is the code like this?</title>
+    <meta
+      name="description"
+      content="Untangle reads a repository's commits, reviews, issues, docs and handover calls, then answers why the code is like this, with the evidence behind each decision."
+    />
+    <meta name="theme-color" content="#0B1230" />
+    <meta property="og:title" content="Untangle: why is the code like this?" />
+    <meta
+      property="og:description"
+      content="Ask why the code is like this, and follow the evidence back through time."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <div id="labels" class="labels" aria-hidden="true"></div>
+
+    <a class="skip" href="#pull">Skip to how it works</a>
+
+    <header class="nav" data-intro>
+      <a class="brand" href="#top" aria-label="Untangle, back to top">
+        <span class="brand__why" lang="hi">क्यों</span>
+        <span class="brand__name">Untangle</span>
+      </a>
+      <nav class="nav__links" aria-label="Page sections">
+        <a href="#pull">How it works</a>
+        <a href="#time">History</a>
+        <a href="#handover">Handovers</a>
+        <a href="#pulse">Pulse</a>
+        <a href="#run">Run it</a>
+      </nav>
+      <a class="btn btn--ghost btn--small" href="https://github.com/PDGamerSG/Untangle">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </header>
+
+    <nav class="rail" aria-label="Progress">
+      <span class="rail__track"><span class="rail__thread"></span></span>
+      <ol class="rail__knots">
+        <li><a href="#top" data-rail="hero"><span>Start</span></a></li>
+        <li><a href="#knot" data-rail="knot"><span>The knot</span></a></li>
+        <li><a href="#pull" data-rail="pull"><span>One question</span></a></li>
+        <li><a href="#time" data-rail="time"><span>History</span></a></li>
+        <li><a href="#handover" data-rail="handover"><span>Handovers</span></a></li>
+        <li><a href="#refuse" data-rail="refuse"><span>Honest gaps</span></a></li>
+        <li><a href="#pulse" data-rail="pulse"><span>Pulse</span></a></li>
+        <li><a href="#run" data-rail="run"><span>Run it</span></a></li>
+        <li><a href="#end" data-rail="end"><span>End</span></a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="top" class="hero" data-section="hero">
+        <div class="hero__inner">
+          <h1 class="hero__title" aria-label="Why is the code like this?">
+            <span class="roller" aria-hidden="true"><span class="roller__word">Why</span></span>
+            <span class="hero__rest" aria-hidden="true">is the code like this?</span>
+          </h1>
+          <p class="hero__lede" data-intro>
+            Untangle reads a repository’s commits, reviews, issues, docs and handover calls, then answers with the
+            evidence behind each decision.
+          </p>
+          <div class="hero__actions" data-intro>
+            <a class="btn btn--red" href="#pull">Follow a question</a>
+            <a class="btn btn--ghost" href="https://github.com/PDGamerSG/Untangle#-quick-start">Read the quick start</a>
+          </div>
+        </div>
+        <p class="hero__foot" data-intro>
+          The examples on this page are real Untangle output for
+          <a href="https://github.com/knadh/listmonk">knadh/listmonk</a>, an open-source newsletter manager.
+        </p>
+        <a class="cue" href="#knot" data-intro>
+          <span class="cue__thread" aria-hidden="true"></span>
+          <span>Scroll to pull the thread</span>
+        </a>
+      </section>
+
+      <section id="knot" class="chapter chapter--knot" data-section="knot">
+        <div class="stage">
+          <div class="copy copy--left">
+            <h2 class="h2">Every codebase is a knot.</h2>
+            <p>
+              The reason a value is 10 lives in a commit from 2020, a review thread, an incident ticket, and a call
+              where someone explained it once. The person who knew may have left.
+            </p>
+            <p class="knot__count">
+              In listmonk alone, <strong data-count="2270">2,270</strong> commits,
+              <strong data-count="896">896</strong> pull requests and <strong data-count="2284">2,284</strong> issues
+              hold <strong data-count="2546">2,546</strong> recorded decisions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="pull" class="chapter chapter--pull" data-section="pull">
+        <div class="stage">
+          <div class="copy copy--top">
+            <h2 class="h2">Pull one thread.</h2>
+            <p>
+              Ask in plain words. Untangle matches the question to an exact config key, then walks its decision through
+              every piece of evidence, in order.
+            </p>
+          </div>
+          <div class="query" role="img" aria-label="Question: why is app.concurrency set the way it is?">
+            <span class="query__label">Question</span>
+            <code class="query__text"></code><span class="query__caret" aria-hidden="true"></span>
+          </div>
+          <ol class="sr-only evidence-list" aria-label="Evidence chain for the question">
+            <li>Entity: app.concurrency, a config key in schema.sql, matched exactly.</li>
+            <li>Decision: app.concurrency is 10, active since 8 Jul 2020.</li>
+            <li>Commit 942eb7c: Add settings UI and “hot reload” support to the app.</li>
+            <li>Handover call, 20 Oct 2026: we were hitting the SES rate limit.</li>
+            <li>Person to ask: Kailash Nadh, who authored 114 of 133 commits on app.concurrency.</li>
+            <li>Date: 8 Jul 2020, when the current value took effect.</li>
+          </ol>
+          <article class="answer" aria-label="Answer">
+            <h3 class="answer__title">Answer</h3>
+            <p class="answer__text">
+              <code>app.concurrency</code> in <code>schema.sql</code> is 10. It was set in commit <code>942eb7c</code> on
+              8 Jul 2020, and a recorded handover call gives the reason: the SES rate limit was being hit.
+            </p>
+            <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.69" aria-label="Confidence">
+              <span class="meter__thread"><span class="meter__red"></span></span>
+              <span class="meter__value">0.69</span>
+              <span class="meter__label">Medium confidence</span>
+            </div>
+            <ul class="answer__reasons"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="time" class="chapter chapter--time" data-section="time">
+        <div class="stage">
+          <div class="copy copy--top">
+            <h2 class="h2">Nothing is deleted.</h2>
+            <p>
+              A new value supersedes the old one, and both stay on the record. Keep scrolling to move through time and
+              see what was true on any date.
+            </p>
+          </div>
+          <div class="readout" aria-live="polite">
+            <p class="readout__date"></p>
+            <p class="readout__value"><code>app.concurrency</code> <span class="readout__is">was</span> <span class="readout__num"></span></p>
+            <p class="readout__where"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="handover" class="chapter chapter--handover" data-section="handover">
+        <div class="stage">
+          <div class="copy copy--left">
+            <h2 class="h2">Handovers, kept.</h2>
+            <p>
+              Record the call before someone leaves. Untangle reads English or Hinglish transcripts and links what was
+              said to the files and keys it names.
+            </p>
+            <p class="small">
+              6 min 52 s of call, 15 decisions extracted. The transcript is synthetic demo data with fictional people;
+              the repository, paths and keys are real.
+            </p>
+          </div>
+          <ol class="transcript"></ol>
+        </div>
+      </section>
+
+      <section id="refuse" class="chapter chapter--refuse" data-section="refuse">
+        <div class="stage">
+          <div class="copy copy--left">
+            <div class="query query--static">
+              <span class="query__label">Question</span>
+              <code class="query__text">why does listmonk use MongoDB?</code>
+            </div>
+            <h2 class="h2">When it doesn’t know, it says so.</h2>
+            <p>
+              No recorded decision answers this, so Untangle refuses instead of guessing. It shows the closest entities
+              it found and the person most likely to know.
+            </p>
+            <dl class="closest">
+              <dt>Closest related</dt>
+              <dd class="closest__list"></dd>
+              <dt>Person to ask</dt>
+              <dd>Kailash Nadh</dd>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section id="pulse" class="chapter chapter--pulse" data-section="pulse">
+        <div class="stage">
+          <div class="copy copy--left">
+            <h2 class="h2">See where knowledge is thin.</h2>
+            <p>
+              Pulse ranks contradictions, drift, missing rationale and ownership gaps across the graph. Each warning
+              opens the same evidence path as a question.
+            </p>
+            <p class="pulse__summary">
+              <span><strong>18</strong> active decisions</span>
+              <span><strong>3</strong> risks</span>
+              <span><strong>83%</strong> with recorded rationale</span>
+            </p>
+          </div>
+          <ul class="risks" aria-label="Ranked risks"></ul>
+        </div>
+      </section>
+
+      <section id="run" class="chapter chapter--run" data-section="run">
+        <div class="run">
+          <div class="copy">
+            <h2 class="h2">Run it on your own repository.</h2>
+            <p>
+              Open source under the MIT license. The default answer path is deterministic and works without a model
+              key. A model can improve the wording, but it can’t add uncited claims.
+            </p>
+          </div>
+          <ol class="steps">
+            <li>
+              <h3>Ingest a repository</h3>
+              <p>Git history, GitHub discussions, docs, symbols, config changes and dependencies go into a Neo4j graph.</p>
+            </li>
+            <li>
+              <h3>Ask a question</h3>
+              <p>The router resolves the entity you named and retrieves its decision chain and evidence.</p>
+            </li>
+            <li>
+              <h3>Review the path</h3>
+              <p>Read the answer with its citations, the supersession timeline, a confidence score and the person to ask.</p>
+            </li>
+          </ol>
+          <figure class="terminal">
+            <figcaption class="terminal__bar">
+              <span>Quick start</span>
+              <button class="terminal__copy" type="button">Copy commands</button>
+            </figcaption>
+            <pre class="terminal__body"><code></code></pre>
+          </figure>
+        </div>
+      </section>
+
+      <section id="end" class="finale" data-section="end">
+        <div class="finale__inner">
+          <p class="finale__line">Ask why the code is like this, and follow the evidence back through time.</p>
+          <div class="finale__actions">
+            <a class="btn btn--red" href="https://github.com/PDGamerSG/Untangle">View on GitHub</a>
+            <a class="btn btn--ghost" href="https://github.com/PDGamerSG/Untangle#-quick-start">Read the quick start</a>
+          </div>
+          <p class="wordmark" aria-hidden="true">Untangle</p>
+        </div>
+        <footer class="footer">
+          <span>MIT licensed. Python, Neo4j, FastAPI and Next.js.</span>
+          <span>Sample data from <a href="https://github.com/knadh/listmonk">knadh/listmonk</a>.</span>
+        </footer>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

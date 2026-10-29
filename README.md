@@ -63,6 +63,14 @@ NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm dev
 
 The sample mode is self-contained and reads the files in `web/sample/`; it does not call Neo4j or the API.
 
+The project landing page is a separate static site that needs no services at all:
+
+```bash
+cd landing
+pnpm install
+pnpm dev                                   # landing: http://localhost:5180
+```
+
 ## 🔍 What it does
 
 | Stage | What happens |
@@ -96,6 +104,7 @@ Git + GitHub + docs + handover calls
 | `src/untangle/` | Python package for graph access, ingestion, answering, handovers, evaluation, API, and CLI. |
 | `cypher/` | Numbered Cypher statements used by the application. |
 | `web/` | Next.js interface for Ask, Pulse, decisions, timeline, and meetings. |
+| `landing/` | Static, scroll-driven landing page (Three.js) built from the sample fixtures; no backend needed. |
 | `tests/` | Unit, contract, fixture, and optional Neo4j integration tests. |
 | `data/kt/` | Transcript format notes and the synthetic handover sample. |
 | `eval/gold/` | Gold questions for graph-versus-vector evaluation. |
