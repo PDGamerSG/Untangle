@@ -20,7 +20,7 @@ from untangle.kt.transcript import (
 SAMPLE = Path(__file__).resolve().parents[1] / "data" / "kt" / "listmonk-kt-sample.json"
 
 
-def test_sample_kyun_json_loads_40_ordered_utterances_with_speakers():
+def test_sample_untangle_json_loads_40_ordered_utterances_with_speakers():
     t = load_transcript(SAMPLE)
     assert t.title == "Listmonk handover: campaign manager and config"
     assert t.language == "hi-IN" and t.source == "transcript-json"

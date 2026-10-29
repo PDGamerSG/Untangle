@@ -8,10 +8,12 @@ This is the source of truth every module is written against. Change it here firs
 - **Every Cypher query lives in `cypher/NN_name.cypher`** and is loaded with `untangle.graph.queries.load_cypher("name")`
   (or `Graph.run_named`). Numbering: `00` schema · `10–19` ingestion upserts · `20–29` decisions and supersession ·
   `30–39` answering and retrieval · `40–49` handover calls (KT) · `50–59` baseline and evaluation · `60–69` stats and admin.
-  One file = one statement. Parameters are `$name`. Batch writes take `$rows` (a list of maps) and `UNWIND $rows AS r`.
+  Cypher is bundled under `untangle/graph/cypher/` in wheels. Set `UNTANGLE_CYPHER_DIR` to select a custom
+  query directory before the checkout or bundled copies. Parameters are `$name`. Batch writes take `$rows` (a list of maps) and `UNWIND $rows AS r`.
 - **Timestamps are epoch milliseconds (int)** on every node and relationship (`authored_at`, `created_at`, `valid_from`, …).
   The API renders ISO-8601 strings next to them (`*_iso`). Never store Neo4j temporal types.
-- **Every node carries `repo`** (the GitHub `owner/name`) so one AuraDB database can hold several repositories.
+- **Repository-scoped nodes carry `repo`** (the GitHub `owner/name`). People and identities can be shared across
+  repositories; query traversal scopes their activity to the requested repository.
 - Node ids come from `untangle.ids` and are deterministic; ingestion is idempotent (`MERGE` on `id`, `SET` properties).
 - Full-text indexes: `entity_search` (File, Module, Symbol, ConfigKey, Dependency on `name|path|key|tokens`),
   `person_search`, `text_search` (Decision, PullRequest, Issue, Comment, Commit, Document, Chunk, Utterance on
@@ -50,7 +52,7 @@ This is the source of truth every module is written against. Change it here firs
 
 ### Relationships
 
-```
+```text
 (Person)-[:AUTHORED]->(Commit)              (Person)-[:COMMITTED]->(Commit)
 (Commit)-[:TOUCHED {change:'A'|'M'|'D'|'R', additions, deletions}]->(File)
 (File)-[:RENAMED_FROM {at, sha}]->(File)    (File)-[:IN]->(Module)     (Module)-[:IN]->(Module)
@@ -75,11 +77,11 @@ This is the source of truth every module is written against. Change it here firs
 
 ## 3. Decisions and supersession (the core)
 
-```
+```text
 Decision {
   id, repo,
   kind:      'config_value' | 'dependency' | 'adr' | 'revert' | 'change' | 'rationale' | 'kt',
-  key:       lower-cased "subject|predicate" (same key = same question; a new active value supersedes the old),
+  key:       lower-cased "subject|predicate" (code history); "kt|subject|predicate" (spoken decisions),
   subject:   the entity the decision is about (file path, dotted config key, dependency name, ADR title, …),
   predicate: 'config_value' | 'uses_dependency' | 'dependency_version' | 'adr_status' | 'reverted' | 'changed'
              | 'chose' | 'constraint' | 'workaround_for' | 'owner' | 'deprecated' | 'kt_said',
@@ -87,14 +89,15 @@ Decision {
   text:      one readable sentence: "retry_limit in config/app.yaml is 3 (set in PR #812 after incident #790)",
   rationale: the stated reason, verbatim or summarised, nullable,
   status:    'active' | 'superseded' | 'retracted',
-  valid_from, valid_to (nullable), created_at, expired_at (nullable),   -- all epoch ms, bi-temporal like Helium
+  valid_from, valid_to (nullable), created_at, expired_at (nullable),   -- all epoch ms; valid time and graph recording time
   confidence: 0..1 (deterministic signals 0.9+, LLM-extracted 0.5–0.8, KT 0.6),
   signal:    what produced it: 'config_diff' | 'lockfile_diff' | 'adr_status' | 'revert_commit' | 'pr_merge'
-             | 'supersedes_text' | 'llm_pr_thread' | 'llm_kt'
+             | 'supersedes_text' | 'llm_pr_thread' | 'llm_kt' | 'heuristic_kt'
 }
 ```
 
 Rules:
+
 1. A decision is `active` from `valid_from` until a later decision with the **same `key`** and a different `object`
    is recorded; then the old one gets `valid_to = new.valid_from`, `expired_at = now`, `status = 'superseded'`, and
    `(new)-[:SUPERSEDES {at, signal}]->(old)`. Implemented in **one statement** (`cypher/21_record_decision.cypher`:
@@ -113,21 +116,21 @@ Rules:
 4. `why_path(decision_id)`: the decision, its evidence, who stated it, where it was decided (PR/issue/ADR/meeting),
    the entities it is about, the incident that motivated it, and the whole `SUPERSEDES` chain both ways.
 
-## 4. Module ownership
+## 4. Module boundaries
 
-| Package | Owner | Responsibility |
+| Package | Boundary | Responsibility |
 |---|---|---|
-| `untangle.graph.*`, `untangle.ids`, `untangle.config`, `untangle.llm`, `untangle.embed` | foundation (done) | connection, schema, loader, ids, model adapters |
-| `untangle.ingest.*` | agent A | `git_history.py` (clone/fetch, `git log` parsing with renames and numstat), `github_api.py` (PRs, reviews, review comments, issue comments, issues; token or anonymous; on-disk JSON cache under `.cache/github/<repo>/`), `docs.py` (ADRs, design docs, CHANGELOG, README), `symbols.py` (regex symbol + config-key + dependency extraction for Go/Python/TS/JS/Rust/Java and YAML/TOML/JSON/.env/INI), `config_history.py` (config values and dependency versions over time via `git show sha:path`), `decisions.py` (deterministic Decision rows from all signals), `chunks.py` (chunking + embeddings), `loader.py` (batched MERGE writes), `pipeline.py` (`ingest_repo(full_name, …)` orchestration with progress logging) |
-| `untangle.answer.*` | agent B | `router.py` (intent + entity resolution), `retrieve.py` (evidence gathering), `confidence.py`, `compose.py` (LLM with citation validation + template fallback + grounding check), `baseline.py` (vector-only RAG), `service.py` (`ask(question, repo, …) -> Answer`) and `untangle.api.main` (FastAPI) |
-| `untangle.kt.*` | agent D | `sarvam.py` (batch STT with diarization, REST ≤30 s, language id, translate), `transcript.py` (Sarvam JSON → utterances), `pipeline.py` (`ingest_kt(...)`: Meeting/Utterance/Person, keyterms from the repo's entities, MENTIONS links, decision extraction via LLM with strict JSON or the fake path, `21_record_decision` for each) |
-| `untangle.eval.*` | agent D | gold YAML format, `run_eval` (graph vs baseline), report writer |
-| `untangle.cli` | agent B owns the file; others add subcommands by exposing `register(subparsers)` in their package | `untangle schema`, `untangle ingest`, `untangle ask`, `untangle serve`, `untangle kt`, `untangle eval`, `untangle stats` |
-| `web/` | agent C | Next.js app |
+| `untangle.graph.*`, `untangle.ids`, `untangle.config`, `untangle.llm`, `untangle.embed` | shared adapters | connection, schema, loader, ids, model adapters |
+| `untangle.ingest.*` | repository ingestion | `git_history.py` (clone/fetch, `git log` parsing with renames and numstat), `github_api.py` (PRs, reviews, review comments, issue comments, issues; token or anonymous; on-disk JSON cache under `.cache/github/<repo>/`), `docs.py` (ADRs, design docs, CHANGELOG, README), `symbols.py` (regex symbol + config-key + dependency extraction for Go/Python/TS/JS/Rust/Java and YAML/TOML/JSON/.env/INI), `config_history.py` (config values and dependency versions over time via `git show sha:path`), `decisions.py` (deterministic Decision rows from all signals), `chunks.py` (chunking + embeddings), `loader.py` (batched MERGE writes), `pipeline.py` (`ingest_repo(full_name, …)` orchestration with progress logging) |
+| `untangle.answer.*` | evidence and answering | `router.py` (intent + entity resolution), `retrieve.py` (evidence gathering), `confidence.py`, `compose.py` (LLM with citation validation + template fallback + grounding check), `baseline.py` (vector-only RAG), `service.py` (`ask(question, repo, …) -> Answer`) and `untangle.api.main` (FastAPI) |
+| `untangle.kt.*` | handover ingestion | `sarvam.py` (batch STT with diarization, REST ≤30 s, language id, translate), `transcript.py` (Sarvam JSON → utterances), `pipeline.py` (`ingest_kt(...)`: Meeting/Utterance/Person, keyterms from the repo's entities, MENTIONS links, decision extraction via LLM with strict JSON or the fake path, `21_record_decision` for each) |
+| `untangle.eval.*` | evaluation | gold YAML format, `run_eval` (graph vs baseline), report writer |
+| `untangle.cli` | subcommands register through `register(subparsers)` | `untangle schema`, `untangle ingest`, `untangle ask`, `untangle serve`, `untangle kt`, `untangle eval`, `untangle stats` |
+| `web/` | web client | Next.js app |
 
 ## 5. CLI
 
-```
+```bash
 untangle schema                                   # ensure constraints and indexes
 untangle ingest owner/name [--max-commits N] [--since YYYY-MM-DD] [--no-github] [--no-embed] [--reset]
 untangle ask "why is the retry limit 3?" --repo owner/name [--at 2024-01-01] [--baseline] [--json]
@@ -139,7 +142,8 @@ untangle serve [--port 8090]
 
 ## 6. API (FastAPI, JSON; CORS from settings)
 
-- `GET /health` → `{ "ok": true, "neo4j": {version, aura}, "llm": {backend, model}, "embed": {backend, dim} }`
+- `GET /health` → legacy `ok`, `neo4j`, `llm`, `embed`, and `sarvam` fields plus `status` (`ok` or
+  `degraded`), `graph: {ok, version, aura, edition}`, and safe `optional_backends` availability summaries.
 - `GET /repos` → `[{ full_name, head_sha, commit_count, ingested_at_iso, counts: {commits, prs, issues, decisions, meetings} }]`
 - `POST /ask` body `{ "question": str, "repo": str, "at": iso|null, "mode": "graph"|"baseline"|"both" }` → `AskResponse`
 - `GET /decisions/{id}` → `WhyPath`
@@ -154,6 +158,10 @@ untangle serve [--port 8090]
   and `decisions: [DecisionCard]` (the same projection as `/decisions/{id}`)
 - `POST /kt/ingest` multipart `{ repo, title, audio | transcript }` → `{ meeting_id, utterances, decisions }`
 - `GET /stats?repo=` → label and relationship counts
+
+Responses carry `x-request-id` and `x-untangle-ms` headers. Handled application errors include `request_id`
+with the same value, so the client can correlate a failure with server logs. FastAPI request validation retains
+its standard `detail` shape; consumers should use the response header for correlation.
 
 ```jsonc
 // AskResponse
@@ -187,7 +195,7 @@ untangle serve [--port 8090]
 `PulseSummary`: `{ active_decisions, risks, critical, coverage, contradictions, drift, ownership_gaps }`.
 `WhyPath`: `{ decision: DecisionCard, evidence: [Ref], older: [DecisionCard], newer: [DecisionCard], motivated_by: [Ref], implemented_by: [Ref], cypher: [...] }`.
 
-## 7. Answering rules (from Helium's answer prompt, adapted)
+## 7. Grounded answering rules
 
 - Use only the evidence given. Cite the id of every decision, commit, PR, issue, comment, document or utterance
   used, in square brackets right after the claim. Only ids present in the evidence may be cited; an answer with

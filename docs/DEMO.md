@@ -1,27 +1,70 @@
-# Demo run-of-show (5 minutes) and the 31 Oct video script
+# Untangle demo runbook
 
-The demo repo is **knadh/listmonk** (Indian open-source newsletter app, Go; ~2,300 commits, ~900 PRs). Everything
-below is driven from the web app at http://localhost:3000 with the API on :8090 and Neo4j (local or Aura).
+This five-minute tour uses `knadh/listmonk` as a public fixture repository. The handover transcript has fictional
+speakers and illustrative rationale; call that out when showing a spoken explanation or ownership statement.
 
-Before the demo: `untangle ingest knadh/listmonk` has run; `untangle kt ingest --repo knadh/listmonk --transcript
-data/kt/listmonk-kt-sample.json` has run; the Aura instance is awake (it pauses after 72 h without writes);
-`untangle eval` has produced `eval/out/listmonk.md`; a recording of this exact flow exists as a backup.
+## Start in sample mode
 
-| # | Time | Beat | What to say / do |
-|---|---|---|---|
-| 1 | 0:00 | The problem | "When an engineer leaves, the *why* leaves with them. Commits, PR threads, incident tickets and Hinglish handover calls hold it, and nobody can search across them." One number from our interviews (time to first meaningful commit). |
-| 1a | 0:20 | Pulse before the question | Open **Pulse**: "What is the team about to forget?" Show the contradiction queue and click **Ask why** on the code-vs-handover conflict. "Untangle can find the risky knowledge before a new engineer has to trip over it." |
-| 2 | 0:30 | A question the docs can't answer | Ask: **why is app.concurrency set the way it is?** Walk the evidence chain on screen: decision → PR → incident → person → date. Open **Why this answer** and show the Cypher and the subgraph: "the model only wrote the sentence; the graph found the answer". |
-| 3 | 1:30 | Supersession | Ask: **do we still …?** (a key whose value changed). The banner shows the older value struck through with its date. Toggle **Compare with vector-only**: the baseline quotes the old text with no warning. "This is the failure the brief describes, and why a vector index alone cannot do this job." |
-| 4 | 2:15 | Honest refusal | Ask: **why does listmonk use MongoDB?** → refusal, closest entities, person to ask. No confidence bar. |
-| 5 | 2:35 | KT in Hinglish | Open **Meetings** → the handover call. Show the Hinglish utterances with the code they mention as chips, and the decision "app.concurrency is 10" that the call produced: it is linked to `schema.sql::app.concurrency` with **CONFIRMS**, so back on Ask the answer leads with the code and quotes the call's reason ("SES का rate limit hit हो रहा था"). Then show `smtp.my0.max_msg_retries`: the call says 2, the repository removed the key, and the answer says the two conflict. (With `SARVAM_API_KEY` set, the same call ingests from audio via Saaras with diarization, and each utterance gets an English rendering.) |
-| 6 | 3:30 | Person to ask and time travel | Ask **who should I ask about internal/manager?**; then drag the **Timeline** slider to a year ago: "this is what the team believed then". |
-| 7 | 4:10 | Numbers and who pays | Show `eval/out/listmonk.md`: graph vs vector-only on evidence accuracy, supersession correctness, refusal precision, person hit rate, latency. Close with the buyer (engineering leaders; attrition and handover), the metric (time to first meaningful commit), the pricing hypothesis, and the three-month roadmap (PR guard bot, IDE/MCP, the UNO Q KT box). |
+Sample mode needs no API, Neo4j instance, or model key. From the repository root:
 
-Backups: the recording; `NEXT_PUBLIC_UNTANGLE_SAMPLE=1` sample mode in the web app (visibly labelled; never pretend it is live).
+```bash
+cd web
+pnpm install --frozen-lockfile
+NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm dev
+```
 
-## 31 Oct submission video (≤ 3 minutes)
+Open `http://localhost:3000` and keep the **Sample data** banner visible. Questions replay the closest supported
+recording, and the answer shows the recorded question. Unknown questions return the recorded refusal.
 
-Same beats 2, 3, 4, 5 and 7, each ~30 s, screen-recorded with a voice-over. Start on the terminal running
-`untangle ask "why is app.concurrency 10?" --repo knadh/listmonk` so the judges see the CLI and the graph
-stats, then switch to the web app. End on the eval table and the repository link.
+## Walkthrough
+
+| Time | Page or action | What to explain |
+|---|---|---|
+| 0:00 | Ask | Engineers need the reason behind a value, not only the code that reads it. |
+| 0:30 | Ask “why is app.concurrency set the way it is?” | Read the active decision, cited history, and labelled synthetic handover explanation. Open **Why this answer** to inspect query rows and the evidence subgraph. |
+| 1:30 | Turn on **Compare with vector-only search** | Compare the graph's decision chain with passages returned by similarity. Point to the supersession dates and the sources actually used. |
+| 2:15 | Ask “why does listmonk use MongoDB?” | Show the refusal and nearby context. No supporting decision is invented. |
+| 2:45 | Meetings | Open the sample call, read an utterance, and follow a mentioned entity. Explain that spoken config statements confirm or contradict repository values without replacing code history. |
+| 3:30 | Ask “who should I ask about internal/manager?” | Read authorship and review counts. Distinguish the real contributor ranking from the fictional ownership statement in the synthetic call. |
+| 4:00 | Timeline and Pulse | Choose a historical date, then inspect the curated sample risk queue and its evidence actions. |
+| 4:40 | Evaluation | Explain the small recorded gold set and its known misses. The saved figures are a historical snapshot, not a fresh benchmark from this tour. |
+
+## Run against a live graph
+
+Prepare Neo4j and `.env` as described in the [root README](../README.md). Then run:
+
+```bash
+uv sync --all-extras
+uv run untangle schema
+uv run untangle ingest knadh/listmonk
+uv run untangle kt ingest --repo knadh/listmonk --transcript data/kt/listmonk-kt-sample.json
+uv run untangle ask "why is app.concurrency set the way it is?" --repo knadh/listmonk
+uv run untangle serve
+```
+
+Start the web app in a second terminal with sample mode unset:
+
+```bash
+cd web
+pnpm dev
+```
+
+Use `NEXT_PUBLIC_UNTANGLE_API` in `web/.env.local` if the API is hosted somewhere other than
+`http://localhost:8090`. Public web settings are applied at build time, so restart the development server or rebuild
+a production client after changing them. The API's CORS origins must allow the web client's origin.
+
+A live ingest can take time and consume GitHub API requests. Finish it before the tour and check `/health`; the web
+client shows failures explicitly and does not fall back to sample mode automatically. A live run may differ from the
+saved fixtures as repository history grows.
+
+## Refresh the recorded results
+
+With a reachable graph containing the repository and sample transcript:
+
+```bash
+uv run untangle eval --repo knadh/listmonk --gold eval/gold/listmonk.yaml
+uv run python scripts/export_sample.py --repo knadh/listmonk
+```
+
+Review the generated files before committing. Keep synthetic labels intact, and report the evaluation timestamp,
+backend, and gold-set limits when presenting metrics. See [EVAL.md](EVAL.md) and the [KT guide](../data/kt/README.md).

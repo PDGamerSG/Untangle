@@ -1,6 +1,22 @@
 # Untangle eval: listmonk (knadh/listmonk)
 
-Generated 2026-10-28T15:53:48.764853Z from `eval/gold/listmonk.yaml`: 25 questions (19 verified, 6 unverified), modes graph, baseline.
+Recorded 2026-10-28T15:53:48.764853Z from `eval/gold/listmonk.yaml`: 25 questions (19 verified, 6 unverified), modes graph, baseline.
+
+This checked-in report is a historical evaluation snapshot. Product wording has been updated to Untangle; the recorded
+scores and timings have not been recomputed during the rename. The repository is public fixture data, while the
+handover rationale and speaker ownership claims come from a clearly labelled synthetic transcript.
+
+## Reproduce
+
+After ingesting the repository and the sample transcript into a reachable Neo4j database, run:
+
+```bash
+uv run untangle eval --repo knadh/listmonk --gold eval/gold/listmonk.yaml
+```
+
+The harness writes `eval/out/listmonk.md` and the companion JSON report. Results depend on the ingested history,
+selected embedding backend, graph state, and machine. These small-set scores do not measure general answer accuracy;
+read the per-question failures and keep unverified expectations separate.
 
 `graph` is Untangle's answer from the decision graph; `baseline` is vector-only retrieval over the same text (no decisions, no supersession, no refusal logic). An expectation marked *unverified* was written without checking the repository's history, so those rows are scored but reported apart.
 

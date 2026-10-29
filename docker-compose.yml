@@ -2,13 +2,12 @@
 # Untangle only uses features AuraDB Free offers: one database, vector + full-text indexes, no APOC/GDS required.
 services:
   neo4j:
-    image: neo4j:enterprise
+    image: neo4j:2025.09
     container_name: untangle-neo4j
     ports:
       - "7474:7474"
       - "7687:7687"
     environment:
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: eval
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-untangle-dev-password}
       NEO4J_server_memory_heap_initial__size: 512M
       NEO4J_server_memory_heap_max__size: 1500M

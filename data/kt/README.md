@@ -2,8 +2,8 @@
 
 Untangle turns a knowledge-transfer call into graph nodes (`Meeting`, `Utterance`, `Person`), links what was said
 to the repository's files, config keys and dependencies (`MENTIONS`), and records the decisions that were spoken
-as `kt` decisions on the same keys the code history uses, so a reason given on a call confirms or supersedes a
-value found in commits.
+as `kt` decisions on separate `kt|…` keys. Spoken config values are linked to the repository record with
+`CONFIRMS` or `CONTRADICTS`; they never supersede code-history decisions.
 
 ## What is in this folder
 
@@ -85,4 +85,5 @@ speaker continue the previous one. Missing timestamps are estimated from text le
   English or Hinglish that name an identifier the repository knows.
 - Every KT decision is `EVIDENCED_BY` the utterances it came from, `STATED_BY` the speaker, `DECIDED_IN` the
   meeting and `ABOUT` the resolved entity. A `config_value` statement lands on the key
-  `<path>::<key>|config_value`, exactly where `untangle ingest` puts the value it found in commits.
+  `kt|<path>::<key>|config_value`. Reconciliation compares it with the repository's active config decision and
+  records agreement or conflict without replacing that decision.
