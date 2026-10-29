@@ -17,7 +17,7 @@ export function NotConfigured() {
       </p>
       <p className="mt-2 max-w-xl text-[0.9rem] leading-relaxed text-ink-2">
         The API answered <code className="t-code">501</code>: handover-call ingestion is switched off on this server. Set{" "}
-        <code className="t-code">SARVAM_API_KEY</code> and run <code className="t-code">kyun kt ingest --repo owner/name --audio call.mp3</code> (or{" "}
+        <code className="t-code">SARVAM_API_KEY</code> and run <code className="t-code">untangle kt ingest --repo owner/name --audio call.mp3</code> (or{" "}
         <code className="t-code">--transcript call.json</code>) to add a meeting. Everything else works without it.
       </p>
     </div>
@@ -34,7 +34,7 @@ export function MeetingsPage() {
         <div>
           <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">Handover calls</h1>
           <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">
-            Knowledge-transfer recordings, transcribed in the language they were spoken, with the decisions Kyun pulled out of them linked to the code
+            Knowledge-transfer recordings, transcribed in the language they were spoken, with the decisions Untangle pulled out of them linked to the code
             they are about.
           </p>
         </div>
@@ -59,7 +59,7 @@ export function MeetingsPage() {
         )
       ) : !res.data?.length ? (
         <EmptyState title="No handover calls for this repository yet">
-          Ingest one with <code className="t-code">kyun kt ingest --repo {repo ?? "owner/name"} --audio call.mp3</code>.
+          Ingest one with <code className="t-code">untangle kt ingest --repo {repo ?? "owner/name"} --audio call.mp3</code>.
         </EmptyState>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">

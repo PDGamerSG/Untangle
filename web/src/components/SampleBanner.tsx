@@ -8,7 +8,7 @@ export function SampleBanner() {
         <span className="rounded-sm bg-accent px-1.5 py-0.5 text-[0.68rem] font-bold uppercase tracking-wider text-accent-ink">Sample data</span>
         <span>
           Reading fixtures from <code className="t-code">web/sample/</code> for <strong>knadh/listmonk</strong>. Unset{" "}
-          <code className="t-code">NEXT_PUBLIC_KYUN_SAMPLE</code> to use the API.
+          <code className="t-code">NEXT_PUBLIC_UNTANGLE_SAMPLE</code> to use the API.
         </span>
       </p>
     </div>

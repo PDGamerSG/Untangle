@@ -92,7 +92,7 @@ export function AskPage() {
             Find the reason behind the code.
           </h1>
           <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-ink-2 sm:text-[1.05rem]">
-            Ask about a value, dependency, file or module. Kyun follows the repository&apos;s history to surface the decision, the discussion, the
+            Ask about a value, dependency, file or module. Untangle follows the repository&apos;s history to surface the decision, the discussion, the
             person and the date — or tell you when the graph has no answer.
           </p>
         </div>
@@ -175,7 +175,7 @@ export function AskPage() {
           <p className="mt-3 text-[0.75rem] text-ink-3">Tip: ask “why”, “do we still”, “what changed”, or “who should I ask”.</p>
         </form>
 
-        <ol className="grid gap-2 sm:grid-cols-3" aria-label="How Kyun works">
+        <ol className="grid gap-2 sm:grid-cols-3" aria-label="How Untangle works">
           {[
             { icon: GitBranch, title: "Read the history", body: "Commits, PRs, issues and handover calls become one searchable record." },
             { icon: Sparkles, title: "Find what is in force", body: "Superseded values stay visible while the active decision leads the answer." },
@@ -196,7 +196,7 @@ export function AskPage() {
           ))}
         </ol>
         <p aria-live="polite" className="sr-only">
-          {busy ? "Kyun is tracing the repository history." : turn?.res ? "Answer ready." : ""}
+          {busy ? "Untangle is tracing the repository history." : turn?.res ? "Answer ready." : ""}
         </p>
 
         {pulse.data?.risks.length ? (

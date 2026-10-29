@@ -23,7 +23,7 @@ export function RepoSelect({ compact = false }: { compact?: boolean }) {
   if (!repos?.length)
     return (
       <p className="text-[0.85rem] text-ink-3">
-        No repositories ingested yet. Run <code className="t-code">kyun ingest owner/name</code>.
+        No repositories ingested yet. Run <code className="t-code">untangle ingest owner/name</code>.
       </p>
     );
   return (
