@@ -7,13 +7,14 @@ from __future__ import annotations
 import hashlib
 import logging
 import math
+import os
 import re
 import sqlite3
 from array import array
 from functools import cache
 from pathlib import Path
 
-from untangle.config import PROJECT_ROOT, Settings, settings
+from untangle.config import Settings, cache_root, settings
 
 log = logging.getLogger("untangle.embed")
 _WORD = re.compile(r"[0-9A-Za-zऀ-ॿ]+")
@@ -52,10 +53,17 @@ class FastEmbedder(Embedder):
     backend = "fastembed"
 
     def __init__(self, model: str, dim: int):
+        # Hugging Face's Xet downloader keeps an additional cache outside cache_dir.
+        # Configure it before importing fastembed/huggingface_hub on serverless hosts.
+        if os.environ.get("VERCEL"):
+            hf = cache_root() / "huggingface"
+            os.environ.setdefault("HF_HOME", str(hf))
+            os.environ.setdefault("HF_HUB_CACHE", str(hf / "hub"))
+            os.environ.setdefault("HF_XET_CACHE", str(hf / "xet"))
         from fastembed import TextEmbedding  # imported lazily: optional dependency
 
         self.model_name, self.dim = model, dim
-        self._model = TextEmbedding(model_name=model)
+        self._model = TextEmbedding(model_name=model, cache_dir=str(cache_root() / "models"), threads=2)
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         return [[float(x) for x in vec] for vec in self._model.embed(texts, batch_size=64)]
@@ -108,15 +116,12 @@ class CachedEmbedder(Embedder):
 
 def cache_path(model: str) -> Path:
     slug = re.sub(r"[^A-Za-z0-9._-]+", "_", model)
-    return PROJECT_ROOT / ".cache" / "embeddings" / f"{slug}.sqlite"
+    return cache_root() / "embeddings" / f"{slug}.sqlite"
 
 
 @cache
 def make_embedder(s: Settings | None = None) -> Embedder:
     s = s or settings()
     if s.embed_backend == "fastembed":
-        try:
-            return CachedEmbedder(FastEmbedder(s.embed_model, s.embed_dim), cache_path(s.embed_model))
-        except Exception as exc:  # noqa: BLE001
-            log.warning("fastembed unavailable (%s); using the fake embedder", exc)
+        return CachedEmbedder(FastEmbedder(s.embed_model, s.embed_dim), cache_path(s.embed_model))
     return FakeEmbedder(s.embed_dim)

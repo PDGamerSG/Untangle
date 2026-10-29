@@ -73,7 +73,7 @@ def build_body():
             ring.append(bm.verts.new((math.cos(a) * r, math.sin(a) * r * squash, z)))
         rings.append(ring)
 
-    for lower, upper in zip(rings, rings[1:]):
+    for lower, upper in zip(rings, rings[1:], strict=False):
         if len(lower) == 1:
             for i in range(SEGMENTS):
                 bm.faces.new((lower[0], upper[i], upper[(i + 1) % SEGMENTS]))

@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/build-landing.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/build-landing.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test tests/api.test.ts",
+    "test:e2e": "playwright test tests/site.spec.ts"
   },
   "dependencies": {
     "d3-force": "^3.0.0",
@@ -16,6 +20,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@types/d3-force": "^3.0.10",
     "@types/node": "^20",

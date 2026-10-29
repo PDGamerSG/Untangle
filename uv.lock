@@ -423,75 +423,6 @@ wheels = [
 ]
 
 [[package]]
-name = "untangle"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "neo4j" },
-    { name = "orjson" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "python-multipart" },
-    { name = "pyyaml" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.optional-dependencies]
-all = [
-    { name = "anthropic" },
-    { name = "fastembed" },
-    { name = "openai" },
-    { name = "sarvamai" },
-]
-embed = [
-    { name = "fastembed" },
-]
-llm = [
-    { name = "anthropic" },
-    { name = "openai" },
-]
-sarvam = [
-    { name = "sarvamai" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "respx" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anthropic", marker = "extra == 'llm'", specifier = ">=0.40" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "fastembed", marker = "extra == 'embed'", specifier = ">=0.4" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "untangle", extras = ["llm", "embed", "sarvam"], marker = "extra == 'all'" },
-    { name = "neo4j", specifier = ">=5.28" },
-    { name = "openai", marker = "extra == 'llm'", specifier = ">=1.40" },
-    { name = "orjson", specifier = ">=3.9" },
-    { name = "pydantic", specifier = ">=2.8" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "python-multipart", specifier = ">=0.0.9" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "sarvamai", marker = "extra == 'sarvam'", specifier = ">=0.1.30" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
-]
-provides-extras = ["llm", "embed", "sarvam", "all"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.3" },
-    { name = "pytest-asyncio", specifier = ">=0.24" },
-    { name = "respx", specifier = ">=0.21" },
-    { name = "ruff", specifier = ">=0.6" },
-]
-
-[[package]]
 name = "loguru"
 version = "0.7.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1082,6 +1013,79 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a3/26/b09b8010994eccc3c09092e6b34058f36a460eea2d4c3e8b910c695975a0/typing_inspection-0.4.4.tar.gz", hash = "sha256:547274fa6b0a561ccf549cc9524b999a578e737d015d8709d021f9d0d13bea47", size = 76928, upload-time = "2026-08-12T12:37:25.997Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl", hash = "sha256:65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147", size = 14750, upload-time = "2026-08-12T12:37:24.648Z" },
+]
+
+[[package]]
+name = "untangle"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "anthropic" },
+    { name = "fastapi" },
+    { name = "fastembed" },
+    { name = "httpx" },
+    { name = "neo4j" },
+    { name = "orjson" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "python-multipart" },
+    { name = "pyyaml" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "anthropic" },
+    { name = "fastembed" },
+    { name = "openai" },
+    { name = "sarvamai" },
+]
+embed = [
+    { name = "fastembed" },
+]
+llm = [
+    { name = "anthropic" },
+    { name = "openai" },
+]
+sarvam = [
+    { name = "sarvamai" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "respx" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic", specifier = ">=0.40" },
+    { name = "anthropic", marker = "extra == 'llm'", specifier = ">=0.40" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "fastembed", specifier = ">=0.4" },
+    { name = "fastembed", marker = "extra == 'embed'", specifier = ">=0.4" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "neo4j", specifier = ">=5.28" },
+    { name = "openai", marker = "extra == 'llm'", specifier = ">=1.40" },
+    { name = "orjson", specifier = ">=3.9" },
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "sarvamai", marker = "extra == 'sarvam'", specifier = ">=0.1.30" },
+    { name = "untangle", extras = ["llm", "embed", "sarvam"], marker = "extra == 'all'" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
+]
+provides-extras = ["llm", "embed", "sarvam", "all"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "respx", specifier = ">=0.21" },
+    { name = "ruff", specifier = ">=0.6" },
 ]
 
 [[package]]

@@ -15,7 +15,12 @@ dependencies = [
   "uvicorn[standard]>=0.30",
   "python-multipart>=0.0.9",
   "orjson>=3.9",
+  "anthropic>=0.40",
+  "fastembed>=0.4",
 ]
+
+[tool.vercel]
+entrypoint = "app:app"
 
 [project.optional-dependencies]
 llm = ["anthropic>=0.40", "openai>=1.40"]

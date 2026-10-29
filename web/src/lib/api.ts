@@ -1,7 +1,7 @@
 import type { AskRequest, AskResponse, Health, MeetingDetail, MeetingSummary, PulseResponse, RepoSummary, Timeline, WhyPath } from "./types";
 import * as sample from "./sample";
 
-export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "http://localhost:8090").replace(/\/+$/, "");
+export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "/api").replace(/\/+$/, "");
 export const SAMPLE_MODE = process.env.NEXT_PUBLIC_UNTANGLE_SAMPLE === "1";
 
 export class ApiError extends Error {
@@ -27,11 +27,11 @@ async function request<T>(path: string, init?: RequestInit & { signal?: AbortSig
   try {
     res = await fetch(url, {
       ...init,
-      headers: { Accept: "application/json", ...(init?.body ? { "Content-Type": "application/json" } : {}), ...(init?.headers ?? {}) },
+      headers: { Accept: "application/json", ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}), ...(init?.headers ?? {}) },
     });
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") throw e;
-    throw new ApiError(0, `Cannot reach the Untangle API at ${API_BASE}. Is \`untangle serve\` running? (${errorMessage(e)})`);
+    throw new ApiError(0, "Could not reach Untangle. Check your connection and try again.");
   }
   const text = await res.text();
   let body: unknown = null;
@@ -44,7 +44,7 @@ async function request<T>(path: string, init?: RequestInit & { signal?: AbortSig
   }
   if (!res.ok) {
     const detail =
-      body && typeof body === "object" && "detail" in body ? (body as { detail: unknown }).detail : typeof body === "string" ? body : null;
+      body && typeof body === "object" ? (body as { detail?: unknown; error?: unknown }).detail ?? (body as { error?: unknown }).error : typeof body === "string" ? body : null;
     const msg = typeof detail === "string" ? detail : `${res.status} ${res.statusText} from ${path}`;
     throw new ApiError(res.status, msg, body);
   }
@@ -80,20 +80,24 @@ export const api = {
 
   meeting: (id: string, signal?: AbortSignal): Promise<MeetingDetail> =>
     SAMPLE_MODE ? sample.sampleMeeting(id) : request(`/meetings/${encodeURIComponent(id)}`, { signal }),
+
+  ingestMeeting: (body: FormData): Promise<{ meeting_id: string; utterances: number; decisions: number }> => {
+    if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Uploads are available in the live app."));
+    return request("/kt/ingest", { method: "POST", body });
+  },
 };
 
 /** Resolves a citation or evidence link: absolute URLs open in a new tab, decision ids go to the why-path page. */
 export function hrefFor(id: string, kind: string, url?: string | null): { href: string; external: boolean } | null {
   if (kind === "decision" || id.startsWith("dec:")) return { href: `/decisions/${encodeURIComponent(id)}`, external: false };
-  if (kind === "meeting" || id.startsWith("meeting:")) return { href: `/meetings/${encodeURIComponent(id)}`, external: false };
+  if (kind === "meeting" || id.startsWith("mtg:") || id.startsWith("meeting:")) return { href: `/meetings/${encodeURIComponent(id)}`, external: false };
+  if (kind === "utterance" || id.startsWith("utt:")) {
+    const m = /^utt:(mtg:.+)#(\d+)$/.exec(id);
+    if (m) return { href: `/meetings/${encodeURIComponent(m[1])}#utt-${Number(m[2])}`, external: false };
+  }
   if (url) {
     if (/^https?:\/\//i.test(url)) return { href: url, external: true };
     return { href: url, external: false };
-  }
-  if (kind === "utterance" || id.startsWith("utt:")) {
-    // utt:<repo>:<meeting>:<seq> -> the meeting page, anchored on the utterance
-    const m = /^utt:(.+):(\d+)$/.exec(id);
-    if (m) return { href: `/meetings/${encodeURIComponent(`meeting:${m[1]}`)}#utt-${m[2]}`, external: false };
   }
   return null;
 }

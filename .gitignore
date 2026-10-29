@@ -1,4 +1,7 @@
 .env
+.env.*
+!.env.example
+.vercel/
 .venv/
 .cache/
 __pycache__/
@@ -7,6 +10,7 @@ __pycache__/
 .ruff_cache/
 dist/
 build/
+web/public/welcome/
 *.egg-info/
 eval/out/
 web/node_modules/

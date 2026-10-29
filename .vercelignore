@@ -1,0 +1,17 @@
+.env
+.env.*
+.venv
+.cache
+.git
+.claude
+landing-preview.png
+**/node_modules
+**/.next
+**/test-results
+**/playwright-report
+**/__pycache__
+.pytest_cache
+.ruff_cache
+dist
+landing/dist
+web/public/welcome

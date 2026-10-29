@@ -19,6 +19,14 @@ const EXAMPLES = [
   { label: "Try an honest refusal", question: "why does listmonk use MongoDB?", icon: ShieldCheck },
 ];
 
+const UNTANGLE_EXAMPLES = [
+  { label: "Trace a decision", question: "why do we use neo4j in pyproject.toml?", icon: Sparkles },
+  { label: "Check what is current", question: "do we still use fastapi?", icon: CheckCircle2 },
+  { label: "Find the right owner", question: "who should I ask about src/untangle/answer?", icon: GitBranch },
+  { label: "See what changed", question: "what changed in docker-compose.yml?", icon: ArrowRight },
+  { label: "Try an honest refusal", question: "why does Untangle use MongoDB?", icon: ShieldCheck },
+];
+
 interface Turn {
   req: AskRequest;
   res?: AskResponse;
@@ -50,6 +58,7 @@ function AnswerSkeleton() {
 
 export function AskPage() {
   const { repo } = useRepo();
+  const examples = repo === "knadh/listmonk" ? EXAMPLES : UNTANGLE_EXAMPLES;
   const pulse = useResource(repo ? `pulse-teaser:${repo}` : null, (signal) => api.pulse(repo!, signal));
   const [question, setQuestion] = useState("");
   const [at, setAt] = useState("");
@@ -125,7 +134,7 @@ export function AskPage() {
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="why is app.concurrency set the way it is?"
+                placeholder={examples[0].question}
                 autoComplete="off"
                 enterKeyHint="search"
                 className="field pl-9 pr-3 text-[1rem]"
@@ -154,7 +163,7 @@ export function AskPage() {
           </div>
 
           <div className="flex flex-wrap gap-1.5" aria-label="Example questions">
-            {EXAMPLES.map((ex) => (
+            {examples.map((ex) => (
               <button
                 key={ex.question}
                 type="button"
