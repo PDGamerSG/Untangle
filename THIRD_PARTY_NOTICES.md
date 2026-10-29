@@ -5,7 +5,7 @@ services and libraries; their own terms apply when you install or enable them.
 
 | Component | Use in Untangle | Terms |
 |---|---|---|
-| Neo4j | Graph storage, indexes, and Cypher execution. | [Neo4j licenses](https://neo4j.com/licensing/) |
+| Neo4j | Graph storage, indexes, and Cypher execution; local Compose and CI use Community 2025.09. | [Neo4j licenses](https://neo4j.com/licensing/) |
 | Sarvam AI | Optional speech-to-text, translation, and language detection for KT recordings. | [Sarvam terms](https://www.sarvam.ai/terms) |
 | GitHub API | Optional repository, pull request, review, and issue ingestion. | [GitHub terms](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) |
 | Python packages | Backend runtime and development dependencies are pinned in `uv.lock`. | Each package's license is published by its distributor. |

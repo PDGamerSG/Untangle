@@ -47,8 +47,8 @@ cd Untangle
 # 2. Prepare the backend
 cp .env.example .env
 # Set NEO4J_PASSWORD. Add GITHUB_TOKEN for a higher GitHub API limit.
-docker compose up -d neo4j
-uv sync --all-extras
+docker compose up -d --wait neo4j
+uv sync --locked --all-extras
 
 # 3. Create the schema and ingest a repository
 uv run untangle schema
