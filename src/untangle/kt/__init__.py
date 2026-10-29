@@ -4,7 +4,7 @@ decisions that share keys with the code-history decisions (so a spoken reason co
 value)."""
 
 from untangle.kt.sarvam import SarvamClient, SarvamError, split_wav_windows
-from untangle.kt.transcript import Transcript, Utterance, from_untangle_json, from_sarvam, from_text, load_transcript
+from untangle.kt.transcript import Transcript, Utterance, from_sarvam, from_text, from_untangle_json, load_transcript
 
 __all__ = [
     "SarvamClient",
