@@ -423,7 +423,7 @@ wheels = [
 ]
 
 [[package]]
-name = "kyun"
+name = "untangle"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -470,7 +470,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "fastembed", marker = "extra == 'embed'", specifier = ">=0.4" },
     { name = "httpx", specifier = ">=0.27" },
-    { name = "kyun", extras = ["llm", "embed", "sarvam"], marker = "extra == 'all'" },
+    { name = "untangle", extras = ["llm", "embed", "sarvam"], marker = "extra == 'all'" },
     { name = "neo4j", specifier = ">=5.28" },
     { name = "openai", marker = "extra == 'llm'", specifier = ">=1.40" },
     { name = "orjson", specifier = ">=3.9" },
