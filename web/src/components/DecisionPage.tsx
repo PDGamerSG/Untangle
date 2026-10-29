@@ -106,7 +106,7 @@ export function DecisionPage() {
     return res.errorStatus === 404 ? (
       <EmptyState title="No such decision">
         <code className="t-code">{id}</code> is not in the graph for this repository.{" "}
-        <Link href="/" className="underline">
+        <Link href="/ask" className="underline">
           Ask a question
         </Link>
       </EmptyState>
@@ -125,7 +125,7 @@ export function DecisionPage() {
   return (
     <div className="space-y-8">
       <nav aria-label="Breadcrumb" className="text-[0.82rem] text-ink-3">
-        <Link href="/" className="hover:underline">
+        <Link href="/ask" className="hover:underline">
           Ask
         </Link>{" "}
         / <span className="text-ink-2">Decision</span>

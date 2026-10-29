@@ -177,7 +177,7 @@ def ingest_audio(
         t = transcribe_audio(client, audio_path, language=language, num_speakers=num_speakers, keyterms=terms, prefer_windows=prefer_windows, title=title)
         return ingest_kt(
             g, repo, title=title, utterances=t.utterances, speakers=t.speakers, started_at=started_at, language=t.language or language,
-            audio_uri=str(Path(audio_path)), llm=llm if llm is not None else make_llm(), embedder=embedder, source=t.source,
+            audio_uri=None, llm=llm if llm is not None else make_llm(), embedder=embedder, source=t.source,
             sarvam=client, translate=translate,
         )
 

@@ -8,7 +8,7 @@ import { HealthDot } from "./HealthDot";
 import { Logo } from "./Logo";
 
 const LINKS = [
-  { href: "/", label: "Ask" },
+  { href: "/ask", label: "Ask" },
   { href: "/pulse", label: "Pulse" },
   { href: "/timeline", label: "Timeline" },
   { href: "/meetings", label: "Meetings" },
@@ -16,7 +16,7 @@ const LINKS = [
 
 function NavLinks({ pathname }: { pathname: string | null }) {
   const isActive = (href: string) =>
-    pathname === null ? false : href === "/" ? pathname === "/" || pathname.startsWith("/decisions") : pathname.startsWith(href);
+    pathname === null ? false : href === "/ask" ? pathname === "/ask" || pathname.startsWith("/decisions") : pathname.startsWith(href);
   return (
     <>
       {LINKS.map((l) => (
@@ -51,7 +51,7 @@ export function Nav() {
             <ActiveNavLinks />
           </Suspense>
           <a
-            href="https://github.com/knadh/listmonk"
+            href="https://github.com/PDGamerSG/Untangle"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-[0.9rem] font-medium text-ink-2 hover:bg-surface-2 hover:text-ink sm:px-2.5"

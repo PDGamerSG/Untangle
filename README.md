@@ -46,7 +46,7 @@ cd Untangle
 
 # 2. Prepare the backend
 cp .env.example .env
-# Set NEO4J_PASSWORD. Add GITHUB_TOKEN for a higher GitHub API limit.
+# Set NEO4J_PASSWORD and ANTHROPIC_API_KEY. Add GITHUB_TOKEN for a higher GitHub API limit.
 docker compose up -d --wait neo4j
 uv sync --locked --all-extras
 
@@ -89,7 +89,7 @@ Build it with `pnpm build`; the generated `dist/` directory is deployable to any
 |---|---|
 | Operating system | macOS, Linux, or Windows with Docker and a shell; CI runs on Ubuntu. |
 | Runtime | Python 3.12–3.13, uv, Node 20.9+ (CI uses 22), pnpm 10, and Neo4j (CI uses 2025.09). |
-| Optional services | GitHub token for large ingests; Sarvam credentials for audio transcription; model or embedding credentials for optional backends. |
+| Services | Claude API key for model-generated answers; Sarvam key for audio transcription; optional GitHub token for large ingests. The local embedding model is free and needs no API key. |
 | Not supported | The project does not record audio for you, infer undocumented intent, or guarantee that synthetic sample reasons describe the public fixture repository. |
 
 ## 🧪 What it does
@@ -118,9 +118,12 @@ KT transcripts      ├─► ingestion ─► Neo4j ─► answer service ─�
 | Neo4j | Graph storage, full-text indexes, and the optional vector baseline. | Neo4j Community/Enterprise terms |
 | Sarvam AI | Optional speech-to-text and language services for KT recordings. | Sarvam terms |
 
-Backend settings live in `.env`; frontend overrides belong in `web/.env.local`. Use `NEXT_PUBLIC_UNTANGLE_API`
-to point the web client at an API other than `http://localhost:8090`. Both public web settings are applied at build time.
-The default `LLM_BACKEND=fake` and `EMBED_BACKEND=fake` require no model credentials.
+Backend settings live in `.env`; frontend overrides belong in `web/.env.local`. The web client calls `/api`, which
+Next.js proxies to `UNTANGLE_API_URL` (default `http://127.0.0.1:8090`). Rebuild after changing the proxy URL or any
+`NEXT_PUBLIC_*` setting. `.env.example` selects Claude and the free local `BAAI/bge-small-en-v1.5` embedding model.
+For offline fixture tests, explicitly select `LLM_BACKEND=fake` and `EMBED_BACKEND=fake`.
+
+For the two-project Vercel setup, required credentials, and production checks, see [Deployment](docs/DEPLOYMENT.md).
 
 Decisions are keyed by subject and predicate. A later value links to the older value with `SUPERSEDES` and records
 `valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and
@@ -152,6 +155,9 @@ cd web
 pnpm install --frozen-lockfile
 pnpm lint
 pnpm build
+pnpm test
+pnpm exec playwright install chromium
+pnpm test:e2e
 ```
 
 Python tests that need a reachable Neo4j skip cleanly; the rest use fake model and embedding adapters plus fixture

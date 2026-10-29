@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDuration } from "@/lib/format";
+import { MeetingUpload } from "./MeetingUpload";
 
 export function NotConfigured() {
   return (
@@ -41,6 +42,8 @@ export function MeetingsPage() {
         <RepoSelect compact />
       </header>
 
+      <MeetingUpload repo={repo} onUploaded={res.reload} />
+
       {res.loading ? (
         <ul className="grid gap-3 sm:grid-cols-2" role="status" aria-label="Loading meetings">
           {[0, 1].map((i) => (
@@ -59,7 +62,7 @@ export function MeetingsPage() {
         )
       ) : !res.data?.length ? (
         <EmptyState title="No handover calls for this repository yet">
-          Ingest one with <code className="t-code">untangle kt ingest --repo {repo ?? "owner/name"} --audio call.mp3</code>.
+          Add a recording or transcript above to make this repository’s handovers searchable.
         </EmptyState>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">

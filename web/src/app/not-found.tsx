@@ -9,7 +9,7 @@ export default function NotFound() {
       <h1 className="t-display mt-1 text-[1.6rem] text-ink">There is no page here.</h1>
       <p className="mt-2 text-[0.9rem] text-ink-2">
         Try the{" "}
-        <Link href="/" className="underline">
+        <Link href="/ask" className="underline">
           Ask page
         </Link>
         .

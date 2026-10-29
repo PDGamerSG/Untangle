@@ -424,11 +424,19 @@ def health(*, graph: Graph | None = None) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001 - health must answer even when the database is down
         neo4j["error"] = str(exc)[:200]
     llm = get_llm()
-    emb = make_embedder()
+    try:
+        emb = make_embedder()
+        embedding = {"backend": emb.backend, "dim": emb.dim, "available": True}
+    except Exception:  # noqa: BLE001 - readiness must report a failed model load
+        log.exception("embedding backend is unavailable")
+        embedding = {"backend": s.embed_backend, "dim": s.embed_dim, "available": False}
+        ok = False
+    if s.llm_backend != "fake" and not llm.available:
+        ok = False
     return {
         "ok": ok, "version": __version__, "neo4j": neo4j,
         "llm": {"backend": llm.backend, "model": llm.model, "available": llm.available},
-        "embed": {"backend": emb.backend, "dim": emb.dim},
+        "embed": embedding,
         "sarvam": {"configured": bool(s.sarvam_api_key), "model": s.sarvam_stt_model},
     }
 

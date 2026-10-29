@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from neo4j.exceptions import Neo4jError
 from pydantic import ValidationError
+from starlette.concurrency import run_in_threadpool
 
 from untangle import __version__
 from untangle.answer import service
@@ -35,6 +36,7 @@ from untangle.api import meetings as meeting_shape
 from untangle.api.health import shape_health
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
+from untangle.kt.sarvam import SarvamError
 
 log = logging.getLogger("untangle.api")
 
@@ -89,6 +91,12 @@ async def _not_found(request: Request, exc: service.NotFound) -> JSONResponse:
 @app.exception_handler(ValueError)
 async def _bad_value(request: Request, exc: ValueError) -> JSONResponse:
     return _error(400, str(exc), request_id=_request_id(request))
+
+
+@app.exception_handler(SarvamError)
+async def _sarvam_error(request: Request, exc: SarvamError) -> JSONResponse:
+    status = 503 if exc.status in (401, 403) or "not set" in str(exc) else 502
+    return _error(status, "Transcription is unavailable. Please try a transcript file or retry later.", request_id=_request_id(request))
 
 
 @app.exception_handler(Neo4jError)
@@ -193,17 +201,24 @@ async def kt_ingest(
     The upload is spooled to a temporary file because the KT functions take paths (Sarvam batch jobs need one)."""
     if audio is None and transcript is None:
         raise HTTPException(status_code=400, detail="send an `audio` file or a `transcript` JSON file")
+    if audio is not None and transcript is not None:
+        raise HTTPException(status_code=400, detail="send exactly one audio or transcript file")
     upload = audio if audio is not None else transcript
+    content = await upload.read(4_000_001)
+    if len(content) > 4_000_000:
+        raise HTTPException(status_code=413, detail="Uploads must be 4 MB or smaller. Use the CLI for longer recordings.")
+    if not content:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty")
     function = "ingest_audio" if audio is not None else "ingest_transcript"
     ingest = _kt(function)
     suffix = Path(upload.filename or ("audio.wav" if audio is not None else "transcript.json")).suffix or ".bin"
     with tempfile.TemporaryDirectory(prefix="untangle-kt-") as tmp:
         path = Path(tmp) / f"upload{suffix}"
-        path.write_bytes(await upload.read())
+        path.write_bytes(content)
         name = title or Path(upload.filename or "handover").stem
         if audio is not None:
-            return ingest(repo, name, path, language=language, num_speakers=speakers, graph=service.get_graph())
-        return ingest(repo, path, title=name, language=language, graph=service.get_graph())
+            return await run_in_threadpool(ingest, repo, name, path, language=language, num_speakers=speakers, graph=service.get_graph())
+        return await run_in_threadpool(ingest, repo, path, title=name, language=language, graph=service.get_graph())
 
 
 @app.exception_handler(ValidationError)

@@ -20,10 +20,11 @@ The API is the FastAPI server from the Python package (`untangle serve`, port 80
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `NEXT_PUBLIC_UNTANGLE_API` | `http://localhost:8090` | Base URL of the Untangle API. |
+| `UNTANGLE_API_URL` | `http://127.0.0.1:8090` | Server-side destination for the `/api` proxy. Set to the API deployment URL on Vercel. |
+| `NEXT_PUBLIC_UNTANGLE_API` | `/api` | Browser-facing base URL of the Untangle API. |
 | `NEXT_PUBLIC_UNTANGLE_SAMPLE` | unset | Set to `1` to read the fixtures in `web/sample/` instead of calling the API. A "Sample data" banner is shown. |
 
-Both are `NEXT_PUBLIC_*`, so they are inlined at build time: rebuild after changing them. Put them in `web/.env.local` or on the command line:
+Public settings and the proxy destination are applied at build time: rebuild after changing them. Put them in `web/.env.local` or on the command line:
 
 ```bash
 NEXT_PUBLIC_UNTANGLE_SAMPLE=1 pnpm dev
@@ -56,7 +57,8 @@ The app never falls back to the sample data when the API fails: errors are shown
 
 | Route | What it shows |
 |---|---|
-| `/` | Ask: repo selector (remembered in `localStorage`), a guided composer with intent-labelled examples, optional "as of" date (`at`), and "Compare with vector-only search" (`mode: both`). The result card renders the answer with `[id]` citations as kind-coloured chips, copy-question/copy-answer actions, the evidence chain stepper, the supersession banner, the confidence meter with the reasons verbatim, the sources, "Why this answer" (route, Cypher calls with copy buttons, LLM backend/model/used, d3-force subgraph with SUPERSEDES dashed red and hover props), and the graph-vs-vector side-by-side when a baseline is present. Refusals get a muted card with the closest entities and the person to ask, and no confidence bar. |
+| `/` | Static landing page with links into the application. |
+| `/ask` | Ask: repo selector (remembered in `localStorage`), a guided composer with intent-labelled examples, optional "as of" date (`at`), and "Compare with vector-only search" (`mode: both`). The result card renders the answer with `[id]` citations as kind-coloured chips, copy-question/copy-answer actions, the evidence chain stepper, the supersession banner, the confidence meter with the reasons verbatim, the sources, "Why this answer" (route, Cypher calls with copy buttons, LLM backend/model/used, d3-force subgraph with SUPERSEDES dashed red and hover props), and the graph-vs-vector side-by-side when a baseline is present. Refusals get a muted card with the closest entities and the person to ask, and no confidence bar. |
 | `/decisions/[id]` | The why-path: decision card, evidence with excerpts and links, the full chain older → newer as a vertical timeline, the motivating incident, implementing commits, and the Cypher. |
 | `/pulse` | Knowledge Risk Radar: deterministic contradiction, drift, ownership, rationale, and staleness signals with evidence-backed scores and Ask/evidence-path actions. |
 | `/timeline` | Date slider (earliest decision → today, debounced) with "In force on ‹date›" and "Superseded since then". |

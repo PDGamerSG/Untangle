@@ -27,7 +27,7 @@ def shape_health(snapshot: Mapping[str, Any]) -> dict[str, Any]:
         },
         "optional_backends": {
             "llm": {"backend": llm.get("backend"), "available": bool(llm.get("available"))},
-            "embeddings": {"backend": embed.get("backend"), "available": bool(embed.get("backend"))},
+            "embeddings": {"backend": embed.get("backend"), "available": bool(embed.get("available", embed.get("backend")))},
             "sarvam": {"configured": bool(sarvam.get("configured"))},
         },
     }

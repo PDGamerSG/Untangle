@@ -12,6 +12,12 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
+def cache_root() -> Path:
+    """Serverless deployments have a read-only checkout and writable temporary storage."""
+    default = Path("/tmp/untangle") if os.environ.get("VERCEL") else PROJECT_ROOT / ".cache"
+    return Path(os.environ.get("UNTANGLE_CACHE_DIR") or default)
+
+
 def _load_env() -> None:
     for candidate in (Path.cwd() / ".env", PROJECT_ROOT / ".env"):
         if candidate.is_file():
@@ -32,7 +38,7 @@ class Settings:
     neo4j_database: str | None = None
 
     github_token: str | None = None
-    repo_cache: Path = field(default_factory=lambda: PROJECT_ROOT / ".cache" / "repos")
+    repo_cache: Path = field(default_factory=lambda: cache_root() / "repos")
 
     llm_backend: str = "fake"
     llm_model: str | None = None
@@ -60,7 +66,7 @@ class Settings:
 @cache
 def settings() -> Settings:
     _load_env()
-    cache_dir = Path(_env("UNTANGLE_REPO_CACHE", str(PROJECT_ROOT / ".cache" / "repos")))
+    cache_dir = Path(_env("UNTANGLE_REPO_CACHE", str(cache_root() / "repos")))
     if not cache_dir.is_absolute():
         cache_dir = PROJECT_ROOT / cache_dir
     return Settings(

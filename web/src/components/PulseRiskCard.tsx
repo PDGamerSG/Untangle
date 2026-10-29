@@ -72,7 +72,7 @@ export function PulseRiskCard({ risk }: { risk: PulseRisk }) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-3">
-        <Link href={`/?question=${encodeURIComponent(question)}`} className="btn btn-primary btn-sm">Ask why <ArrowUpRight size={13} /></Link>
+        <Link href={`/ask?question=${encodeURIComponent(question)}`} className="btn btn-primary btn-sm">Ask why <ArrowUpRight size={13} /></Link>
         <Link href={`/decisions/${encodeURIComponent(risk.decision.id)}`} className="btn btn-line btn-sm">Open evidence path <ArrowUpRight size={13} /></Link>
         {risk.evidence[0]?.url ? <a href={risk.evidence[0].url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">Source <ExternalLink size={13} /></a> : null}
       </div>

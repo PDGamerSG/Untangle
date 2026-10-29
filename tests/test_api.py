@@ -32,6 +32,42 @@ async def test_kt_ingest_requires_a_file(client):
     assert "audio" in r.json()["detail"]
 
 
+async def test_kt_ingest_rejects_ambiguous_files(client):
+    r = await client.post("/kt/ingest", data={"repo": "o/r"}, files={
+        "audio": ("call.wav", b"audio", "audio/wav"),
+        "transcript": ("call.json", b"{}", "application/json"),
+    })
+    assert r.status_code == 400
+    assert "exactly one" in r.json()["detail"]
+
+
+async def test_kt_ingest_rejects_empty_files(client):
+    r = await client.post("/kt/ingest", data={"repo": "o/r"}, files={"transcript": ("call.txt", b"")})
+    assert r.status_code == 400
+    assert "empty" in r.json()["detail"]
+
+
+async def test_kt_ingest_rejects_files_over_hosting_limit(client):
+    r = await client.post("/kt/ingest", data={"repo": "o/r"}, files={"transcript": ("call.txt", b"a" * (4_000_000 + 1))})
+    assert r.status_code == 413
+
+
+async def test_kt_upload_uses_transcript_service(client, monkeypatch):
+    calls = []
+
+    def ingest(repo, path, **kwargs):
+        calls.append((repo, path.read_text(), kwargs["title"]))
+        return {"meeting_id": "mtg:o/r:call", "utterances": 1, "decisions": 0}
+
+    monkeypatch.setattr(api, "_kt", lambda name: ingest)
+    monkeypatch.setattr(service, "get_graph", lambda: None)
+    r = await client.post("/kt/ingest", data={"repo": "o/r", "title": "Handover"},
+                          files={"transcript": ("call.txt", b"Sam: We use Neo4j.", "text/plain")})
+    assert r.status_code == 200
+    assert r.json()["meeting_id"] == "mtg:o/r:call"
+    assert calls == [("o/r", "Sam: We use Neo4j.", "Handover")]
+
+
 async def test_request_id_is_echoed_and_added_to_errors(client):
     r = await client.get("/decisions/missing")
     request_id = r.headers.get("x-request-id")
@@ -45,6 +81,17 @@ async def test_health_exposes_process_and_graph_status(client):
     assert "graph" in payload and "ok" in payload["graph"]
     assert "optional_backends" in payload
     assert "sarvam" in payload["optional_backends"]
+
+
+async def test_health_reports_failed_embeddings_without_crashing(client, monkeypatch):
+    def unavailable():
+        raise RuntimeError("read-only model cache")
+
+    monkeypatch.setattr(service, "make_embedder", unavailable)
+    r = await client.get("/health")
+    assert r.status_code == 200
+    assert r.json()["status"] == "degraded"
+    assert r.json()["optional_backends"]["embeddings"]["available"] is False
 
 
 def test_kt_delegation_answers_501_when_the_function_is_missing():

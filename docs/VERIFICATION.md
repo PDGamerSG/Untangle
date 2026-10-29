@@ -1,5 +1,22 @@
 # Untangle verification record
 
+## Production integration checks — 2026-10-30
+
+- Frontend landing branch is merged into `main` at `c556460`.
+- Full backend suite against a disposable local Neo4j: **199 passed**.
+- Backend suite without Neo4j: **171 passed, 28 skipped**.
+- Repository-wide Ruff, web ESLint, landing build, and Next.js production build: **passed**.
+- Web API contracts: **3 passed**. Browser integration suite: **9 passed**, including regression checks for
+  decision breadcrumbs and missing-page recovery after moving Ask to `/ask`.
+- Real `PDGamerSG/Untangle` ingestion into local Neo4j with FastEmbed: **34 commits, 522 decisions, 106 embedded
+  chunks, 2,978 nodes, 5,762 relationships**. This verifies the ingestion path; it does not populate production Aura.
+- Browser tests use intercepted API fixtures; live Claude, Neo4j Aura, and Sarvam verification still requires
+  production credentials. Public deployments respond, but the API is degraded while those credentials are absent.
+
+See [Deployment](DEPLOYMENT.md) for the production environment and remaining live checks.
+
+## Earlier migration verification
+
 This record captures the checks run during the Untangle migration and setup refresh. It is a snapshot of the repository state, not a promise that later dependency or fixture changes will produce identical timings.
 
 ## Repository and identity
