@@ -51,11 +51,11 @@ export function Nav() {
             <ActiveNavLinks />
           </Suspense>
           <a
-            href="https://github.com/knadh/listmonk"
+            href="https://github.com/PDGamerSG/Untangle"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-[0.9rem] font-medium text-ink-2 hover:bg-surface-2 hover:text-ink sm:px-2.5"
-            aria-label="GitHub repository, opens in a new tab"
+            aria-label="Untangle on GitHub, opens in a new tab"
             title="GitHub"
           >
             <GitBranch size={16} aria-hidden />
