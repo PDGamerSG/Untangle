@@ -42,8 +42,9 @@ test("landing assets load and the app opens", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", err => errors.push(err.message));
   await page.goto("/");
-  await page.getByRole("link", { name: "Open app", exact: true }).click();
-  await expect(page).toHaveURL(/\/ask$/);
+  await page.getByRole("link", { name: "Open dashboard", exact: true }).first().click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Your repository’s memory" })).toBeVisible();
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("knadh/listmonk");
   expect(errors).toEqual([]);
 });
@@ -133,15 +134,16 @@ test("phone layout stays within the viewport", async ({ page }) => {
   const longRepo = "example-organization/a-repository-with-a-long-name";
   await page.route("**/api/repos", route => route.fulfill({ json: [{ ...repos[0], full_name: longRepo }] }));
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/ask", "/pulse", "/meetings", "/timeline"]) {
+  for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline"]) {
     await page.goto(path);
     await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
   }
 });
 
-test("Explore searches the graph and opens an entity page", async ({ page }) => {
+test("dashboard search opens an entity page and asks about it", async ({ page }) => {
   await page.goto("/explore");
+  await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("list", { name: "Nodes by type" })).toContainText("decisions");
   await page.getByLabel(/Search knadh\/listmonk|Search PDGamerSG\/Untangle/).fill("concurrency");
   await page.getByRole("link", { name: /ConfigKey\s*app\.concurrency/ }).click();
@@ -150,4 +152,38 @@ test("Explore searches the graph and opens an entity page", async ({ page }) => 
   await expect(page.getByText("Declared in")).toBeVisible();
   await page.getByRole("link", { name: /Ask why/ }).click();
   await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency like this?");
+  await expect(page.getByText(/Answer from the graph/i)).toBeVisible();
+});
+
+test("landing call-to-action at the end of the story opens the dashboard", async ({ page }) => {
+  await page.goto("/");
+  const cta = page.getByRole("link", { name: "Open dashboard", exact: true }).last();
+  await cta.scrollIntoViewIfNeeded();
+  await cta.click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test("dashboard shows live status and its example questions answer straight away", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { name: "System status" })).toBeVisible();
+  await expect(page.getByText(/Neo4j/).first()).toBeVisible();
+  await page.getByRole("button", { name: "why is app.concurrency set the way it is?", exact: true }).click();
+  await expect(page).toHaveURL(/\/ask/);
+  await expect(page.getByText(/Answer from the graph/i)).toBeVisible();
+});
+
+test("every nav link opens its page", async ({ page }) => {
+  await page.goto("/dashboard");
+  const nav = page.getByRole("navigation", { name: "Primary" });
+  for (const [label, url, heading] of [
+    ["Ask", /\/ask$/, /Find the reason/],
+    ["Timeline", /\/timeline$/, null],
+    ["Pulse", /\/pulse$/, /What is the team about to forget/],
+    ["Meetings", /\/meetings$/, null],
+    ["Dashboard", /\/dashboard$/, /Your repository’s memory/],
+  ] as const) {
+    await nav.getByRole("link", { name: label, exact: true }).click();
+    await expect(page).toHaveURL(url);
+    if (heading) await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
+  }
 });

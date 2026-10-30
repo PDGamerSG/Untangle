@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
-import { ExplorePage } from "@/components/ExplorePage";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Explore" };
-
+/** Search and graph statistics live on the dashboard. */
 export default function Page() {
-  return <ExplorePage />;
+  redirect("/dashboard");
 }

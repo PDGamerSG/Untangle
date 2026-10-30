@@ -174,7 +174,6 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
   const nav = $(".nav");
   const rail = $(".rail");
   const knots = [...document.querySelectorAll<HTMLAnchorElement>("[data-rail]")];
-  let lastY = 0;
   return (y: number) => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     rail.style.setProperty("--progress", (y / Math.max(max, 1)).toFixed(4));
@@ -186,12 +185,7 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
       k.classList.toggle("is-past", !!s && y >= s.top - window.innerHeight * 0.5);
       k.toggleAttribute("aria-current", k.dataset.rail === current);
     }
-    const down = y > lastY + 2;
-    const up = y < lastY - 2;
-    if (y < window.innerHeight * 0.5) nav.classList.remove("is-hidden");
-    else if (down) nav.classList.add("is-hidden");
-    else if (up) nav.classList.remove("is-hidden");
+    // The nav stays put so the way into the dashboard is always one click away.
     nav.classList.toggle("is-solid", y > window.innerHeight * 0.6);
-    lastY = y;
   };
 }
