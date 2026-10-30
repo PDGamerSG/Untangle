@@ -1,16 +1,19 @@
 """English rendering for API responses.
 
-Handover calls, and the decisions extracted from them, are stored in the language they were spoken in, which is
-often Hindi or Hinglish written in Devanagari. The web app shows English only, so every response passes through
-`EnglishRenderer.render` before it leaves the API:
+Handover calls, and the decisions extracted from them, are stored in the language they were spoken in: Hindi or
+Hinglish, written in Devanagari or in Latin script ("abhi bhi Jira mein blocked hai"). The web app shows English only,
+so every response passes through `EnglishRenderer.render` before it leaves the API:
 
 - an utterance that already has `text_en` shows that as its `text`;
-- any other string containing Devanagari is translated with Sarvam and the result is cached in the graph as a
+- any other prose that reads as Hindi is translated, and the result is cached in the graph as a
   `(:Translation {key, en})` node, so each sentence is translated once and later requests are fast;
 - identifiers, URLs and query parameters are never touched.
 
-Set `UNTANGLE_DISPLAY_LANGUAGE=original` to return stored text unchanged. Without a Sarvam key the renderer still
-uses cached translations and leaves anything uncached as stored."""
+Translation uses the configured Claude model in batches (it keeps file paths, config keys and ticket ids intact)
+and falls back to Sarvam's formal English. A result is used and cached only when it no longer reads as Hindi, so a
+partial translation is retried on a later request instead of being kept.
+
+Set `UNTANGLE_DISPLAY_LANGUAGE=original` to return stored text unchanged."""
 
 from __future__ import annotations
 
@@ -18,25 +21,54 @@ import hashlib
 import logging
 import re
 import threading
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from typing import Any, Protocol
+
+from pydantic import BaseModel
 
 log = logging.getLogger("untangle.api.english")
 
 DEVANAGARI = re.compile(r"[ऀ-ॿ꣠-ꣿ]")
 
+# Hindi function words and verbs that do not occur as English words. Two or more of them in one string marks it as
+# romanized Hindi; ambiguous words such as "to", "me" and "so" are left out on purpose.
+_HINGLISH = frozenset(
+    """
+    hai hain hoon hun tha thi hoga hogi honge kya kyun kyunki kyuki kyonki nahi nahin mein abhi bhi haan han
+    gaya gayi gaye liye karna karne karo karenge karega karegi karunga karungi kiya kiye raha rahi rahe wala wali
+    wale isliye taaki aur ye yeh woh kuch sab dekh dekho dekhna chal chalo theek thik acha accha achha matlab bas
+    bahut kaam aaj jab toh ko ka ki ke pe se ho hua hui mera meri mere tera teri hamara humne hamne maine tumne
+    unhe unko usko isko iska uska apna apni wahan yahan kahan kaise kab kaun lekin magar phir agar baad pehle
+    zyada jaldi chahiye sakte sakta sakti diya diye lagta lagti batao bata bolo bola boli rakha rakhe rakhna
+    """.split()
+)
+_WORD = re.compile(r"[A-Za-z]+")
+
 # Keys whose values are identifiers, links or query text rather than prose.
 _SKIP_KEYS = frozenset({"id", "key", "url", "href", "uri", "audio_uri", "path", "params", "cypher", "label", "kind", "role"})
 
+# Bump when the translation method changes, so earlier cached renderings are not reused.
+_CACHE_VERSION = "en-v2"
 
-def needs_translation(text: str) -> bool:
-    return bool(DEVANAGARI.search(text))
+
+def looks_hindi(text: str) -> bool:
+    """Devanagari, or Latin-script Hinglish."""
+    if DEVANAGARI.search(text):
+        return True
+    words = [w.lower() for w in _WORD.findall(text)]
+    if len(words) < 3:
+        return False
+    hits = [w for w in words if w in _HINGLISH]
+    return len(set(hits)) >= 2 and len(hits) >= max(2, 0.18 * len(words))
+
+
+needs_translation = looks_hindi
 
 
 def cache_key(text: str) -> str:
-    return hashlib.sha1(text.strip().encode("utf-8")).hexdigest()
+    return hashlib.sha1(f"{_CACHE_VERSION}|{text.strip()}".encode()).hexdigest()
 
 
 def _skip(key: str) -> bool:
@@ -50,14 +82,14 @@ def prefer_text_en(obj: Any) -> Any:
     if isinstance(obj, dict):
         out = {k: prefer_text_en(v) for k, v in obj.items()}
         en = out.get("text_en")
-        if isinstance(en, str) and en.strip() and isinstance(out.get("text"), str):
+        if isinstance(en, str) and en.strip() and not looks_hindi(en) and isinstance(out.get("text"), str):
             out["text"] = en
         return out
     return obj
 
 
 def collect(obj: Any, found: set[str] | None = None, *, key: str = "") -> set[str]:
-    """Every prose string under `obj` that contains Devanagari."""
+    """Every prose string under `obj` that reads as Hindi."""
     found = set() if found is None else found
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -66,7 +98,7 @@ def collect(obj: Any, found: set[str] | None = None, *, key: str = "") -> set[st
     elif isinstance(obj, list):
         for v in obj:
             collect(v, found, key=key)
-    elif isinstance(obj, str) and needs_translation(obj):
+    elif isinstance(obj, str) and looks_hindi(obj):
         found.add(obj)
     return found
 
@@ -104,18 +136,14 @@ class GraphTranslationStore:
             self.graph.run_named("translations_put", {"rows": rows}, write=True)
 
 
+# A batch translator takes source strings and returns one English string (or None) per input, in order.
+BatchTranslate = Callable[[Sequence[str]], list[str | None]]
+
+
 class EnglishRenderer:
-    def __init__(
-        self,
-        translate: Callable[[str], str] | None,
-        store: TranslationStore | None = None,
-        *,
-        max_workers: int = 8,
-        memory_limit: int = 5000,
-    ):
+    def __init__(self, translate: BatchTranslate | None, store: TranslationStore | None = None, *, memory_limit: int = 5000):
         self.translate = translate
         self.store = store
-        self.max_workers = max_workers
         self.memory_limit = memory_limit
         self._memory: dict[str, str] = {}
         self._lock = threading.Lock()
@@ -157,24 +185,106 @@ class EnglishRenderer:
         return english
 
     def _translate_all(self, keyed: Mapping[str, str]) -> dict[str, str]:
-        def one(item: tuple[str, str]) -> tuple[str, str | None]:
-            k, text = item
-            try:
-                en = (self.translate(text) or "").strip()  # type: ignore[misc]
-            except Exception as exc:  # noqa: BLE001 - leave this one string as stored
-                log.warning("translation failed: %s", exc)
-                return k, None
-            return k, en or None
-
-        with ThreadPoolExecutor(max_workers=max(1, min(self.max_workers, len(keyed)))) as pool:
-            results = list(pool.map(one, keyed.items()))
-        return {k: en for k, en in results if en}
+        keys = list(keyed)
+        try:
+            results = self.translate([keyed[k] for k in keys])  # type: ignore[misc]
+        except Exception as exc:  # noqa: BLE001 - leave the strings as stored
+            log.warning("translation failed: %s", exc)
+            return {}
+        out: dict[str, str] = {}
+        for k, en in zip(keys, results, strict=False):
+            en = (en or "").strip()
+            if en and not looks_hindi(en):
+                out[k] = en
+        return out
 
     def _remember(self, key: str, en: str) -> None:
         with self._lock:
             if len(self._memory) >= self.memory_limit:
                 self._memory.clear()
             self._memory[key] = en
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# translators
+
+
+class _Batch(BaseModel):
+    translations: list[str]
+
+
+_SYSTEM = (
+    "You translate notes from software engineering meetings into natural, plain English. The input is a JSON list "
+    "of strings in Hindi, Hinglish (Hindi and English mixed), or romanized Hindi. Translate every string fully into "
+    "English. Keep exactly as written: code identifiers, file paths, config keys, package names, ticket ids such as "
+    "MAIL-12, numbers, dates, people's names and any text in backticks. Do not add or drop information. Reply with "
+    'one JSON object {"translations": [...]} holding one English string per input, in the same order.'
+)
+
+
+def llm_batch_translator(llm: Any, *, chunk: int = 25, workers: int = 4) -> BatchTranslate:
+    """Claude (or another configured model) translating up to `chunk` strings per request."""
+    import json
+
+    def one(texts: Sequence[str]) -> list[str | None]:
+        reply = llm.complete_json(_SYSTEM, json.dumps(list(texts), ensure_ascii=False), _Batch, max_tokens=4096)
+        if len(reply.translations) != len(texts):
+            raise ValueError(f"expected {len(texts)} translations, got {len(reply.translations)}")
+        return list(reply.translations)
+
+    def run(texts: Sequence[str]) -> list[str | None]:
+        parts = [list(texts[i : i + chunk]) for i in range(0, len(texts), chunk)]
+
+        def safe(part: list[str]) -> list[str | None]:
+            try:
+                return one(part)
+            except Exception as exc:  # noqa: BLE001 - the fallback translator gets these strings
+                log.warning("model translation failed for %d strings: %s", len(part), exc)
+                return [None] * len(part)
+
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(parts)))) as pool:
+            return [en for part in pool.map(safe, parts) for en in part]
+
+    return run
+
+
+def sarvam_batch_translator(client: Any, *, workers: int = 6) -> BatchTranslate:
+    """Sarvam's `/translate`, one request per string, in formal English (code-mixed output keeps Hindi words)."""
+
+    def one(text: str) -> str | None:
+        try:
+            return client.translate(text, source="auto", target="en-IN", mode="formal")
+        except Exception as exc:  # noqa: BLE001
+            log.warning("sarvam translation failed: %s", exc)
+            return None
+
+    def run(texts: Sequence[str]) -> list[str | None]:
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(texts)))) as pool:
+            return list(pool.map(one, texts))
+
+    return run
+
+
+def chain(*translators: BatchTranslate) -> BatchTranslate:
+    """Try each translator on the strings the previous ones left in Hindi."""
+
+    def run(texts: Sequence[str]) -> list[str | None]:
+        out: list[str | None] = [None] * len(texts)
+        for translate in translators:
+            todo = [i for i, en in enumerate(out) if not en or looks_hindi(en)]
+            if not todo:
+                break
+            try:
+                results = translate([texts[i] for i in todo])
+            except Exception as exc:  # noqa: BLE001
+                log.warning("translator failed: %s", exc)
+                continue
+            for i, en in zip(todo, results, strict=False):
+                if en and en.strip() and not looks_hindi(en):
+                    out[i] = en.strip()
+        return out
+
+    return run
 
 
 _renderer: EnglishRenderer | None = None
@@ -199,10 +309,15 @@ def _build(s: Any) -> EnglishRenderer:
     from untangle.answer import service
     from untangle.kt.sarvam import SarvamClient
 
-    translate: Callable[[str], str] | None = None
+    translators: list[BatchTranslate] = []
+    try:
+        llm = service.get_llm()
+        if llm.available:
+            translators.append(llm_batch_translator(llm))
+    except Exception as exc:  # noqa: BLE001 - no model configured: Sarvam alone
+        log.info("no model for translation: %s", exc)
     if s.sarvam_api_key:
-        client = SarvamClient(s.sarvam_api_key, timeout=30.0, retries=1)
-        translate = lambda text: client.translate(text, source="auto", target="en-IN", mode="code-mixed")  # noqa: E731
+        translators.append(sarvam_batch_translator(SarvamClient(s.sarvam_api_key, timeout=30.0, retries=1)))
 
     class _LazyStore:
         """Connects on first use so a renderer can exist before the graph is reachable."""
@@ -213,7 +328,7 @@ def _build(s: Any) -> EnglishRenderer:
         def put(self, rows: list[dict[str, str]]) -> None:
             GraphTranslationStore(service.get_graph()).put(rows)
 
-    return EnglishRenderer(translate, _LazyStore())
+    return EnglishRenderer(chain(*translators) if translators else None, _LazyStore())
 
 
 def to_english(payload: Any) -> Any:
@@ -221,4 +336,17 @@ def to_english(payload: Any) -> Any:
     return payload if r is None else r.render(payload)
 
 
-__all__ = ["EnglishRenderer", "GraphTranslationStore", "collect", "needs_translation", "prefer_text_en", "renderer", "replace", "to_english"]
+__all__ = [
+    "EnglishRenderer",
+    "GraphTranslationStore",
+    "chain",
+    "collect",
+    "llm_batch_translator",
+    "looks_hindi",
+    "needs_translation",
+    "prefer_text_en",
+    "renderer",
+    "replace",
+    "sarvam_batch_translator",
+    "to_english",
+]
