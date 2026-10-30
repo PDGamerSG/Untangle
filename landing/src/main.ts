@@ -1,5 +1,4 @@
 import "@fontsource-variable/mona-sans/standard.css";
-import "@fontsource-variable/anek-devanagari/wght.css";
 import "@fontsource-variable/martian-mono/wght.css";
 import "./style.css";
 
