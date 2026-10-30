@@ -94,7 +94,10 @@ export function CitationChip({
   );
 }
 
-/** An entity tag. It links to the entity's page unless it already sits inside a link. */
+/** Labels `GET /entities/{id}` can open (cypher/30_entity_by_id). Other nodes, such as work items named in a call, stay plain tags. */
+const ENTITY_PAGE_LABELS = new Set(["File", "Module", "Symbol", "ConfigKey", "Dependency"]);
+
+/** An entity tag. It links to the entity's page when that page exists and the tag is not already inside a link. */
 export function EntityChip({ entity, link = true }: { entity: EntityRef; link?: boolean }) {
   const kind =
     entity.label === "ConfigKey"
@@ -119,7 +122,7 @@ export function EntityChip({ entity, link = true }: { entity: EntityRef; link?: 
     </>
   );
   const title = `${entity.label}: ${entity.name}${entity.path ? ` (${entity.path})` : ""}`;
-  if (!link) {
+  if (!link || !ENTITY_PAGE_LABELS.has(entity.label)) {
     return (
       <span className="chip" data-kind={kind} title={title}>
         {body}
