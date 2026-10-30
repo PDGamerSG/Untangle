@@ -13,14 +13,28 @@ WITH d, e, max(coalesce(target.last_touched_at, target.last_seen_at, target.firs
 OPTIONAL MATCH (kt:Decision)-[:CONTRADICTS]->(d)
 WITH d, e, last_touched, collect(DISTINCT kt) AS contradiction_nodes
 OPTIONAL MATCH (d)-[:STATED_BY]->(owner:Person)
-OPTIONAL MATCH (owner)-[:AUTHORED]->(oc:Commit)
-WHERE oc.repo = $repo
-OPTIONAL MATCH (owner)-[:REVIEWED]->(opr:PullRequest)
-WHERE opr.repo = $repo
-WITH d, e, last_touched, contradiction_nodes, owner,
-     [x IN collect(oc.authored_at) + collect(opr.merged_at) + collect(opr.created_at) WHERE x IS NOT NULL] AS owner_dates
-WITH d, e, last_touched, contradiction_nodes, owner,
-     reduce(latest = 0, x IN owner_dates | CASE WHEN x > latest THEN x ELSE latest END) AS owner_last_active
+WITH collect({d: d, e: e, last_touched: last_touched, contradiction_nodes: contradiction_nodes, owner: owner}) AS rows,
+     collect(DISTINCT owner) AS owners
+// Each owner's latest activity is computed once, not once per decision: a maintainer can have thousands of commits
+// and reviews, and expanding them for every decision they stated times out on large repositories.
+CALL (owners) {
+  UNWIND owners AS o
+  CALL (o) {
+    OPTIONAL MATCH (o)-[:AUTHORED]->(oc:Commit)
+    WHERE oc.repo = $repo
+    RETURN max(oc.authored_at) AS commit_last
+  }
+  CALL (o) {
+    OPTIONAL MATCH (o)-[:REVIEWED]->(opr:PullRequest)
+    WHERE opr.repo = $repo
+    RETURN max(opr.merged_at) AS merged_last, max(opr.created_at) AS created_last
+  }
+  RETURN collect({id: o.id, last: reduce(latest = 0, x IN [commit_last, merged_last, created_last] |
+                   CASE WHEN x IS NOT NULL AND x > latest THEN x ELSE latest END)}) AS activity
+}
+UNWIND rows AS r
+WITH r.d AS d, r.e AS e, r.last_touched AS last_touched, r.contradiction_nodes AS contradiction_nodes, r.owner AS owner,
+     CASE WHEN r.owner IS NULL THEN 0 ELSE coalesce([a IN activity WHERE a.id = r.owner.id | a.last][0], 0) END AS owner_last_active
 WITH d, e, last_touched, contradiction_nodes, owner, owner_last_active,
      size(contradiction_nodes) > 0 AS contradiction,
      last_touched IS NOT NULL AND last_touched > coalesce(d.valid_from, 0) AS drift,

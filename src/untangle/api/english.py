@@ -96,7 +96,7 @@ class GraphTranslationStore:
     def get(self, keys: list[str]) -> dict[str, str]:
         if not keys:
             return {}
-        rows = self.graph.run_named("translations_get", {"keys": keys}).records()
+        rows = self.graph.run_named("translations_get", {"keys": keys}).records
         return {r["key"]: r["en"] for r in rows if r.get("en")}
 
     def put(self, rows: list[dict[str, str]]) -> None:
