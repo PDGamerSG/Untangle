@@ -95,13 +95,13 @@ export class Stage {
       (m.material as MeshBasicMaterial).color.multiplyScalar(intensity);
       return m;
     };
-    const top = box(8, 2.4, 0xfff4e6, 3.2);
+    const top = box(8, 2.4, 0xffffff, 3.2);
     top.position.set(0, 6, 2);
     top.lookAt(0, 0, 0);
     const side = box(2.2, 7, 0xbfc8ff, 1.6);
     side.position.set(-6.5, 0.5, 3);
     side.lookAt(0, 0, 0);
-    const warm = box(1.4, 4, 0xff6b4a, 1.2);
+    const warm = box(1.4, 4, 0x6b9bff, 1.2);
     warm.position.set(6.5, -1, -2);
     warm.lookAt(0, 0, 0);
     env.add(top, side, warm);

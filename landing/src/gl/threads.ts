@@ -31,9 +31,9 @@ export function hexToVec3(hex: string) {
 }
 
 export const COLORS = {
-  cotton: "#F2EBDC",
-  faded: "#7C8AD0",
-  red: "#FF4B3A",
+  cotton: "#FFFFFF",
+  faded: "#8FB0FF",
+  red: "#3B74FF",
 };
 
 /**
