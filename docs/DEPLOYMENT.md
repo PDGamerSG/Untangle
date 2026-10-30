@@ -11,6 +11,10 @@ The selected repository is `PDGamerSG/Untangle`.
 | `untangle-code-api` | Repository root | FastAPI | `vercel.json`, `app.py` |
 | `untangle-code` | `web` | Next.js | `web/vercel.json` |
 
+The API's `vercel.json` pins its function to `bom1` (Mumbai) because the Aura instance runs in GCP `asia-south1`.
+Keep the two in one region: every answer runs several Cypher round trips, and a function in Vercel's default `iad1`
+paid about 230 ms per trip, which made simple pages take seconds and a handover transcript about ten.
+
 The frontend build needs files outside its root directory: `web/scripts/build-landing.mjs` builds the sibling
 `landing` project and copies its assets into `web/public/welcome`. Enable Vercel's option to include source files
 outside the root directory. Generated assets and private `.env` files are excluded from Git and deployment uploads.

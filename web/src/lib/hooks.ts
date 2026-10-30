@@ -15,9 +15,39 @@ function statusOf(e: unknown): number | undefined {
   return typeof s === "number" ? s : undefined;
 }
 
+/* A small in-memory cache shared by every `useResource` on the page. A key seen in the last `FRESH_MS` is served
+ * without a request; an older one is shown at once and refreshed in the background; two components asking for the
+ * same key at the same time share one request. The cache lives for the page session only. */
+interface Entry {
+  data: unknown;
+  at: number;
+}
+const memory = new Map<string, Entry>();
+const inflight = new Map<string, Promise<unknown>>();
+const FRESH_MS = 30_000;
+
+function fetchShared<T>(key: string, load: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const running = inflight.get(key) as Promise<T> | undefined;
+  if (running) return running;
+  const p = load(new AbortController().signal)
+    .then((data) => {
+      memory.set(key, { data, at: Date.now() });
+      return data;
+    })
+    .finally(() => inflight.delete(key));
+  inflight.set(key, p);
+  return p;
+}
+
+/** Stores a response under `key` so a later `useResource(key)` renders it without another request. */
+export function primeResource(key: string, data: unknown): void {
+  memory.set(key, { data, at: Date.now() });
+}
+
 /**
- * Loads a resource identified by `key`. The loader is re-run whenever the key changes or `reload` is called.
- * State is only set from promise callbacks, never synchronously inside the effect.
+ * Loads a resource identified by `key`. The loader is re-run whenever the key changes or `reload` is called, and
+ * skipped while a fresh copy sits in the page cache. State is only set from promise callbacks, never synchronously
+ * inside the effect; a cached value is read during render instead.
  */
 export function useResource<T>(key: string | null, load: (signal: AbortSignal) => Promise<T>) {
   const [state, setState] = useState<ResourceState<T>>({ key: null });
@@ -25,25 +55,32 @@ export function useResource<T>(key: string | null, load: (signal: AbortSignal) =
 
   useEffect(() => {
     if (key === null) return;
-    const ctrl = new AbortController();
-    load(ctrl.signal).then(
+    const hit = memory.get(key);
+    if (hit && nonce === 0 && Date.now() - hit.at < FRESH_MS) return;
+    let cancelled = false;
+    fetchShared(key, load).then(
       (data) => {
-        if (!ctrl.signal.aborted) setState({ key, data });
+        if (!cancelled) setState({ key, data });
       },
       (e: unknown) => {
-        if (!ctrl.signal.aborted) setState({ key, error: errorMessage(e), status: statusOf(e) });
+        if (!cancelled) setState({ key, error: errorMessage(e), status: statusOf(e) });
       },
     );
-    return () => ctrl.abort();
+    return () => {
+      cancelled = true;
+    };
     // The loader is identified by `key`; `nonce` forces a refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, nonce]);
 
-  const current = key !== null && state.key === key ? state : undefined;
+  const cached = key !== null ? memory.get(key) : undefined;
+  const current: ResourceState<T> | undefined =
+    key !== null && state.key === key ? state : cached ? { key, data: cached.data as T } : undefined;
   const reload = useCallback(() => {
+    if (key !== null) memory.delete(key);
     setState({ key: null });
     setNonce((n) => n + 1);
-  }, []);
+  }, [key]);
 
   return {
     data: current?.data,

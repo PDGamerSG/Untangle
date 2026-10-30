@@ -6,7 +6,7 @@ import { RepoSelect } from "./RepoSelect";
 import { useRepo } from "./RepoContext";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
-import { useDebounced, useResource } from "@/lib/hooks";
+import { primeResource, useDebounced, useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";
 import type { DecisionCard as DecisionCardT } from "@/lib/types";
 
@@ -21,13 +21,16 @@ function dayOf(iso: string): string {
 function useBounds(repo: string | null) {
   return useResource(repo ? `timeline-bounds:${repo}` : null, async (signal) => {
     const today = new Date();
-    const now = await api.timeline(repo!, today.toISOString(), signal);
+    const todayDay = dayOf(today.toISOString());
+    const now = await api.timeline(repo!, `${todayDay}T23:59:59Z`, signal);
+    // The page's first view is today, so this response is the one it will ask for next.
+    primeResource(`timeline:${repo}:${todayDay}`, now);
     let minMs = now.earliest_iso ? Date.parse(now.earliest_iso) : NaN;
     if (Number.isNaN(minMs)) {
       const dates = [...now.active, ...now.superseded_since].map((d) => Date.parse(d.valid_from_iso)).filter((n) => !Number.isNaN(n));
       minMs = dates.length ? Math.min(...dates) : today.getTime() - 365 * DAY_MS;
     }
-    return { minDay: dayOf(new Date(minMs).toISOString()), todayDay: dayOf(today.toISOString()) };
+    return { minDay: dayOf(new Date(minMs).toISOString()), todayDay };
   });
 }
 
