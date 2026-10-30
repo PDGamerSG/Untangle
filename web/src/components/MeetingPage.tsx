@@ -159,11 +159,11 @@ export function MeetingPage() {
         {m.summary ? <p className="mt-3 max-w-3xl text-[0.95rem] leading-relaxed text-ink-2">{m.summary}</p> : null}
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <section className="space-y-4" aria-label="Recording and transcript">
           <Transcript m={m} />
         </section>
-        <aside className="lg:sticky lg:top-16 lg:self-start">
+        <aside className="xl:sticky xl:top-16 xl:self-start">
           <SectionTitle hint={`${m.decisions.length}`}>Decisions from this call</SectionTitle>
           {m.decisions.length ? (
             <ul className="space-y-3">
