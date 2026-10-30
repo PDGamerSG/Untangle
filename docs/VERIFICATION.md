@@ -13,10 +13,12 @@
 - The historical selector regression is covered by both offline and Neo4j-backed tests: a file-wide query such as
   `why do we use neo4j in pyproject.toml?` stays on the named dependency even when another dependency is in force.
 - A real Claude `claude-haiku-5-5` completion passed the answer validator with `why.llm.used=true`.
-- The configured Sarvam credential was tested against `POST /speech-to-text` with a short generated WAV and the
-  service returned `403 invalid_api_key_error`; a replacement Sarvam key is required for live audio ingestion.
-- Public deployments respond at the URLs below. The production API remains degraded until the corrected Sarvam key
-  is installed and the API is redeployed.
+- The configured Sarvam credential passed live model discovery, short real-time transcription, batch diarised
+  transcription, language identification, and Hindi-to-English translation with a generated WAV. Short recordings
+  use the batch endpoint first because Sarvam's real-time endpoint does not support diarisation; the app falls back
+  to non-diarised real-time transcription when batch access is unavailable.
+- Public deployments respond at the URLs below. The API health check reports Neo4j Aura, Claude, FastEmbed, and
+  Sarvam as available.
 
 See [Deployment](DEPLOYMENT.md) for the production environment and remaining live checks.
 

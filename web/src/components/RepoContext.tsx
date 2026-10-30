@@ -6,13 +6,14 @@ import { useResource, useStoredValue } from "@/lib/hooks";
 import type { RepoSummary } from "@/lib/types";
 
 const STORAGE_KEY = "untangle.repo";
+const DEFAULT_REPO = "PDGamerSG/Untangle";
 
 interface RepoState {
   repos: RepoSummary[] | undefined;
   loading: boolean;
   error: string | null;
   reload: () => void;
-  /** The effective repo: the stored choice when it exists in the list, else the first repo. */
+  /** The saved choice, then this deployment's repository, then the first available repository. */
   repo: string | null;
   current: RepoSummary | undefined;
   setRepo: (fullName: string) => void;
@@ -25,7 +26,10 @@ export function RepoProvider({ children }: { children: ReactNode }) {
   const [stored, setStored] = useStoredValue(STORAGE_KEY);
   const value = useMemo<RepoState>(() => {
     const repos = res.data;
-    const repo = repos && repos.length ? (stored && repos.some((r) => r.full_name === stored) ? stored : repos[0].full_name) : null;
+    const selected = repos?.find((r) => r.full_name === stored)
+      ?? repos?.find((r) => r.full_name === DEFAULT_REPO)
+      ?? repos?.[0];
+    const repo = selected?.full_name ?? null;
     return {
       repos,
       loading: res.loading,

@@ -77,6 +77,12 @@ def test_validate_accepts_grounded_dates_and_numbers():
     assert validate(good, ev) is None
 
 
+def test_validate_accepts_the_short_commit_hash_shown_in_the_prompt():
+    ev = FX.evidence()
+    ev.dossiers[0].oldest.decided_in["sha"] = "229c599018a55bdb0d46ee425e960d19aa0d6880"
+    assert validate(f"Set in commit 229c599 [{FX.commit_old}].", ev) is None
+
+
 # -- compose: model vs template -------------------------------------------------------------------------------------
 
 
