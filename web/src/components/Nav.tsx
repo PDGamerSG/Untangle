@@ -7,8 +7,8 @@ import { HealthDot } from "./HealthDot";
 import { Logo } from "./Logo";
 
 const LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/ask", label: "Ask" },
-  { href: "/explore", label: "Explore" },
   { href: "/timeline", label: "Timeline" },
   { href: "/pulse", label: "Pulse" },
   { href: "/meetings", label: "Meetings" },
@@ -20,8 +20,8 @@ function NavLinks({ pathname }: { pathname: string | null }) {
       ? false
       : href === "/ask"
         ? pathname === "/ask" || pathname.startsWith("/decisions")
-        : href === "/explore"
-          ? pathname.startsWith("/explore") || pathname.startsWith("/entities")
+        : href === "/dashboard"
+          ? pathname.startsWith("/dashboard") || pathname.startsWith("/entities")
           : pathname.startsWith(href);
   return (
     <>
@@ -50,16 +50,18 @@ function ActiveNavLinks() {
 export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-bg/85 backdrop-blur">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
-        <Logo />
-        <nav aria-label="Primary" className="ml-auto flex min-w-0 items-center">
-          {/* On a phone the links scroll sideways inside the bar instead of widening the page. */}
-          <div className="flex min-w-0 items-center gap-0 overflow-x-auto [scrollbar-width:none] sm:gap-1">
-            <Suspense fallback={<NavLinks pathname={null} />}>
-              <ActiveNavLinks />
-            </Suspense>
-          </div>
+      {/* Phones get two rows (name and status, then the five links) so every link stays visible. */}
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center px-3 sm:h-14 sm:flex-nowrap sm:gap-3 sm:px-6">
+        <div className="flex h-12 items-center sm:h-auto">
+          <Logo />
+        </div>
+        <div className="ml-auto flex items-center sm:order-last sm:ml-0">
           <HealthDot />
+        </div>
+        <nav aria-label="Primary" className="flex h-9 w-full items-center justify-between pb-1 sm:ml-auto sm:h-auto sm:w-auto sm:justify-end sm:gap-1 sm:pb-0">
+          <Suspense fallback={<NavLinks pathname={null} />}>
+            <ActiveNavLinks />
+          </Suspense>
         </nav>
       </div>
     </header>

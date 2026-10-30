@@ -41,7 +41,7 @@ function Transcript({ m }: { m: MeetingDetail }) {
   return (
     <>
       {m.audio_uri ? (
-        <div className="sticky top-14 z-30 -mx-4 border-b border-rule bg-bg/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="sticky top-[5.3rem] z-30 sm:top-14 -mx-4 border-b border-rule bg-bg/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
           <audio ref={audio} controls preload="metadata" src={audioSrc(m.audio_uri)} className="w-full" aria-label={`Recording of ${m.title}`} />
         </div>
       ) : null}

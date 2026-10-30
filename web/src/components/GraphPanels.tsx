@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowUpRight, Database, Search, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EntityChip } from "./Chip";
-import { RepoSelect } from "./RepoSelect";
 import { useRepo } from "./RepoContext";
 import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
@@ -42,7 +41,7 @@ function useDebounced(value: string, ms: number) {
   return debounced;
 }
 
-function GraphStatsPanel({ repo }: { repo: string }) {
+export function GraphStatsPanel({ repo }: { repo: string }) {
   const { current } = useRepo();
   const res = useResource(`stats:${repo}`, (signal) => api.stats(repo, signal));
   const counts = current?.counts;
@@ -114,7 +113,7 @@ function GraphStatsPanel({ repo }: { repo: string }) {
   );
 }
 
-function SearchPanel({ repo }: { repo: string }) {
+export function SearchPanel({ repo }: { repo: string }) {
   const [text, setText] = useState("");
   const query = useDebounced(text.trim(), 250);
   const res = useResource(query ? `search:${repo}:${query}` : null, (signal) => api.search(repo, query, signal));
@@ -161,7 +160,7 @@ function SearchPanel({ repo }: { repo: string }) {
       ) : res.error ? (
         <ErrorState title="Search failed" error={res.error} onRetry={res.reload} />
       ) : entities.length || people.length ? (
-        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
           <div className="card divide-y divide-rule">
             {entities.map((e) => (
               <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
@@ -205,32 +204,5 @@ function SearchPanel({ repo }: { repo: string }) {
         <EmptyState title={`Nothing in ${repo} matches “${query}”`}>Try a shorter name, or part of a file path.</EmptyState>
       )}
     </section>
-  );
-}
-
-export function ExplorePage() {
-  const { repo } = useRepo();
-  return (
-    <div className="space-y-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-w-3xl">
-          <p className="eyebrow text-accent">Graph explorer</p>
-          <h1 className="t-display mt-2 text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">Explore the repository’s memory</h1>
-          <p className="mt-2 max-w-2xl text-[0.98rem] leading-relaxed text-ink-2">
-            Search everything Untangle extracted from the history, open any file, key or dependency to see the decisions
-            about it, and check how much of the repository the graph covers.
-          </p>
-        </div>
-        <RepoSelect compact />
-      </header>
-      {repo ? (
-        <>
-          <SearchPanel repo={repo} />
-          <GraphStatsPanel repo={repo} />
-        </>
-      ) : (
-        <EmptyState title="Choose an ingested repository to explore" />
-      )}
-    </div>
   );
 }

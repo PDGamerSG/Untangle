@@ -1,6 +1,6 @@
 # Production deployment
 
-The public frontend is https://untangle-code.vercel.app. Its `/ask` route opens the application.
+The public frontend is https://untangle-code.vercel.app. The landing page's **Open dashboard** buttons open `/dashboard`, the application's home.
 The FastAPI project is https://untangle-code-api.vercel.app; the frontend proxies `/api/*` to it.
 The selected repository is `PDGamerSG/Untangle`.
 

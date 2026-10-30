@@ -24,8 +24,8 @@ export interface Health {
   status?: "ok" | "degraded";
   neo4j: { version: string; aura: boolean };
   graph?: { ok: boolean; version?: string | null; aura?: boolean; edition?: string | null };
-  llm: { backend: string; model: string };
-  embed: { backend: string; dim: number };
+  llm: { backend: string; model: string; available?: boolean };
+  embed: { backend: string; dim: number; available?: boolean };
   optional_backends?: {
     llm: { backend: string; available: boolean };
     embeddings: { backend: string; available: boolean };

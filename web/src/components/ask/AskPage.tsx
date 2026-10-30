@@ -69,10 +69,13 @@ export function AskPage() {
   const cmpId = useId();
   const busy = turn !== null && !turn.res && !turn.error;
 
+  // A question handed over in the URL (from the dashboard, Pulse or an entity page) is asked straight away.
+  const [pending, setPending] = useState<string | null>(null);
   useEffect(() => {
     const initial = new URLSearchParams(window.location.search).get("question");
     if (!initial) return;
     setQuestion(initial);
+    setPending(initial);
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
 
@@ -88,6 +91,14 @@ export function AskPage() {
       setTurn((t) => (t && t.req === req ? { req, error: errorMessage(e) } : t));
     }
   };
+
+  useEffect(() => {
+    if (!pending || !repo) return;
+    setPending(null);
+    void ask(pending);
+    // `ask` reads the current repo and options; it only needs to run once per handed-over question.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending, repo]);
 
   return (
     <div className="space-y-10">

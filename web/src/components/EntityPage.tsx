@@ -83,7 +83,7 @@ export function EntityPage() {
           <span id="entity-decisions">Decisions about it</span>
         </SectionTitle>
         {data.decisions.length ? (
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {[...active, ...older].map((d) => (
               <DecisionCard key={d.id} decision={d} />
             ))}
@@ -93,7 +93,7 @@ export function EntityPage() {
         )}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
         <section aria-labelledby="entity-people">
           <SectionTitle>
             <span id="entity-people">People to ask</span>
