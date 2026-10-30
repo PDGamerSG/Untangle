@@ -7,7 +7,7 @@ import uuid
 
 import pytest
 
-from _answer_fixture import T_NOW, Fixture, seed_graph, unseed_people
+from _answer_fixture import T_NOW, Fixture, ms, seed_graph, unseed_people
 from untangle.answer import service
 from untangle.answer.retrieve import Recorder, gather
 from untangle.answer.router import resolve_entities, route
@@ -83,6 +83,45 @@ def test_belief_at_answers_as_of_date(graph, seeded):
     assert "later superseded on 14 Mar 2023 by 10" in r.answer
     assert r.evidence_chain[0].id == seeded.dec_old
     assert "decision was in force on 1 May 2022" in r.confidence.reasons
+
+
+def test_belief_at_before_first_decision_stays_on_the_named_entity(graph, seeded):
+    r = _ask(graph, seeded, "what was app.concurrency?", at="2020-01-01")
+    assert r.intent == "belief_at" and r.refused is False
+    assert r.answer.startswith("On 1 Jan 2020 nothing was recorded yet about `app.concurrency` in `config.toml`")
+
+
+@pytest.mark.parametrize("subject", ["neo4j", "RetryLimit"])
+def test_historical_dependency_keeps_subject_with_many_same_file_decisions(graph, test_repo, subject):
+    file_id = f"file:{test_repo}:pyproject.toml"
+    target_id = f"dec:{test_repo}:dependency:{subject}"
+    graph.query("""
+        CREATE (f:File {id: $file, repo: $repo, name: 'pyproject.toml', path: 'pyproject.toml', tokens: 'pyproject toml'})
+        CREATE (c:Commit {id: $commit, repo: $repo, sha: 'abcdef012345', title: 'Add dependencies', authored_at: $start})
+        WITH f, c
+        UNWIND $names AS name
+        CREATE (d:Decision {id: 'dec:' + $repo + ':dependency:' + name, repo: $repo,
+            kind: 'dependency', key: name + '|dependency_version', subject: name, predicate: 'dependency_version',
+            object: '1.0', text: name + ' in pyproject.toml is 1.0', status: 'active',
+            valid_from: CASE name WHEN $subject THEN $start ELSE $earlier END})
+        CREATE (d)-[:ABOUT]->(f), (d)-[:DECIDED_IN]->(c)
+        """, {"file": file_id, "repo": test_repo, "commit": f"commit:{test_repo}@abcdef012345",
+              "names": [f"other{i}" for i in range(10)] + [subject], "subject": subject,
+              "start": ms(2021, 1, 1), "earlier": ms(2019, 1, 1)})
+    llm = FakeLLM()
+    result = service.ask(f"why do we use {subject} in pyproject.toml?", test_repo, at="2020-01-01",
+                         graph=graph, llm=llm, now_ms=T_NOW)
+    assert not result.refused
+    assert result.answer.startswith(f"On 1 Jan 2020 nothing was recorded yet about `{subject}`")
+    assert result.evidence_chain[0].id == target_id
+    assert target_id in result.citations
+    assert "no decision was in force on 1 Jan 2020" in result.confidence.reasons
+    assert result.supersession == []
+    assert f"DECISION 1: {subject}" in llm.calls[0][1]
+
+    missing = service.ask("what was redis in pyproject.toml?", test_repo, at="2020-01-01",
+                          graph=graph, llm=FakeLLM(), now_ms=T_NOW)
+    assert missing.refused and missing.evidence_chain == [] and missing.supersession == []
 
 
 def test_who_to_ask_and_what_changed(graph, seeded):

@@ -15,7 +15,8 @@ from untangle.answer.compose import (
     validate,
 )
 from untangle.answer.confidence import score, signals_from
-from untangle.answer.retrieve import build_dossiers, version_from_row
+from untangle.answer.retrieve import Dossier, build_dossiers, version_from_row
+from untangle.answer.service import evidence_chain
 from untangle.llm import FakeLLM
 
 FX = Fixture("test/fixture")
@@ -158,6 +159,60 @@ def test_template_belief_at_before_any_decision():
     ev = FX.evidence("what was app.concurrency on 2019-01-01?", at="2019-01-01")
     text = render_template(ev, at_ms=ev.decision.at_ms)
     assert text.startswith("On 1 Jan 2019 nothing was recorded yet about `app.concurrency` in `config.toml`; the first recorded value, 5, came in commit 3fa2c1d")
+
+
+def test_template_belief_at_before_any_decision_keeps_the_named_subject():
+    ev = FX.evidence("what was app.concurrency on 2019-01-01?", at="2019-01-01")
+    unrelated = version_from_row(FX.row_new() | {
+        "id": "dec:test/fixture:dependency:unrelated",
+        "key": "dependency|pyproject.toml::untangle",
+        "subject": "pyproject.toml::untangle",
+        "object": "*",
+        "text": "untangle was added in pyproject.toml",
+        "about": [{"id": "file:test/fixture:pyproject.toml", "labels": ["File"], "name": "pyproject.toml", "path": "pyproject.toml"}],
+        "supersedes": [],
+        "superseded_by": [],
+    })
+    ev.dossiers = [Dossier([unrelated]), *ev.dossiers]
+    text = render_template(ev, at_ms=ev.decision.at_ms)
+    assert text.startswith("On 1 Jan 2019 nothing was recorded yet about `app.concurrency` in `config.toml`")
+
+
+def test_historical_subject_selection_is_shared_by_answer_confidence_and_chain():
+    ev = FX.evidence("what was app.concurrency on 2019-01-01?", at="2019-01-01")
+    unrelated = version_from_row(FX.row_new() | {
+        "id": "dec:test/fixture:dependency:in-force-unrelated",
+        "key": "dependency|pyproject.toml::untangle",
+        "subject": "untangle",
+        "object": "*",
+        "text": "untangle is used by the project",
+        "valid_from": 1,
+        "valid_to": None,
+        "status": "active",
+        "about": [{"id": "file:test/fixture:pyproject.toml", "labels": ["File"], "name": "pyproject.toml", "path": "pyproject.toml"}],
+        "supersedes": [],
+        "superseded_by": [],
+    })
+    ev.dossiers = [Dossier([unrelated]), *ev.dossiers]
+
+    led = ev.lead(ev.decision.at_ms)
+    assert led is not None and led[1].id == FX.dec_old
+    assert render_template(ev, at_ms=ev.decision.at_ms).startswith(
+        "On 1 Jan 2019 nothing was recorded yet about `app.concurrency` in `config.toml`"
+    )
+    confidence = score(signals_from(ev, at_ms=ev.decision.at_ms, now_ms=T_NOW))
+    assert "no decision was in force on 1 Jan 2019" in confidence.reasons
+    assert evidence_chain(ev, ev.decision.at_ms)[0].id == FX.dec_old
+
+
+def test_historical_gap_uses_last_value_before_the_date():
+    ev = FX.evidence("what was app.concurrency?", at="2022-05-01")
+    ev.dossiers[0].oldest.valid_to = 1640995200000  # 2022-01-01; next version starts in 2023
+    led = ev.lead(ev.decision.at_ms)
+    assert led is not None and led[1].id == FX.dec_old
+    text = render_template(ev, at_ms=ev.decision.at_ms)
+    assert f"the last one before it, 5, ended on 1 Jan 2022 [{FX.dec_old}]" in text
+    assert evidence_chain(ev, ev.decision.at_ms)[0].id == FX.dec_old
 
 
 def test_template_is_current_yes_and_no():

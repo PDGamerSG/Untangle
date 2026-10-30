@@ -7,6 +7,7 @@ Reasoning is disabled on Sarvam by default so the output is the answer, not a tr
 
 from __future__ import annotations
 
+import inspect
 import json
 import logging
 import re
@@ -70,13 +71,20 @@ class AnthropicLLM(LLM):
         self.model = model
 
     def complete(self, system: str, user: str, *, temperature: float = 0.1, max_tokens: int = 1024) -> str:
-        msg = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
-            messages=[{"role": "user", "content": user}],
-        )
+        kwargs: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            "messages": [{"role": "user", "content": user}],
+        }
+        # Anthropic SDK 2.x removed the top-level temperature parameter for the current Claude models. Keep
+        # compatibility with older SDKs while allowing the locked production SDK to make a real request.
+        parameters = inspect.signature(self.client.messages.create).parameters
+        if "temperature" in parameters:
+            kwargs["temperature"] = temperature
+        if "thinking" in parameters:
+            kwargs["thinking"] = {"type": "disabled"}
+        msg = self.client.messages.create(**kwargs)
         return "".join(block.text for block in msg.content if getattr(block, "type", "") == "text").strip()
 
 
