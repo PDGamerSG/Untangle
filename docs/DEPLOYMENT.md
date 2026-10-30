@@ -35,6 +35,7 @@ Set these on the **API project's Production environment**. Never put private cre
 | `EMBED_MODEL` | `BAAI/bge-small-en-v1.5`. |
 | `EMBED_DIM` | `384`. |
 | `CORS_ORIGINS` | `https://untangle-code.vercel.app`. |
+| `UNTANGLE_DISPLAY_LANGUAGE` | `en` (default). Responses render stored Hindi and Hinglish in English; `original` turns this off. |
 
 The embedding model runs on CPU through ONNX and needs no paid API or key. Vercel instances download it into
 `/tmp/untangle`; a cold instance can take longer to answer. It does not silently substitute fake embeddings if
@@ -56,6 +57,10 @@ uv run untangle schema
 uv run untangle ingest PDGamerSG/Untangle
 uv run untangle stats --repo PDGamerSG/Untangle
 ```
+
+Run `uv run untangle schema` once after upgrading so the `Translation` index exists. The API translates stored
+Hindi and Hinglish text with Sarvam the first time a page shows it and caches the English in `(:Translation)` nodes,
+so the first view of a handover call is slower than later ones.
 
 Re-run ingestion after pushing repository changes to refresh the graph. It uses deterministic IDs and merges
 existing records. Do not use `--reset` unless deliberately rebuilding the repository's graph.

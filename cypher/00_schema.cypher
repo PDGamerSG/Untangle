@@ -24,6 +24,7 @@ CREATE INDEX decision_valid_to IF NOT EXISTS FOR (n:Decision) ON (n.valid_to)
 CREATE INDEX chunk_repo_kind IF NOT EXISTS FOR (n:Chunk) ON (n.repo, n.source_kind)
 CREATE INDEX meeting_repo IF NOT EXISTS FOR (n:Meeting) ON (n.repo)
 CREATE INDEX utterance_meeting_seq IF NOT EXISTS FOR (n:Utterance) ON (n.meeting_id, n.seq)
+CREATE INDEX translation_key IF NOT EXISTS FOR (n:Translation) ON (n.key)
 
 // Full-text (Lucene standard analyzer). `tokens` holds names split on punctuation so `retry_limit` and `retry limit` both match.
 CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (n:File|Module|Symbol|ConfigKey|Dependency) ON EACH [n.name, n.path, n.key, n.tokens]
