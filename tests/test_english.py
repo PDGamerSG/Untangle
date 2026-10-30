@@ -1,5 +1,6 @@
-"""English rendering of API responses: utterances use `text_en`, other Devanagari is translated once and cached,
-identifiers are left alone, and a failing translator never fails the response."""
+"""English rendering of API responses: utterances use `text_en`, other Hindi (Devanagari or romanized) is translated
+once and cached, identifiers are left alone, partial translations are not kept, and a failing translator never fails
+the response."""
 
 from __future__ import annotations
 
@@ -11,10 +12,25 @@ import pytest
 from untangle.answer import service
 from untangle.api import english
 from untangle.api import main as api
-from untangle.api.english import EnglishRenderer, cache_key, collect, prefer_text_en, replace
+from untangle.api.english import (
+    EnglishRenderer,
+    cache_key,
+    chain,
+    collect,
+    llm_batch_translator,
+    looks_hindi,
+    prefer_text_en,
+    replace,
+)
+from untangle.llm import FakeLLM
 
 HINDI = "SES का rate limit hit हो रहा था"
 ENGLISH = "The SES rate limit was being hit"
+ROMAN = "MAIL-8 abhi bhi Jira mein Blocked hai"
+
+
+def always(en):
+    return lambda texts: [en] * len(texts)
 
 
 class MemoryStore:
@@ -58,9 +74,9 @@ def test_renderer_translates_once_then_serves_the_cache():
     calls: list[str] = []
     store = MemoryStore()
 
-    def translate(text):
-        calls.append(text)
-        return ENGLISH
+    def translate(texts):
+        calls.extend(texts)
+        return [ENGLISH] * len(texts)
 
     r = EnglishRenderer(translate, store)
     payload = {"active": [{"text": HINDI, "rationale": HINDI}]}
@@ -69,12 +85,12 @@ def test_renderer_translates_once_then_serves_the_cache():
     assert store.puts and store.puts[0]["key"] == cache_key(HINDI) and store.puts[0]["source"] == HINDI
 
     # A fresh process reads the graph cache instead of calling Sarvam again.
-    again = EnglishRenderer(lambda text: pytest.fail("should not translate"), store)
+    again = EnglishRenderer(lambda texts: pytest.fail("should not translate"), store)
     assert again.render(payload)["active"][0]["text"] == ENGLISH
 
 
 def test_renderer_leaves_text_when_translation_fails():
-    def broken(text):
+    def broken(texts):
         raise RuntimeError("sarvam down")
 
     r = EnglishRenderer(broken, MemoryStore())
@@ -95,8 +111,56 @@ def test_renderer_survives_an_unreachable_cache():
         def put(self, rows):
             raise ConnectionError("no graph")
 
-    r = EnglishRenderer(lambda text: ENGLISH, Down())
+    r = EnglishRenderer(always(ENGLISH), Down())
     assert r.render({"text": HINDI}) == {"text": ENGLISH}
+
+
+def test_looks_hindi_covers_romanized_hinglish_but_not_english():
+    assert looks_hindi(HINDI)
+    assert looks_hindi(ROMAN)
+    assert looks_hindi("Haan, comments dekh liye, unpe kaam karungi.")
+    for english_text in [
+        "Related code changed after this decision was recorded",
+        "app.concurrency in schema.sql is 10",
+        "who should I ask about internal/manager?",
+        "The tab shows the PR from the main branch",
+        "Kailash Nadh authored 114 of 133 commits on app.concurrency",
+    ]:
+        assert not looks_hindi(english_text), english_text
+
+
+def test_romanized_hinglish_is_translated():
+    r = EnglishRenderer(always("MAIL-8 is still blocked in Jira"), MemoryStore())
+    assert r.render({"text": ROMAN}) == {"text": "MAIL-8 is still blocked in Jira"}
+
+
+def test_partial_translations_are_not_used_or_cached():
+    store = MemoryStore()
+    r = EnglishRenderer(always("Morning. ये Rohan का last full week है।"), store)
+    assert r.render({"text": HINDI}) == {"text": HINDI}
+    assert store.puts == []
+
+
+def test_chain_falls_back_for_strings_the_first_translator_left_in_hindi():
+    first = lambda texts: [ENGLISH if t == HINDI else t for t in texts]  # noqa: E731 - leaves ROMAN untouched
+    second_calls: list[str] = []
+
+    def second(texts):
+        second_calls.extend(texts)
+        return ["MAIL-8 is still blocked in Jira" for _ in texts]
+
+    assert chain(first, second)([HINDI, ROMAN]) == [ENGLISH, "MAIL-8 is still blocked in Jira"]
+    assert second_calls == [ROMAN]
+
+
+def test_model_translator_batches_and_checks_the_count():
+    import json
+
+    reply = json.dumps({"translations": [ENGLISH, "MAIL-8 is still blocked in Jira"]})
+    llm = FakeLLM({"MAIL-8": reply})
+    assert llm_batch_translator(llm)([HINDI, ROMAN]) == [ENGLISH, "MAIL-8 is still blocked in Jira"]
+    short = FakeLLM({"MAIL-8": json.dumps({"translations": [ENGLISH]})})
+    assert llm_batch_translator(short)([HINDI, ROMAN]) == [None, None]
 
 
 @pytest.fixture
@@ -106,7 +170,7 @@ async def client():
 
 
 async def test_search_endpoint_answers_in_english(client, monkeypatch):
-    monkeypatch.setattr(english, "renderer", lambda: EnglishRenderer(lambda text: ENGLISH, MemoryStore()))
+    monkeypatch.setattr(english, "renderer", lambda: EnglishRenderer(always(ENGLISH), MemoryStore()))
     monkeypatch.setattr(service, "search", lambda repo, q: {
         "entities": [{"id": f"cfg:o/r:{HINDI}", "label": "ConfigKey", "name": HINDI, "path": "config.toml", "key": None, "score": 1.0}],
         "people": [],
