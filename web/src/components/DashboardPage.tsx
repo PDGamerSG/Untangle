@@ -211,8 +211,7 @@ export function DashboardPage() {
     <div className="space-y-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-3xl">
-          <p className="eyebrow text-accent">Dashboard</p>
-          <h1 className="t-display mt-2 text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">Your repository’s memory</h1>
+          <h1 className="t-display text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">Dashboard</h1>
           <p className="mt-2 max-w-2xl text-[0.98rem] leading-relaxed text-ink-2">
             Ask a question, search what the graph knows, and see what needs attention. Everything here is read live from
             the Untangle API.

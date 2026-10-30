@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, BrainCircuit, CheckCircle2, ShieldAlert } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { RepoSelect } from "./RepoSelect";
 import { PulseRiskCard } from "./PulseRiskCard";
@@ -21,8 +21,7 @@ export function PulsePage() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-3xl">
-          <p className="eyebrow flex items-center gap-2 text-accent"><BrainCircuit size={14} aria-hidden /> Proactive repository memory</p>
-          <h1 className="t-display mt-2 text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">What is the team about to forget?</h1>
+          <h1 className="t-display text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">What is the team about to forget?</h1>
           <p className="mt-2 max-w-2xl text-[0.98rem] leading-relaxed text-ink-2">Pulse watches the graph for conflicts, drift and missing ownership, then shows the evidence behind each warning. It tells you where a handover or a decision review will pay off first.</p>
         </div>
         <RepoSelect compact />

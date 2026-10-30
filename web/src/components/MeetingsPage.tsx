@@ -35,8 +35,8 @@ export function MeetingsPage() {
         <div>
           <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">Handover calls</h1>
           <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">
-            Knowledge-transfer recordings, transcribed in the language they were spoken, with the decisions Untangle pulled out of them linked to the code
-            they are about.
+            Knowledge-transfer calls, transcribed and shown in English, with the decisions Untangle pulled out of them linked to the code they are
+            about.
           </p>
         </div>
         <RepoSelect compact />

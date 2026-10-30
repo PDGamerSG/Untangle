@@ -41,7 +41,7 @@ function Transcript({ m }: { m: MeetingDetail }) {
   return (
     <>
       {m.audio_uri ? (
-        <div className="sticky top-[5.3rem] z-30 sm:top-14 -mx-4 border-b border-rule bg-bg/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="sticky top-[5.3rem] z-30 sm:top-14 lg:top-0 -mx-4 border-b border-rule bg-bg/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
           <audio ref={audio} controls preload="metadata" src={audioSrc(m.audio_uri)} className="w-full" aria-label={`Recording of ${m.title}`} />
         </div>
       ) : null}
@@ -163,7 +163,7 @@ export function MeetingPage() {
         <section className="space-y-4" aria-label="Recording and transcript">
           <Transcript m={m} />
         </section>
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <aside className="lg:sticky lg:top-16 lg:self-start">
           <SectionTitle hint={`${m.decisions.length}`}>Decisions from this call</SectionTitle>
           {m.decisions.length ? (
             <ul className="space-y-3">

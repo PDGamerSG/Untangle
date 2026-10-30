@@ -104,11 +104,7 @@ export function AskPage() {
     <div className="space-y-10">
       <section className="space-y-6">
         <div className="max-w-3xl">
-          <p className="eyebrow flex items-center gap-2 text-accent">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            Repository memory, with receipts
-          </p>
-          <h1 className="t-display mt-3 max-w-2xl text-[2.35rem] leading-[1.02] text-ink sm:text-[3.5rem]">
+          <h1 className="t-display max-w-2xl text-[2.35rem] leading-[1.02] text-ink sm:text-[3.5rem]">
             Find the reason behind the code.
           </h1>
           <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-ink-2 sm:text-[1.05rem]">
@@ -199,7 +195,7 @@ export function AskPage() {
           {[
             { icon: GitBranch, title: "Read the history", body: "Commits, PRs, issues and handover calls become one searchable record." },
             { icon: Sparkles, title: "Find what is in force", body: "Superseded values stay visible while the active decision leads the answer." },
-            { icon: ShieldCheck, title: "Show the receipts", body: "Every claim links back to the evidence path the graph actually read." },
+            { icon: ShieldCheck, title: "Show the evidence", body: "Every claim links back to the evidence path the graph actually read." },
           ].map((step, i) => (
             <li key={step.title} className="surface-soft flex gap-3 p-3.5">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent" aria-hidden>

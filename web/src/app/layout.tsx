@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
-import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { RepoProvider } from "@/components/RepoContext";
 import { SampleBanner } from "@/components/SampleBanner";
@@ -24,10 +23,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf8f4" },
-    { media: "(prefers-color-scheme: dark)", color: "#121110" },
-  ],
+  themeColor: "#0f3a99",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -42,11 +39,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
           <Nav />
-          <SampleBanner />
-          <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 sm:px-6">
-            {children}
-          </main>
-          <Footer />
+          <div className="flex flex-1 flex-col lg:pl-60">
+            <SampleBanner />
+            <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+              {children}
+            </main>
+          </div>
         </RepoProvider>
       </body>
     </html>

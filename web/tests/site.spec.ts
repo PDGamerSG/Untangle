@@ -44,7 +44,7 @@ test("landing assets load and the app opens", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Open dashboard", exact: true }).first().click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Your repository’s memory" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("knadh/listmonk");
   expect(errors).toEqual([]);
 });
@@ -166,7 +166,7 @@ test("landing call-to-action at the end of the story opens the dashboard", async
 test("dashboard shows live status and its example questions answer straight away", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { name: "System status" })).toBeVisible();
-  await expect(page.getByText(/Neo4j/).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "System status" }).getByText(/Neo4j/)).toBeVisible();
   await page.getByRole("button", { name: "why is app.concurrency set the way it is?", exact: true }).click();
   await expect(page).toHaveURL(/\/ask/);
   await expect(page.getByText(/Answer from the graph/i)).toBeVisible();
@@ -180,7 +180,7 @@ test("every nav link opens its page", async ({ page }) => {
     ["Timeline", /\/timeline$/, null],
     ["Pulse", /\/pulse$/, /What is the team about to forget/],
     ["Meetings", /\/meetings$/, null],
-    ["Dashboard", /\/dashboard$/, /Your repository’s memory/],
+    ["Dashboard", /\/dashboard$/, /^Dashboard$/],
   ] as const) {
     await nav.getByRole("link", { name: label, exact: true }).click();
     await expect(page).toHaveURL(url);
