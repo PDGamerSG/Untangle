@@ -57,6 +57,7 @@ class Settings:
     api_host: str = "127.0.0.1"
     api_port: int = 8090
     cors_origins: tuple[str, ...] = ("http://localhost:3000",)
+    display_language: str = "en"
 
     @property
     def aura(self) -> bool:
@@ -90,4 +91,5 @@ def settings() -> Settings:
         api_host=_env("API_HOST", "127.0.0.1"),
         api_port=int(_env("API_PORT", "8090")),
         cors_origins=tuple(o.strip() for o in _env("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()),
+        display_language=_env("UNTANGLE_DISPLAY_LANGUAGE", "en").strip().lower(),
     )

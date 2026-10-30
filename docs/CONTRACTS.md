@@ -142,6 +142,11 @@ untangle serve [--port 8090]
 
 ## 6. API (FastAPI, JSON; CORS from settings)
 
+Display language: with `UNTANGLE_DISPLAY_LANGUAGE=en` (the default) the read endpoints (`/ask`, `/decisions`,
+`/entities`, `/search`, `/timeline`, `/pulse`, `/meetings`) render prose stored in Devanagari in English. Utterances
+use their `text_en` as `text`; other strings are translated with Sarvam and cached in `(:Translation {key, en})`.
+Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and the graph keep the original text.
+
 - `GET /health` → legacy `ok`, `neo4j`, `llm`, `embed`, and `sarvam` fields plus `status` (`ok` or
   `degraded`), `graph: {ok, version, aura, edition}`, and safe `optional_backends` availability summaries.
 - `GET /repos` → `[{ full_name, head_sha, commit_count, ingested_at_iso, counts: {commits, prs, issues, decisions, meetings} }]`

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from neo4j.exceptions import Neo4jError
@@ -33,6 +34,7 @@ from untangle.answer.models import (
     WhyPath,
 )
 from untangle.api import meetings as meeting_shape
+from untangle.api.english import to_english
 from untangle.api.health import shape_health
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
@@ -125,34 +127,39 @@ def repos() -> list[RepoInfo]:
     return service.repos()
 
 
+def _english(result: Any) -> Any:
+    """The response as the web app shows it: stored Hindi and Hinglish rendered in English (see `api.english`)."""
+    return to_english(jsonable_encoder(result))
+
+
 @app.post("/ask", response_model=AskResponse)
-def ask(body: AskRequest) -> AskResponse:
-    return service.ask(body.question, body.repo, at=body.at, mode=body.mode)
+def ask(body: AskRequest) -> Any:
+    return _english(service.ask(body.question, body.repo, at=body.at, mode=body.mode))
 
 
 @app.get("/decisions/{decision_id:path}", response_model=WhyPath)
-def decision(decision_id: str) -> WhyPath:
-    return service.why_path(decision_id)
+def decision(decision_id: str) -> Any:
+    return _english(service.why_path(decision_id))
 
 
 @app.get("/entities/{entity_id:path}", response_model=EntityResponse)
-def entity(entity_id: str) -> EntityResponse:
-    return service.entity(entity_id)
+def entity(entity_id: str) -> Any:
+    return _english(service.entity(entity_id))
 
 
 @app.get("/search", response_model=SearchResponse)
-def search(repo: str = Query(min_length=3), q: str = Query(min_length=1, max_length=500)) -> SearchResponse:
-    return service.search(repo, q)
+def search(repo: str = Query(min_length=3), q: str = Query(min_length=1, max_length=500)) -> Any:
+    return _english(service.search(repo, q))
 
 
 @app.get("/timeline", response_model=TimelineResponse)
-def timeline(repo: str = Query(min_length=3), at: str | None = None) -> TimelineResponse:
-    return service.timeline(repo, at)
+def timeline(repo: str = Query(min_length=3), at: str | None = None) -> Any:
+    return _english(service.timeline(repo, at))
 
 
 @app.get("/pulse", response_model=PulseResponse)
-def pulse(repo: str = Query(min_length=3), limit: int = Query(default=24, ge=1, le=50)) -> PulseResponse:
-    return service.pulse(repo, limit=limit)
+def pulse(repo: str = Query(min_length=3), limit: int = Query(default=24, ge=1, le=50)) -> Any:
+    return _english(service.pulse(repo, limit=limit))
 
 
 @app.get("/stats")
@@ -179,7 +186,7 @@ def _kt(function: str) -> Any:
 
 @app.get("/meetings")
 def meetings(repo: str = Query(min_length=3)) -> Any:
-    return [meeting_shape.summary_out(r) for r in _kt("meetings")(repo, graph=service.get_graph())]
+    return _english([meeting_shape.summary_out(r) for r in _kt("meetings")(repo, graph=service.get_graph())])
 
 
 @app.get("/meetings/{meeting_id:path}")
@@ -188,7 +195,7 @@ def meeting(meeting_id: str) -> Any:
     result = _kt("meeting")(meeting_id, graph=graph)
     if result is None:
         raise HTTPException(status_code=404, detail=f"no meeting {meeting_id!r}")
-    return meeting_shape.detail_out(result, graph=graph)
+    return _english(meeting_shape.detail_out(result, graph=graph))
 
 
 @app.post("/kt/ingest")
