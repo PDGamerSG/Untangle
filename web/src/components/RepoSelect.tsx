@@ -27,11 +27,11 @@ export function RepoSelect({ compact = false }: { compact?: boolean }) {
       </p>
     );
   return (
-    <div className={compact ? "flex items-center gap-2" : "flex flex-col gap-1"}>
+    <div className={compact ? "flex min-w-0 max-w-full items-center gap-2" : "flex flex-col gap-1"}>
       <label htmlFor={id} className="text-[0.78rem] font-semibold uppercase tracking-wider text-ink-3">
         Repository
       </label>
-      <select id={id} value={repo ?? ""} onChange={(e) => setRepo(e.target.value)} className={`field ${compact ? "h-9 w-auto py-1" : "max-w-xs"}`}>
+      <select id={id} value={repo ?? ""} onChange={(e) => setRepo(e.target.value)} className={`field ${compact ? "h-9 min-w-0 max-w-full w-auto py-1" : "max-w-xs"}`}>
         {repos.map((r) => (
           <option key={r.full_name} value={r.full_name}>
             {r.full_name}
