@@ -136,7 +136,6 @@
   --font-sans: var(--font-ui);
   --font-mono: var(--font-code);
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-devanagari: var(--font-tiro), "Nirmala UI", "Noto Serif Devanagari", serif;
   --radius-card: 14px;
 }
 
@@ -174,9 +173,6 @@ body {
   font-variation-settings: "opsz" 72, "SOFT" 40;
 }
 
-.t-devanagari {
-  font-family: var(--font-devanagari);
-}
 
 .t-num {
   font-variant-numeric: tabular-nums;
