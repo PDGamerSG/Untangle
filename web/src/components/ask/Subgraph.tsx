@@ -136,7 +136,7 @@ export function Subgraph({ subgraph }: { subgraph: SubgraphT }) {
   if (!nodes.length) return <p className="text-[0.85rem] text-ink-3">No subgraph returned for this answer.</p>;
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem]">
+    <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_16rem]">
       <div className="card overflow-hidden bg-surface">
         <svg
           viewBox={`0 0 ${W} ${H}`}

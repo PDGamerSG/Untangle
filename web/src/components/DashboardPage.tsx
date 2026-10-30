@@ -234,7 +234,7 @@ export function DashboardPage() {
             <SystemStatus />
           </div>
 
-          <nav aria-label="Dashboard shortcuts" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <nav aria-label="Dashboard shortcuts" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {SHORTCUTS.map(({ href, label, text, icon: Icon }) => (
               <Link key={href} href={href} className="card group flex flex-col gap-2 p-4 transition-colors hover:border-rule-strong">
                 <span className="flex items-center justify-between">
