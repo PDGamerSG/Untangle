@@ -12,8 +12,7 @@
   --ink-on-cotton: #16205a;
   --ink-on-cotton-2: rgb(22 32 90 / 0.68);
 
-  --sans: "Mona Sans Variable", "Anek Devanagari Variable", ui-sans-serif, system-ui, sans-serif;
-  --hindi: "Anek Devanagari Variable", "Mona Sans Variable", sans-serif;
+  --sans: "Mona Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --mono: "Martian Mono Variable", ui-monospace, Menlo, monospace;
 
   /* Type scale from the classic sequence: 13 14 16 18 21 24 36 48 60 72 */
@@ -227,24 +226,6 @@ code {
   font-weight: 680;
   font-stretch: 112%;
   letter-spacing: -0.01em;
-}
-
-.nav__links {
-  display: flex;
-  gap: 1.6rem;
-  font-size: var(--fs-sm);
-  font-stretch: 106%;
-}
-
-.nav__links a {
-  color: var(--cotton-2);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.nav__links a:hover,
-.nav__links a[aria-current="true"] {
-  color: var(--cotton);
 }
 
 .rail {
@@ -763,11 +744,6 @@ code {
   font-weight: 600;
 }
 
-.tag__title[lang="hi"] {
-  font-family: var(--hindi);
-  font-weight: 600;
-}
-
 .tag__note {
   display: block;
   font-size: var(--fs-sm);
@@ -1090,16 +1066,9 @@ code {
 .line__text {
   display: block;
   margin: 0.25rem 0 0.2rem;
-  font-family: var(--hindi);
   font-size: var(--fs-md);
   line-height: 1.45;
   font-weight: 500;
-}
-
-.line__en {
-  display: block;
-  font-size: var(--fs-sm);
-  color: var(--cotton-2);
 }
 
 .mention {
@@ -1412,10 +1381,6 @@ code {
 
 /* ---------- Narrow screens ---------- */
 @media (max-width: 900px) {
-  .nav__links {
-    display: none;
-  }
-
   .rail {
     display: none;
   }
@@ -1540,10 +1505,6 @@ code {
     min-height: 2.9rem;
     padding: 0 1.1rem;
     font-size: var(--fs-sm);
-  }
-
-  .nav .btn span {
-    display: none;
   }
 
   .tag {

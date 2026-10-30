@@ -20,8 +20,7 @@ export function renderContent() {
     }
     return `<li class="line">
       <span class="line__meta"><span>${line.at}</span><span>${esc(line.speaker)}</span></span>
-      <span class="line__text" lang="hi">${text}</span>
-      <span class="line__en">${esc(line.en)}</span>
+      <span class="line__text">${text}</span>
     </li>`;
   }).join("");
 
@@ -175,7 +174,6 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
   const nav = $(".nav");
   const rail = $(".rail");
   const knots = [...document.querySelectorAll<HTMLAnchorElement>("[data-rail]")];
-  const links = [...document.querySelectorAll<HTMLAnchorElement>(".nav__links a")];
   let lastY = 0;
   return (y: number) => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -188,7 +186,6 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
       k.classList.toggle("is-past", !!s && y >= s.top - window.innerHeight * 0.5);
       k.toggleAttribute("aria-current", k.dataset.rail === current);
     }
-    for (const l of links) l.setAttribute("aria-current", String(l.getAttribute("href") === `#${current}`));
     const down = y > lastY + 2;
     const up = y < lastY - 2;
     if (y < window.innerHeight * 0.5) nav.classList.remove("is-hidden");
