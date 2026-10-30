@@ -3,6 +3,8 @@ identifiers are left alone, and a failing translator never fails the response.""
 
 from __future__ import annotations
 
+import uuid
+
 import httpx
 import pytest
 
@@ -124,3 +126,14 @@ async def test_original_language_can_be_kept(client, monkeypatch):
     r = await client.get("/meetings", params={"repo": "o/r"})
     assert r.status_code == 200
     assert r.json()[0]["title"] == HINDI
+
+
+@pytest.mark.neo4j
+def test_graph_store_round_trips_translations(graph):
+    store = english.GraphTranslationStore(graph)
+    key = cache_key(f"{HINDI} {uuid.uuid4().hex}")
+    try:
+        store.put([{"key": key, "en": ENGLISH, "source": HINDI, "at": "2026-10-30T00:00:00Z"}])
+        assert store.get([key, "missing"]) == {key: ENGLISH}
+    finally:
+        graph.query("MATCH (t:Translation {key: $key}) DELETE t", {"key": key})
