@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Tiro_Devanagari_Hindi } from "next/font/google";
+import { Fraunces } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { RepoProvider } from "@/components/RepoContext";
@@ -12,13 +12,6 @@ const fraunces = Fraunces({
   axes: ["opsz", "SOFT"],
   weight: "variable",
   style: ["normal", "italic"],
-  display: "swap",
-});
-
-const tiro = Tiro_Devanagari_Hindi({
-  variable: "--font-tiro",
-  subsets: ["devanagari"],
-  weight: "400",
   display: "swap",
 });
 
@@ -39,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${tiro.variable} h-full`}>
+    <html lang="en" className={`${fraunces.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         <RepoProvider>
           <a

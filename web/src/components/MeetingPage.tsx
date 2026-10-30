@@ -87,8 +87,7 @@ function Transcript({ m }: { m: MeetingDetail }) {
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="text-[1.02rem] leading-relaxed text-ink">{u.text}</p>
-                {u.text_en ? <p className="mt-0.5 text-[0.86rem] leading-relaxed text-ink-3">{u.text_en}</p> : null}
+                <p className="text-[1.02rem] leading-relaxed text-ink">{u.text_en || u.text}</p>
                 {u.mentions?.length ? (
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {u.mentions.map((e) => (

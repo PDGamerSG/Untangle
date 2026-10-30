@@ -59,10 +59,12 @@ The app never falls back to the sample data when the API fails: errors are shown
 |---|---|
 | `/` | Static landing page with links into the application. |
 | `/ask` | Ask: repo selector (remembered in `localStorage`), a guided composer with intent-labelled examples, optional "as of" date (`at`), and "Compare with vector-only search" (`mode: both`). The result card renders the answer with `[id]` citations as kind-coloured chips, copy-question/copy-answer actions, the evidence chain stepper, the supersession banner, the confidence meter with the reasons verbatim, the sources, "Why this answer" (route, Cypher calls with copy buttons, LLM backend/model/used, d3-force subgraph with SUPERSEDES dashed red and hover props), and the graph-vs-vector side-by-side when a baseline is present. Refusals get a muted card with the closest entities and the person to ask, and no confidence bar. |
+| `/explore` | Graph explorer: entity and people search (`GET /search`), repository counts, and nodes by type (`GET /stats`). |
+| `/entities/[id]` | One file, module, symbol, config key or dependency (`GET /entities/{id}`): its facts, the decisions about it, the people to ask, and recent commits. Every entity chip in the app links here. |
 | `/decisions/[id]` | The why-path: decision card, evidence with excerpts and links, the full chain older → newer as a vertical timeline, the motivating incident, implementing commits, and the Cypher. |
 | `/pulse` | Knowledge Risk Radar: deterministic contradiction, drift, ownership, rationale, and staleness signals with evidence-backed scores and Ask/evidence-path actions. |
 | `/timeline` | Date slider (earliest decision → today, debounced) with "In force on ‹date›" and "Superseded since then". |
-| `/meetings`, `/meetings/[id]` | Handover calls; a meeting page with the audio player, speakers, utterances (Hinglish with the English rendering underneath, entity mentions, "play from here"), and the decisions extracted. A `501` from the API shows "KT ingestion not configured". |
+| `/meetings`, `/meetings/[id]` | Handover calls; a meeting page with the audio player, speakers, utterances in English (the API renders Hindi and Hinglish speech in English), entity mentions, "play from here", and the decisions extracted. A `501` from the API shows "KT ingestion not configured". |
 
 Nav: Ask · Pulse · Timeline · Meetings · GitHub, with a health dot (`GET /health`; hover for Neo4j version/Aura, LLM backend, embedding backend). Light and dark follow `prefers-color-scheme`; tokens live in `src/app/globals.css`.
 

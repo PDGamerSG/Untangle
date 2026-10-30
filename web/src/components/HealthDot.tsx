@@ -18,6 +18,7 @@ export function HealthDot() {
             `Neo4j ${d.neo4j.version}${d.neo4j.aura ? " (AuraDB)" : ""}`,
             `LLM: ${d.llm.backend}${d.llm.model ? ` / ${d.llm.model}` : ""}`,
             `Embeddings: ${d.embed.backend} (${d.embed.dim} dims)`,
+            `Speech and translation: ${(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "Sarvam ready" : "not configured"}`,
             SAMPLE_MODE ? "Sample mode (fixtures)" : API_BASE,
           ]
         : ["No health data"];

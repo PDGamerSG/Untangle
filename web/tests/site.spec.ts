@@ -9,6 +9,8 @@ import pulse from "../sample/pulse.json";
 import { sampleDecision, sampleTimeline } from "../src/lib/sample";
 
 // Browser integration tests use recorded API contracts. Live service checks run separately.
+const concurrencyKey = { id: "cfg:knadh/listmonk:schema.sql::app.concurrency", label: "ConfigKey", name: "app.concurrency", path: "schema.sql", key: "app.concurrency", score: 1 };
+
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/**", async (route) => {
     const url = new URL(route.request().url());
@@ -25,6 +27,12 @@ test.beforeEach(async ({ page }) => {
     } else if (path === "/timeline") body = await sampleTimeline(url.searchParams.get("at") ?? new Date().toISOString());
     else if (path.startsWith("/decisions/")) body = await sampleDecision(path.slice(11));
     else if (path === "/kt/ingest") body = { meeting_id: meeting.id, utterances: 40, decisions: 15 };
+    else if (path === "/stats") body = { nodes: 120, relationships: 300, labels: { Decision: 18, ConfigKey: 40, Commit: 62 }, relationship_types: { ABOUT: 30 } };
+    else if (path === "/search") body = { entities: [concurrencyKey], people: [{ id: "person:gh:knadh", name: "Kailash Nadh", login: "knadh", score: 1 }] };
+    else if (path.startsWith("/entities/")) {
+      const why = await sampleDecision(answer.evidence_chain[0].id!);
+      body = { entity: { ...concurrencyKey, file: { path: "schema.sql", id: "file:knadh/listmonk:schema.sql" } }, decisions: [why.decision], people: [], recent_commits: [] };
+    }
     else throw new Error(`Unexpected API request: ${path}`);
     await route.fulfill({ json: body });
   });
@@ -130,4 +138,16 @@ test("phone layout stays within the viewport", async ({ page }) => {
     await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
   }
+});
+
+test("Explore searches the graph and opens an entity page", async ({ page }) => {
+  await page.goto("/explore");
+  await expect(page.getByRole("list", { name: "Nodes by type" })).toContainText("decisions");
+  await page.getByLabel(/Search knadh\/listmonk|Search PDGamerSG\/Untangle/).fill("concurrency");
+  await page.getByRole("link", { name: /ConfigKey\s*app\.concurrency/ }).click();
+  await expect(page).toHaveURL(/\/entities\//);
+  await expect(page.getByRole("heading", { level: 1, name: "app.concurrency" })).toBeVisible();
+  await expect(page.getByText("Declared in")).toBeVisible();
+  await page.getByRole("link", { name: /Ask why/ }).click();
+  await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency like this?");
 });

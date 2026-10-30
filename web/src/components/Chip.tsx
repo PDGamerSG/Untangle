@@ -94,7 +94,8 @@ export function CitationChip({
   );
 }
 
-export function EntityChip({ entity }: { entity: EntityRef }) {
+/** An entity tag. It links to the entity's page unless it already sits inside a link. */
+export function EntityChip({ entity, link = true }: { entity: EntityRef; link?: boolean }) {
   const kind =
     entity.label === "ConfigKey"
       ? "config"
@@ -107,15 +108,28 @@ export function EntityChip({ entity }: { entity: EntityRef }) {
             : entity.label === "Symbol"
               ? "symbol"
               : "entity";
-  return (
-    <span className="chip" data-kind={kind} title={`${entity.label}: ${entity.name}${entity.path ? ` (${entity.path})` : ""}`}>
+  const body = (
+    <>
       <span className="chip-kind">{entity.label}</span>
       <span className="truncate">{entity.name}</span>
       {/* the same key or symbol can live in several files: name the file so the chips can be told apart */}
       {(entity.label === "ConfigKey" || entity.label === "Symbol") && entity.path ? (
         <span className="truncate text-ink-3">· {entity.path.split("/").pop()}</span>
       ) : null}
-    </span>
+    </>
+  );
+  const title = `${entity.label}: ${entity.name}${entity.path ? ` (${entity.path})` : ""}`;
+  if (!link) {
+    return (
+      <span className="chip" data-kind={kind} title={title}>
+        {body}
+      </span>
+    );
+  }
+  return (
+    <Link href={`/entities/${encodeURIComponent(entity.id)}`} className="chip" data-kind={kind} title={`Open ${title}`}>
+      {body}
+    </Link>
   );
 }
 

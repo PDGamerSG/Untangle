@@ -31,6 +31,49 @@ export interface Health {
     embeddings: { backend: string; available: boolean };
     sarvam: { configured: boolean };
   };
+  sarvam?: { configured: boolean; model?: string | null };
+}
+
+export interface CommitCard {
+  id: string;
+  sha?: string | null;
+  title?: string | null;
+  url?: string | null;
+  authored_at_iso?: string | null;
+  author?: PersonCard | null;
+  pr?: Ref | null;
+  paths: string[];
+}
+
+export interface EntityResponse {
+  entity: { id: string; label: string; name?: string | null; path?: string | null; key?: string | null; [field: string]: unknown };
+  decisions: DecisionCard[];
+  people: PersonCard[];
+  recent_commits: CommitCard[];
+}
+
+export interface EntityHit extends EntityRef {
+  key?: string | null;
+  score: number;
+}
+
+export interface PersonHit {
+  id: string;
+  name?: string | null;
+  login?: string | null;
+  score: number;
+}
+
+export interface SearchResponse {
+  entities: EntityHit[];
+  people: PersonHit[];
+}
+
+export interface GraphStats {
+  nodes: number;
+  relationships: number;
+  labels: Record<string, number>;
+  relationship_types: Record<string, number>;
 }
 
 export interface RepoSummary {

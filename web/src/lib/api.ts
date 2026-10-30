@@ -1,4 +1,17 @@
-import type { AskRequest, AskResponse, Health, MeetingDetail, MeetingSummary, PulseResponse, RepoSummary, Timeline, WhyPath } from "./types";
+import type {
+  AskRequest,
+  AskResponse,
+  EntityResponse,
+  GraphStats,
+  Health,
+  MeetingDetail,
+  MeetingSummary,
+  PulseResponse,
+  RepoSummary,
+  SearchResponse,
+  Timeline,
+  WhyPath,
+} from "./types";
 import * as sample from "./sample";
 
 export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "/api").replace(/\/+$/, "");
@@ -68,6 +81,17 @@ export const api = {
 
   decision: (id: string, signal?: AbortSignal): Promise<WhyPath> =>
     SAMPLE_MODE ? sample.sampleDecision(id) : request(`/decisions/${encodeURIComponent(id)}`, { signal }),
+
+  entity: (id: string, signal?: AbortSignal): Promise<EntityResponse> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(404, "Entity pages are available in the live app.")) : request(`/entities/${encodeURIComponent(id)}`, { signal }),
+
+  search: (repo: string, query: string, signal?: AbortSignal): Promise<SearchResponse> =>
+    SAMPLE_MODE ? Promise.resolve({ entities: [], people: [] }) : request(`/search${q({ repo, q: query })}`, { signal }),
+
+  stats: (repo: string, signal?: AbortSignal): Promise<GraphStats> =>
+    SAMPLE_MODE
+      ? Promise.resolve({ nodes: 0, relationships: 0, labels: {}, relationship_types: {} })
+      : request(`/stats${q({ repo })}`, { signal }),
 
   timeline: (repo: string, atIso: string, signal?: AbortSignal): Promise<Timeline> =>
     SAMPLE_MODE ? sample.sampleTimeline(atIso) : request(`/timeline${q({ repo, at: atIso })}`, { signal }),
