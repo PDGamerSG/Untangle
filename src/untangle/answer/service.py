@@ -126,7 +126,7 @@ def ask(
     response = AskResponse(
         question=question, repo=repo, mode=mode, answer=composed.answer, refused=refused, confidence=confidence,
         evidence_chain=[] if refused else evidence_chain(evidence, at_ms),
-        supersession=supersessions(evidence),
+        supersession=supersessions(evidence, at_ms=at_ms),
         citations=citations_for(composed.answer, evidence),
         # what the answer is about; when it refuses, the closest related entities instead
         entities=[EntityRef(id=e.id, label=e.label, name=e.name, path=e.path, key=e.key) for e in (evidence.related if refused else evidence.entities)],
@@ -210,20 +210,23 @@ def _person_step(evidence: Evidence, v: Version | None) -> EvidenceStep | None:
     return None
 
 
-def supersessions(evidence: Evidence) -> list[Supersession]:
+def supersessions(evidence: Evidence, at_ms: int | None = None) -> list[Supersession]:
     """Replacements in the history the answer is about: the leading decision's chain, the same key in other files,
     and decisions about the entities the question matched. Unrelated chains that full-text search touched are left
     out: a list of every change in the evidence would bury the one that matters."""
     out: list[Supersession] = []
     seen: set[tuple[str, str]] = set()
-    led = evidence.lead()
+    led = evidence.lead(at_ms)
     lead_ids = set(led[0].ids()) if led else set()
     lead_key = dotted_key(led[1]) if led else None
     entity_ids = {e.id for e in evidence.entities}
+    subject_specific = bool(evidence.named_subject_terms())
 
     def relevant(v: Version) -> bool:
         if not led:
-            return True
+            return not subject_specific
+        if subject_specific:
+            return v.id in lead_ids or (lead_key is not None and dotted_key(v) == lead_key)
         return v.id in lead_ids or (lead_key is not None and dotted_key(v) == lead_key) or any(a.get("id") in entity_ids for a in v.about)
 
     for v in evidence.versions:

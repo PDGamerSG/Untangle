@@ -451,21 +451,20 @@ def _commit_phrase(c: dict[str, Any]) -> str:
 
 def _belief_at(evidence: Evidence, at_ms: int) -> list[str]:
     day = fmt_date(at_ms) or "that date"
-    dossier = next((d for d in evidence.dossiers if d.at(at_ms)), None)
+    led = evidence.lead(at_ms)
+    dossier = led[0] if led else None
     if dossier is None:
-        top = evidence.top
-        if top is None:
-            return _fallback(evidence)
-        first = top.oldest
+        return _fallback(evidence)
+    v = dossier.at(at_ms)
+    if v is None:
+        first = dossier.oldest
         if (first.valid_from or 0) > at_ms:
             out = [f"On {day} nothing was recorded yet about {subject_phrase(first)}; the first recorded value, {first.object or squash(first.text, 80)}, came in {describe_where(first.where)} on {fmt_date(first.valid_from) or '?'} [{first.id}]"]
         else:
-            last = top.newest
+            last = led[1]
             out = [f"On {day} no decision about {subject_phrase(last)} was in force; the last one before it, {last.object or squash(last.text, 80)}, ended on {fmt_date(last.valid_to) or '?'} [{last.id}]"]
         person = person_sentence(evidence)
         return out + ([person] if person else [])
-    v = dossier.at(at_ms)
-    assert v is not None
     out = [f"On {day} {value_sentence(v, past=True)[0].lower() + value_sentence(v, past=True)[1:]}"]
     out.append(set_sentence(v))
     nxt = next((n for n in dossier.versions if (n.valid_from or 0) >= (v.valid_to or 0) and v.valid_to and n.id != v.id), None)

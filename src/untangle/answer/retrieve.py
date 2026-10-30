@@ -388,16 +388,24 @@ class Evidence:
 
     @property
     def top(self) -> Dossier | None:
-        return self.dossiers[0] if self.dossiers else None
+        return self._selected_dossier() or (self.dossiers[0] if self.dossiers else None)
 
     def lead(self, at_ms: int | None = None) -> tuple[Dossier, Version] | None:
         """The decision an answer leads with. Normally the top dossier's active (or in-force) version; when that is a
         spoken (KT) statement linked to a repository record, the repository record leads and the call supports or
         disputes it, so speech never reads as overriding what the code history says."""
-        top = self.top
+        selected = self._selected_dossier(at_ms=at_ms)
+        if selected is None and self.named_subject_terms():
+            return None
+        top = selected or (self.dossiers[0] if self.dossiers else None)
         if top is None:
             return None
-        v = (top.at(at_ms) if at_ms is not None else None) or top.top
+        v = top.at(at_ms) if at_ms is not None else None
+        if v is None:
+            # With no value in force, cite the nearest prior record or the first future record. The template,
+            # confidence and evidence chain must all describe that same boundary of the recorded history.
+            prior = [v for v in top.versions if v.valid_from is not None and at_ms is not None and v.valid_from <= at_ms]
+            v = (prior[-1] if prior else top.oldest) if at_ms is not None else top.top
         if v.kind == "kt" and self.decision.source != "kt":  # asked what the call said: the call leads
             for partner in v.contradicts + v.confirms:
                 pv = self.version(partner.get("id") or "")
@@ -407,6 +415,51 @@ class Evidence:
                     if pv.id in d.ids():
                         return d, pv
         return top, v
+
+    def named_subject_terms(self) -> set[str]:
+        """Question terms that name a decision subject rather than its containing file."""
+        if self.decision.numbers:
+            # Explicit PR/issue references already identify the decision; prose such as "why was #812 merged"
+            # must not be treated as an unmatched subject token.
+            return set()
+        specific = set(specific_terms(self.decision))
+        file_tokens: set[str] = set()
+        for entity in self.entities:
+            if entity.label == "File":
+                file_tokens.update(tokens(entity.path or entity.name or "").split())
+        return specific - file_tokens
+
+    def _selected_dossier(self, *, at_ms: int | None = None) -> Dossier | None:
+        """Select the chain whose subject matches the question's named thing.
+
+        Entity retrieval is intentionally broad for a file: a question about one dependency can return every
+        dependency in that file.  The fused score is useful as a tie-breaker, but it must not outweigh an exact
+        subject token (especially for historical questions, where an unrelated chain may be in force on the date).
+        """
+        if not self.dossiers:
+            return None
+        subject_terms = self.named_subject_terms()
+        if not subject_terms:
+            return None
+
+        # File/path mentions identify the container, not the decision subject.  Keep dotted keys and dependency
+        # names as discriminators (e.g. `app.concurrency` and `neo4j`).
+        def subject_match(dossier: Dossier) -> int:
+            own: set[str] = set()
+            for version in dossier.versions:
+                own.update(_subject_tokens(version))
+            return len(own & subject_terms)
+
+        matches = [(subject_match(d), d) for d in self.dossiers]
+        best_match = max(match for match, _ in matches)
+        if best_match <= 0:
+            return None
+        candidates = [d for match, d in matches if match == best_match]
+        if at_ms is not None:
+            in_force = [d for d in candidates if d.at(at_ms) is not None]
+            if in_force:
+                candidates = in_force
+        return max(candidates, key=lambda d: (d.score, 1 if d.top.active else 0, d.top.valid_from or 0))
 
     def spoken(self, v: Version) -> tuple[str, dict[str, Any]] | None:
         """The handover-call statement that confirms or contradicts `v` (a repository decision), or `v`'s own
@@ -421,6 +474,10 @@ class Evidence:
     def anchored(self) -> bool:
         """Something (a decision, a PR or a commit) is anchored on a resolved entity or reference."""
         if self.dossiers:
+            # When a question names a specific subject, unrelated file-level decisions are not an anchor for it.
+            # This prevents a missing dependency/setting from borrowing confidence from a neighbour in the same file.
+            if self.named_subject_terms() and self._selected_dossier() is None:
+                return False
             return True
         return bool(self.entities) and bool(self.prs or self.commits)
 
@@ -491,8 +548,8 @@ class Evidence:
             for ref in [v.decided_in, *v.motivated_by, *v.implemented_by, *v.evidence]:
                 if not ref:
                     continue
-                add(ref.get("id"), ref.get("title"), ref.get("excerpt"), ref.get("number"), ref.get("sha"), ref.get("url"), *date_forms(ref.get("created_at")))
-                add(v.id, ref.get("title"), ref.get("number"), ref.get("sha"), *date_forms(ref.get("created_at")))  # the decision sentence may name its source
+                add(ref.get("id"), ref.get("title"), ref.get("excerpt"), ref.get("number"), ref.get("sha"), short_sha(ref.get("sha")), ref.get("url"), *date_forms(ref.get("created_at")))
+                add(v.id, ref.get("title"), ref.get("number"), ref.get("sha"), short_sha(ref.get("sha")), *date_forms(ref.get("created_at")))  # the decision sentence may name its source
             if v.stated_by:
                 add(v.stated_by.get("id"), v.stated_by.get("name"), v.stated_by.get("login"))
         for pr in self.prs:
@@ -503,7 +560,7 @@ class Evidence:
             for c in pr.get("commits") or []:
                 add(pr["id"], c.get("sha"), c.get("title"))
         for c in self.commits:
-            add(c["id"], c.get("sha"), c.get("title"), c.get("excerpt"), c.get("url"), *date_forms(c.get("authored_at")))
+            add(c["id"], c.get("sha"), short_sha(c.get("sha")), c.get("title"), c.get("excerpt"), c.get("url"), *date_forms(c.get("authored_at")))
         for e in self.entities + self.related:
             add(e.id, e.name, e.path, e.key, e.extra.get("current_value"), e.extra.get("current_version"))
         for p in self.people:
@@ -637,8 +694,14 @@ def gather(
     # Text-only hits must still be about something the question names, or share tokens with it, to count as anchored.
     if not entity_ids and not decision.numbers:
         versions = {vid: v for vid, v in versions.items() if _text_hit_is_anchored(v, decision)}
-    # cap first, then demote: a moved setting's old chain stays in the evidence as history for the answer
-    ev.dossiers = demote_moved(build_dossiers(versions)[:MAX_DOSSIERS], set(decision.mentions))
+    ev.dossiers = demote_moved(build_dossiers(versions), set(decision.mentions))
+    # Select before capping so file-wide historical hits cannot crowd out the named subject. Keep the prompt
+    # and graph seeds in the same order as the answer's lead; other chains remain available as context.
+    selected = ev._selected_dossier(at_ms=decision.at_ms)
+    if selected is not None:
+        ev.dossiers.remove(selected)
+        ev.dossiers.insert(0, selected)
+    ev.dossiers = ev.dossiers[:MAX_DOSSIERS]
 
     if entity_ids and (not ev.dossiers or decision.intent in ("what_changed", "who_to_ask")):
         ev.prs = rec.run("prs_about_entity", {"ids": entity_ids, "limit": 6})
@@ -687,9 +750,7 @@ def _is_bot(row: dict[str, Any]) -> bool:
 
 def _subject_tokens(v: Version) -> set[str]:
     raw = (v.subject or "") + " " + (v.key or "").split("|", 1)[0]
-    for sep in ("|", "::", "/", ".", "_", "-", ":"):
-        raw = raw.replace(sep, " ")
-    return {t for t in raw.lower().split() if len(t) > 1 and t not in _GENERIC}
+    return {t for t in tokens(raw).split() if len(t) > 1 and t not in _GENERIC}
 
 
 _GENERIC = frozenset({"toml", "yaml", "yml", "json", "go", "py", "ts", "js", "md", "sample", "config", "cfg", "env", "ini", "mod", "sum", "lock", "txt"})

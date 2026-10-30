@@ -155,7 +155,10 @@ def score(s: Signals) -> Confidence:
             reasons.append(f"decision was in force on {fmt_date(s.at_ms)}" if s.at_ms is not None else "decision is active")
         else:
             active_part = WEIGHTS["active"] * 0.4
-            reasons.append("the leading decision was superseded" if s.top_status == "superseded" else "the leading decision is not active")
+            if s.at_ms is not None:
+                reasons.append(f"no decision was in force on {fmt_date(s.at_ms)}")
+            else:
+                reasons.append("the leading decision was superseded" if s.top_status == "superseded" else "the leading decision is not active")
     else:
         active_part = 0.0
         reasons.append("no recorded decision; built from pull requests and commits only")
