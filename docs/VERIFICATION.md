@@ -3,24 +3,37 @@
 ## Production integration checks — 2026-10-30
 
 - Frontend landing branch is merged into `main` at `c556460`.
-- Full backend suite against a disposable local Neo4j: **205 passed**.
+- Full backend suite against a disposable Neo4j: **211 passed**, also confirmed in
+  [GitHub CI](https://github.com/PDGamerSG/Untangle/actions/runs/41014902804).
 - Repository-wide Ruff and `git diff --check`: **passed**.
-- Web API contracts: **3 passed**. Browser integration suite: **9 passed**, including decision breadcrumbs,
-  missing-page recovery after moving Ask to `/ask`, refusal, timeline, Pulse, uploads, and mobile overflow checks.
-- Real `PDGamerSG/Untangle` ingestion into local Neo4j with FastEmbed: **35 commits, 537 decisions, 117 embedded
-  chunks, 3,053 nodes, 5,945 relationships**. This verifies the ingestion path; Aura was also initialized with the
-  same graph counts.
+- Web API contracts: **3 passed**. Browser integration suite: **10 passed**, including repository defaults and
+  persistence, decision breadcrumbs, missing-page recovery, refusal, timeline, Pulse, uploads, and mobile layout.
+  The mobile regression includes a long repository name, which previously widened the compact selector beyond
+  the viewport on Meetings, Timeline, and Pulse. The shared selector now shrinks within its container.
+- Next.js and landing production builds and web lint: **passed**.
+- Real `PDGamerSG/Untangle` ingestion into Aura with FastEmbed at `0ad859c`: **37 commits, 537 decisions, 120
+  embedded chunks, 3,076 nodes, 5,983 relationships**. These are a snapshot; subsequent ingestion updates them.
 - The historical selector regression is covered by both offline and Neo4j-backed tests: a file-wide query such as
   `why do we use neo4j in pyproject.toml?` stays on the named dependency even when another dependency is in force.
 - A real Claude `claude-haiku-5-5` completion passed the answer validator with `why.llm.used=true`.
+- Unmocked production browser checks passed for the landing page, default repository, cited Claude answer,
+  graph/vector comparison, evidence navigation, historical answer, unsupported-question refusal, timeline, and Pulse.
+  Historical answers are checked for the correct subject and date; `llm.used=false` is allowed when the documented
+  citation validator falls back to a deterministic answer. A separate current-answer check requires real Claude use.
 - The configured Sarvam credential passed live model discovery, short real-time transcription, batch diarised
   transcription, language identification, and Hindi-to-English translation with a generated WAV. Short recordings
   use the batch endpoint first because Sarvam's real-time endpoint does not support diarisation; the app falls back
   to non-diarised real-time transcription when batch access is unavailable.
-- Public deployments respond at the URLs below. The API health check reports Neo4j Aura, Claude, FastEmbed, and
-  Sarvam as available.
+- Both text and generated-WAV uploads passed through the public `/api/kt/ingest` endpoint in the browser. Each
+  returned one utterance, one Claude-extracted decision (`llm.used=true`, no extraction errors), and one embedded
+  chunk. Audio reported `source=sarvam-batch`; the saved transcript page rendered its extracted decisions from Neo4j.
+  These checks use synthetic data in a temporary repository, never a real handover.
+- Public deployments respond at https://untangle-code.vercel.app and https://untangle-code-api.vercel.app.
+  API health reports Neo4j Aura, Claude, FastEmbed, and Sarvam as available; the live calls above verify the services
+  beyond their configuration flags.
 
-See [Deployment](DEPLOYMENT.md) for the production environment and remaining live checks.
+See [Deployment](DEPLOYMENT.md) for the production environment, API surface, and verification commands. Browser
+uploads are limited to 4 MB; use the CLI for longer recordings. Re-ingest after code changes to refresh the graph.
 
 ## Earlier migration verification
 

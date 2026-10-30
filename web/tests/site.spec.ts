@@ -122,10 +122,12 @@ test("API errors show the server message and recover on retry", async ({ page })
 });
 
 test("phone layout stays within the viewport", async ({ page }) => {
+  const longRepo = "example-organization/a-repository-with-a-long-name";
+  await page.route("**/api/repos", route => route.fulfill({ json: [{ ...repos[0], full_name: longRepo }] }));
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of ["/ask", "/pulse", "/meetings", "/timeline"]) {
     await page.goto(path);
-    await expect(page.getByLabel("Repository", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
   }
 });
