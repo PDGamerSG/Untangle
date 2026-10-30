@@ -69,7 +69,7 @@ export function MeetingsPage() {
           {res.data.map((m) => (
             <li key={m.id}>
               <Link href={`/meetings/${encodeURIComponent(m.id)}`} className="card block h-full p-4 transition-colors hover:border-rule-strong">
-                <p className="flex items-center gap-2 text-[0.76rem] font-semibold uppercase tracking-wider text-ink-3">
+                <p className="flex items-center gap-2 text-[0.8rem] text-ink-3">
                   {m.audio_uri ? <AudioLines size={14} aria-hidden /> : <Mic size={14} aria-hidden />}
                   {m.language} · {m.source}
                 </p>

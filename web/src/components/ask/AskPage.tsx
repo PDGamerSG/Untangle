@@ -1,26 +1,18 @@
 "use client";
 
-import { ArrowRight, CalendarDays, CheckCircle2, GitBranch, Search, ShieldCheck, Sparkles } from "lucide-react";
-import { useId, useState } from "react";
-import { useEffect } from "react";
+import { CalendarDays, Search } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 import { RepoSelect } from "@/components/RepoSelect";
 import { useRepo } from "@/components/RepoContext";
 import { ErrorState, Skeleton, SkeletonLines } from "@/components/states";
 import { api, errorMessage } from "@/lib/api";
 import { examplesFor } from "@/lib/examples";
-import { useResource } from "@/lib/hooks";
 import type { AskRequest, AskResponse } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
 
 function examplesOf(repo: string | null) {
   const e = examplesFor(repo);
-  return [
-    { label: "Trace a decision", question: e.trace, icon: Sparkles },
-    { label: "Check what is current", question: e.current, icon: CheckCircle2 },
-    { label: "Find the right owner", question: e.owner, icon: GitBranch },
-    { label: "See what changed", question: e.changed, icon: ArrowRight },
-    { label: "Try an honest refusal", question: e.refusal, icon: ShieldCheck },
-  ];
+  return [e.trace, e.current, e.owner, e.changed, e.refusal];
 }
 
 interface Turn {
@@ -55,7 +47,6 @@ function AnswerSkeleton() {
 export function AskPage() {
   const { repo } = useRepo();
   const examples = examplesOf(repo);
-  const pulse = useResource(repo ? `pulse-teaser:${repo}` : null, (signal) => api.pulse(repo!, signal));
   const [question, setQuestion] = useState("");
   const [at, setAt] = useState("");
   const [compare, setCompare] = useState(false);
@@ -99,33 +90,24 @@ export function AskPage() {
   return (
     <div className="space-y-10">
       <section className="space-y-6">
-        <div className="max-w-3xl">
-          <h1 className="t-display max-w-2xl text-[2.35rem] leading-[1.02] text-ink sm:text-[3.5rem]">
-            Find the reason behind the code.
-          </h1>
-          <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-ink-2 sm:text-[1.05rem]">
-            Ask about a value, dependency, file or module. Untangle follows the repository&apos;s history to surface the decision, the discussion, the
-            person and the date — or tell you when the graph has no answer.
-          </p>
-        </div>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-3xl">
+            <h1 className="t-display max-w-2xl text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">Find the reason behind the code.</h1>
+            <p className="mt-2 max-w-2xl text-[0.98rem] leading-relaxed text-ink-2">
+              Ask about a value, dependency, file or module. Untangle follows the repository&apos;s history to the decision, the discussion, the
+              person and the date, or says plainly when the graph has no answer.
+            </p>
+          </div>
+          <RepoSelect compact />
+        </header>
 
         <form
-          className="card relative overflow-hidden p-4 sm:p-5"
+          className="card p-4 sm:p-5"
           onSubmit={(e) => {
             e.preventDefault();
             void ask(question);
           }}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-accent/60 to-transparent" aria-hidden />
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="eyebrow text-ink-3">Ask the repository</p>
-              <p className="mt-1 text-[0.85rem] text-ink-2">Start with a question about something you can point to.</p>
-            </div>
-            <RepoSelect compact />
-          </div>
-
-          <div className="mt-4 space-y-3">
           <label htmlFor={qId} className="sr-only">
             Your question
           </label>
@@ -137,18 +119,18 @@ export function AskPage() {
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder={examples[0].question}
+                placeholder={examples[0]}
                 autoComplete="off"
                 enterKeyHint="search"
                 className="field pl-9 pr-3 text-[1rem]"
               />
             </div>
-            <button type="submit" className="btn btn-primary sm:min-w-28" disabled={busy || !question.trim() || !repo}>
+            <button type="submit" className="btn btn-primary sm:min-w-24" disabled={busy || !question.trim() || !repo}>
               {busy ? "Asking…" : "Ask"}
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.85rem]">
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.85rem]">
             <label htmlFor={atId} className="inline-flex items-center gap-2 text-ink-2">
               <CalendarDays size={15} className="text-ink-3" aria-hidden />
               <span className="whitespace-nowrap">As of</span>
@@ -165,63 +147,28 @@ export function AskPage() {
             </label>
           </div>
 
-          <div className="flex flex-wrap gap-1.5" aria-label="Example questions">
-            {examples.map((ex) => (
+          <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-rule pt-4 text-[0.82rem] text-ink-3" aria-label="Example questions">
+            <span className="mr-0.5">Try</span>
+            {examples.map((q) => (
               <button
-                key={ex.question}
+                key={q}
                 type="button"
                 disabled={busy || !repo}
                 onClick={() => {
-                  setQuestion(ex.question);
-                  void ask(ex.question);
+                  setQuestion(q);
+                  void ask(q);
                 }}
-                className="group inline-flex items-center gap-1.5 rounded-full border border-rule bg-surface px-3 py-1.5 text-[0.8rem] text-ink-2 transition-colors hover:border-accent/50 hover:bg-accent-soft hover:text-ink disabled:opacity-50"
-                title={ex.question}
+                className="example"
               >
-                <ex.icon size={13} aria-hidden className="text-ink-3 transition-colors group-hover:text-accent" />
-                {ex.label}
+                {q}
               </button>
             ))}
           </div>
-          </div>
-          <p className="mt-3 text-[0.75rem] text-ink-3">Tip: ask “why”, “do we still”, “what changed”, or “who should I ask”.</p>
         </form>
 
-        <ol className="grid gap-2 sm:grid-cols-3" aria-label="How Untangle works">
-          {[
-            { icon: GitBranch, title: "Read the history", body: "Commits, PRs, issues and handover calls become one searchable record." },
-            { icon: Sparkles, title: "Find what is in force", body: "Superseded values stay visible while the active decision leads the answer." },
-            { icon: ShieldCheck, title: "Show the evidence", body: "Every claim links back to the evidence path the graph actually read." },
-          ].map((step, i) => (
-            <li key={step.title} className="surface-soft flex gap-3 p-3.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent" aria-hidden>
-                <step.icon size={15} />
-              </span>
-              <div>
-                <p className="text-[0.82rem] font-semibold text-ink">
-                  <span className="t-num mr-1.5 text-ink-3">0{i + 1}</span>
-                  {step.title}
-                </p>
-                <p className="mt-1 text-[0.78rem] leading-relaxed text-ink-2">{step.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
         <p aria-live="polite" className="sr-only">
           {busy ? "Untangle is tracing the repository history." : turn?.res ? "Answer ready." : ""}
         </p>
-
-        {pulse.data?.risks.length ? (
-          <section className="surface-soft overflow-hidden" aria-label="Top knowledge risks">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule px-4 py-3">
-              <div><p className="eyebrow text-accent">Pulse noticed</p><p className="mt-1 text-[0.86rem] font-semibold text-ink">{pulse.data.summary.critical ? `${pulse.data.summary.critical} critical knowledge risk${pulse.data.summary.critical === 1 ? "" : "s"}` : "Knowledge risks in this repository"}</p></div>
-              <a href="/pulse" className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-ink-2 underline-offset-4 hover:underline">Open Pulse <ArrowRight size={13} /></a>
-            </div>
-            <ul className="divide-y divide-rule sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-              {pulse.data.risks.slice(0, 3).map((risk) => <li key={risk.id}><a href={`/pulse#${risk.id}`} className="block p-3 transition-colors hover:bg-surface"><p className="eyebrow text-ink-3">{risk.category.replaceAll("_", " ")}</p><p className="mt-1 truncate text-[0.86rem] font-semibold text-ink">{risk.entity.name ?? risk.decision.subject}</p><p className="mt-1 line-clamp-2 text-[0.76rem] leading-relaxed text-ink-2">{risk.reasons[0]}</p></a></li>)}
-            </ul>
-          </section>
-        ) : null}
       </section>
 
       {turn ? (

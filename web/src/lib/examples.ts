@@ -35,6 +35,22 @@ const EXAMPLES: Record<string, RepoExamples> = {
     refusal: "why does onrecord use MongoDB?",
     search: ["signature", "c2pa", "src/cli.ts", "schema", "README.md"],
   },
+  "imputnet/helium": {
+    trace: "why is ublock_origin.version set the way it is?",
+    current: "do we still use onboarding.version?",
+    owner: "who should I ask about patches/helium/ui/layout/vertical.patch?",
+    changed: "what changed in chromium_version.txt?",
+    refusal: "why does Helium use MongoDB?",
+    search: ["ublock", "deps.ini", "vertical.patch", "chromium_version.txt", "onboarding"],
+  },
+  "usememos/memos": {
+    trace: "why do we use google.golang.org/grpc?",
+    current: "do we still use i18next?",
+    owner: "who should I ask about server/router/api/v1/user_service.go?",
+    changed: "what changed in web/package.json?",
+    refusal: "why does memos use MongoDB?",
+    search: ["grpc", "i18next", "user_service.go", "store/db", "MemoEditor"],
+  },
 };
 
 /** Questions that hold for any repository with a README, used until a repository has its own list. */

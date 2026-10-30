@@ -4,12 +4,12 @@ import { EntityChip, CitationChip } from "@/components/Chip";
 import { fmtDay, predicateLabel } from "@/lib/format";
 import type { PulseCategory, PulseRisk } from "@/lib/types";
 
-const CATEGORY: Record<PulseCategory, { label: string; icon: typeof ShieldAlert; color: string; bg: string }> = {
-  contradiction: { label: "Code ↔ handover conflict", icon: MessageCircleWarning, color: "text-bad", bg: "bg-bad-soft" },
-  drift: { label: "Decision drift", icon: ArrowUpRight, color: "text-accent", bg: "bg-accent-soft" },
-  ownership_gap: { label: "Ownership gap", icon: UserRound, color: "text-warn", bg: "bg-surface-2" },
-  rationale_gap: { label: "Missing rationale", icon: ShieldAlert, color: "text-warn", bg: "bg-surface-2" },
-  stale: { label: "Stale decision", icon: ShieldAlert, color: "text-ink-2", bg: "bg-surface-2" },
+const CATEGORY: Record<PulseCategory, { label: string; icon: typeof ShieldAlert; color: string }> = {
+  contradiction: { label: "Code and handover disagree", icon: MessageCircleWarning, color: "text-bad" },
+  drift: { label: "Decision drift", icon: ArrowUpRight, color: "text-accent" },
+  ownership_gap: { label: "Ownership gap", icon: UserRound, color: "text-warn" },
+  rationale_gap: { label: "Missing rationale", icon: ShieldAlert, color: "text-warn" },
+  stale: { label: "Stale decision", icon: ShieldAlert, color: "text-ink-2" },
 };
 
 export function riskQuestion(risk: PulseRisk): string {
@@ -26,29 +26,27 @@ export function PulseRiskCard({ risk }: { risk: PulseRisk }) {
   const Icon = category.icon;
   const question = riskQuestion(risk);
   return (
-    <article id={risk.id} className="pulse-risk card overflow-hidden p-4 sm:p-5" data-risk={risk.category}>
+    <article id={risk.id} className="card overflow-hidden p-4 sm:p-5" data-risk={risk.category}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-2.5">
-          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${category.bg} ${category.color}`} aria-hidden>
-            <Icon size={17} />
-          </span>
-          <div className="min-w-0">
-            <p className={`eyebrow ${category.color}`}>{category.label}</p>
-            <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
+        <div className="min-w-0">
+          <p className={`flex items-center gap-1.5 text-[0.85rem] font-semibold ${category.color}`}>
+            <Icon size={15} aria-hidden />
+            {category.label}
+          </p>
+          <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
               <EntityChip entity={risk.entity} />
-              <span className="text-[0.78rem] text-ink-3">{predicateLabel(risk.decision.predicate)}</span>
-            </div>
+            <span className="text-[0.78rem] text-ink-3">{predicateLabel(risk.decision.predicate)}</span>
           </div>
         </div>
         <div className="shrink-0 text-right">
           <p className="t-num text-[1.15rem] font-semibold text-ink">{Math.round(risk.score * 100)}%</p>
-          <p className="eyebrow text-ink-3">risk score</p>
+          <p className="text-[0.76rem] text-ink-3">risk score</p>
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
-          <p className="text-[0.76rem] font-semibold uppercase tracking-wider text-ink-3">Active decision</p>
+          <p className="text-[0.8rem] text-ink-3">Active decision</p>
           <p className="t-display mt-1 text-[1.35rem] text-ink">{risk.decision.object}</p>
           <p className="mt-1 text-[0.88rem] leading-relaxed text-ink-2">{risk.decision.text}</p>
         </div>

@@ -12,14 +12,14 @@ export function BaselineCompare({ res }: { res: AskResponse }) {
       <SectionTitle hint="same question, two retrieval methods">Graph vs vector-only</SectionTitle>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="card border-accent/40 p-4">
-          <p className="text-[0.72rem] font-bold uppercase tracking-wider text-accent">Graph answer</p>
+          <p className="text-[0.85rem] font-semibold text-accent">Graph answer</p>
           <AnswerText text={res.answer} citations={res.citations} className="mt-2 text-[0.92rem] leading-relaxed text-ink" />
           <p className="t-num mt-3 text-[0.78rem] text-ink-3">
             {res.refused ? "Refused: nothing anchored in the graph." : `Confidence ${Math.round(res.confidence.score * 100)}% (${res.confidence.label}) · ${res.supersession.length ? `${res.supersession.length} supersession${res.supersession.length === 1 ? "" : "s"} applied` : "no supersession"}`}
           </p>
         </div>
         <div className="card-muted p-4">
-          <p className="text-[0.72rem] font-bold uppercase tracking-wider text-ink-3">Vector-only answer</p>
+          <p className="text-[0.85rem] font-semibold text-ink-3">Vector-only answer</p>
           <p className="mt-2 whitespace-pre-line text-[0.92rem] leading-relaxed text-ink-2">{b.answer}</p>
           <p className="mt-3 text-[0.78rem] italic text-ink-3">{b.note}</p>
           {b.chunks.length ? (

@@ -20,7 +20,7 @@ export function ConfidenceMeter({ confidence }: { confidence: AskResponse["confi
             <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: tone }} />
           </div>
           <span className="t-num w-12 text-right text-[1.05rem] font-semibold text-ink">{pct}%</span>
-          <span className="rounded-md px-2 py-0.5 text-[0.74rem] font-bold uppercase tracking-wider" style={{ color: tone, background: "color-mix(in srgb, " + tone + " 14%, transparent)" }}>
+          <span className="rounded-md px-2 py-0.5 text-[0.78rem] font-semibold" style={{ color: tone, background: "color-mix(in srgb, " + tone + " 12%, transparent)" }}>
             {confidence.label}
           </span>
         </div>

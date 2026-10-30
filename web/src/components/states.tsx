@@ -42,9 +42,9 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 
 export function SectionTitle({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <div className="mb-2 flex items-baseline justify-between gap-3">
-      <h3 className="text-[0.78rem] font-bold uppercase tracking-wider text-ink-3">{children}</h3>
-      {hint ? <span className="text-[0.78rem] text-ink-3">{hint}</span> : null}
+    <div className="sec-head">
+      <h3>{children}</h3>
+      {hint ? <span className="sec-hint">{hint}</span> : null}
     </div>
   );
 }

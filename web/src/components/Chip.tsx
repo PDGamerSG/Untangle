@@ -114,10 +114,10 @@ export function EntityChip({ entity, link = true }: { entity: EntityRef; link?: 
   const body = (
     <>
       <span className="chip-kind">{entity.label}</span>
-      <span className="truncate">{entity.name}</span>
+      <span className="chip-code truncate">{entity.name}</span>
       {/* the same key or symbol can live in several files: name the file so the chips can be told apart */}
       {(entity.label === "ConfigKey" || entity.label === "Symbol") && entity.path ? (
-        <span className="truncate text-ink-3">· {entity.path.split("/").pop()}</span>
+        <span className="truncate font-normal text-ink-3">in {entity.path.split("/").pop()}</span>
       ) : null}
     </>
   );
