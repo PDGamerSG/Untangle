@@ -79,31 +79,73 @@ def client_for(handler, **kw: Any) -> SarvamClient:
 # ---------- short endpoint ----------
 
 
-def test_transcribe_short_sends_documented_multipart_and_returns_diarized_entries():
+def test_transcribe_short_sends_supported_multipart_without_diarization():
     seen: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen["url"] = str(request.url)
         seen["key"] = request.headers.get("api-subscription-key")
         seen["fields"], seen["files"] = parse_multipart(request)
-        return httpx.Response(200, json=SHORT_RESPONSE)
+        return httpx.Response(200, json={k: v for k, v in SHORT_RESPONSE.items() if k != "diarized_transcript"})
 
     wav = make_wav(5)
     with client_for(handler) as c:
-        body = c.transcribe_short(wav, "clip.wav", language_code="hi-IN", keyterms=["app.concurrency", "queries.sql"], num_speakers=2)
+        body = c.transcribe_short(wav, "clip.wav", language_code="hi-IN", keyterms=["app.concurrency", "queries.sql"])
     assert seen["url"] == "https://api.sarvam.ai/speech-to-text"
     assert seen["key"] == KEY
     f = seen["fields"]
     assert f["model"] == "saaras:v4" and f["mode"] == "codemix" and f["language_code"] == "hi-IN"
-    assert f["with_timestamps"] == "true" and f["with_diarization"] == "true" and f["num_speakers"] == "2"
+    assert f["with_timestamps"] == "true"
+    assert "with_diarization" not in f and "num_speakers" not in f
     assert json.loads(f["keyterms"]) == ["app.concurrency", "queries.sql"]
     name, content, ctype = seen["files"]["file"]
     assert name == "clip.wav" and content == wav and ctype.startswith("audio/")
     assert body["transcript"].startswith("हमने")
     entries = entries_from_response(body)
-    assert [e["speaker_id"] for e in entries] == ["SPEAKER_00", "SPEAKER_01"]
+    assert [e["speaker_id"] for e in entries] == ["SPEAKER_00", "SPEAKER_00"]
     assert entries[1]["start_time_seconds"] == 4.1
     assert c.last_request_id == "req-short-1"
+
+
+def test_short_diarization_is_rejected_with_batch_guidance():
+    with client_for(lambda request: pytest.fail("unsupported request must not reach Sarvam")) as c:
+        with pytest.raises(SarvamError, match="batch"):
+            c.transcribe_short(make_wav(1), "a.wav", diarize=True)
+
+
+@pytest.mark.parametrize("speakers", [None, 2])
+def test_short_recordings_use_batch_for_speaker_detection(tmp_path, monkeypatch, speakers):
+    from untangle.kt.service import transcribe_audio
+
+    path = tmp_path / "short.wav"
+    path.write_bytes(make_wav(5))
+    with client_for(lambda request: pytest.fail("real-time API cannot diarize")) as c:
+        monkeypatch.setattr(c, "run_batch_job", lambda path, **kw: BATCH_OUTPUT)
+        transcript = transcribe_audio(c, path, num_speakers=speakers)
+    assert transcript.source == "sarvam-batch"
+    assert len({u.speaker_label for u in transcript.utterances}) == 2
+
+
+def test_batch_failure_uses_real_time_without_unsupported_speaker_fields(tmp_path):
+    from untangle.kt.service import transcribe_audio
+
+    path = tmp_path / "short.wav"
+    path.write_bytes(make_wav(5))
+    paths = []
+
+    def handler(request):
+        paths.append(request.url.path)
+        if request.url.path == "/speech-to-text/job/v1":
+            return httpx.Response(403, json={"error": {"message": "batch access unavailable"}})
+        fields, _ = parse_multipart(request)
+        assert "with_diarization" not in fields and "num_speakers" not in fields
+        return httpx.Response(200, json={k: v for k, v in SHORT_RESPONSE.items() if k != "diarized_transcript"})
+
+    with client_for(handler) as c:
+        transcript = transcribe_audio(c, path, num_speakers=2)
+    assert paths == ["/speech-to-text/job/v1", "/speech-to-text"]
+    assert transcript.source == "sarvam-rest" and transcript.utterances
+    assert transcript.labels == ["SPEAKER_00"]
 
 
 def test_transcribe_short_refuses_wav_longer_than_30s_without_calling_the_api():
@@ -147,7 +189,7 @@ def test_retries_on_429_and_5xx_then_succeeds_with_backoff():
         return httpx.Response(200, json=SHORT_RESPONSE)
 
     c = SarvamClient(KEY, transport=httpx.MockTransport(handler), sleep=sleeps.append, retries=3, backoff_seconds=0.5)
-    body = c.transcribe_short(make_wav(1), "a.wav")
+    body = c.transcribe_short(make_wav(1), "a.wav", diarize=False)
     assert body["language_code"] == "hi-IN"
     assert len(attempts) == 3
     assert sleeps == [2.0, 1.0]  # Retry-After honoured, then exponential backoff (0.5 * 2**1)
@@ -171,7 +213,7 @@ def test_client_errors_are_not_retried_and_carry_the_message():
         return httpx.Response(403, json={"error": {"message": "Invalid API key", "code": "invalid_api_key_error"}})
 
     with client_for(handler) as c, pytest.raises(SarvamError, match="Invalid API key") as exc:
-        c.transcribe_short(make_wav(1), "a.wav")
+        c.transcribe_short(make_wav(1), "a.wav", diarize=False)
     assert len(attempts) == 1 and exc.value.status == 403
 
 

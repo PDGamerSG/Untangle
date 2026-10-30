@@ -98,4 +98,6 @@ prove production credentials work.
 
 After deployment, separately verify health, repository counts, a cited Claude answer (with `llm.used` true in its
 trace), graph/vector comparison, decision and timeline routes, and a short Sarvam audio upload. Health's model
-availability checks configuration; a real completion is required to validate the key and selected model.
+availability checks configuration; a real completion is required to validate the key and selected model. Sarvam's
+real-time endpoint does not support diarisation, so audio ingestion uses its batch endpoint first and retains a
+non-diarised real-time fallback.

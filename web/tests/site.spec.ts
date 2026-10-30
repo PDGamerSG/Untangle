@@ -40,6 +40,18 @@ test("landing assets load and the app opens", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("new sessions prefer Untangle and preserve a subsequent repository choice", async ({ page }) => {
+  await page.route("**/api/repos", route => route.fulfill({ json: [
+    ...repos,
+    { ...repos[0], full_name: "PDGamerSG/Untangle", url: "https://github.com/PDGamerSG/Untangle" },
+  ] }));
+  await page.goto("/ask");
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("PDGamerSG/Untangle");
+  await page.getByLabel("Repository", { exact: true }).selectOption("knadh/listmonk");
+  await page.reload();
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("knadh/listmonk");
+});
+
 test("ask, compare, inspect evidence and follow a decision", async ({ page }) => {
   await page.goto("/ask");
   await page.getByLabel("Your question", { exact: true }).fill("why is app.concurrency set the way it is?");

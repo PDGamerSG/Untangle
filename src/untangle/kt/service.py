@@ -2,9 +2,9 @@
 
 * `meetings(repo)` / `meeting(id)` read the graph (`45_kt_meetings`, `46_kt_meeting_detail`).
 * `ingest_transcript(repo, path)` loads a Untangle / Sarvam / plain-text transcript and runs `ingest_kt`.
-* `ingest_audio(repo, title, path)` transcribes with Sarvam first: the synchronous endpoint for WAV clips of at
-  most 30 s, the batch job for everything longer (and for compressed formats whose duration is unknown), and the
-  28 s window fallback through the short endpoint when the batch API is not available on the account.
+* `ingest_audio(repo, title, path)` transcribes with Sarvam's batch endpoint for speaker diarisation, including
+  short recordings. If batch transcription fails, WAV files can fall back to 28 s real-time windows; compressed
+  files under the short-endpoint size limit can fall back to a single request. Those fallbacks do not diarize.
 
 The Sarvam client, LLM, embedder and graph are injectable so everything runs offline against fakes; the defaults
 come from `untangle.config.settings()` (`SARVAM_API_KEY`, `LLM_BACKEND`, `EMBED_BACKEND`, `NEO4J_*`)."""
@@ -24,7 +24,7 @@ from untangle.config import Settings, settings
 from untangle.embed import Embedder
 from untangle.graph.db import Graph, connect
 from untangle.kt.pipeline import ingest_kt, keyterms_for_repo
-from untangle.kt.sarvam import SHORT_LIMIT_SECONDS, SarvamClient, SarvamError, wav_duration_seconds
+from untangle.kt.sarvam import SarvamClient, SarvamError, wav_duration_seconds
 from untangle.kt.transcript import Transcript, from_sarvam, load_transcript
 from untangle.llm import LLM, make_llm
 
@@ -105,9 +105,6 @@ def transcribe_audio(
     if not audio:
         raise SarvamError(f"{path} is empty")
     duration = wav_duration_seconds(audio)
-    if duration is not None and duration <= SHORT_LIMIT_SECONDS:
-        doc = client.transcribe_short(audio, path.name, language_code=language, keyterms=keyterms, diarize=True, num_speakers=num_speakers)
-        return from_sarvam(doc, language=language, source="sarvam-rest", title=title)
     if prefer_windows and duration is not None:
         doc = client.transcribe_windows(audio, path.name, language_code=language, keyterms=keyterms, num_speakers=num_speakers)
         return from_sarvam(doc, language=language, source="sarvam-rest", title=title)
@@ -121,7 +118,7 @@ def transcribe_audio(
             return from_sarvam(doc, language=language, source="sarvam-rest", title=title)
         if len(audio) <= SHORT_FILE_BYTES:
             log.warning("batch job failed (%s); trying the short endpoint for the small %s", exc, path.name)
-            doc = client.transcribe_short(audio, path.name, language_code=language, keyterms=keyterms, diarize=True, num_speakers=num_speakers)
+            doc = client.transcribe_short(audio, path.name, language_code=language, keyterms=keyterms, diarize=False)
             return from_sarvam(doc, language=language, source="sarvam-rest", title=title)
         raise
 

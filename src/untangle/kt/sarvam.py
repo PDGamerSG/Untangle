@@ -1,9 +1,10 @@
 """Sarvam AI client for handover calls: speech-to-text (Saaras) for Hindi, Hinglish and English, language
 identification and translation.
 
-Two transcription paths, both diarised:
+Two transcription paths:
 
 * `transcribe_short` - the synchronous `POST /speech-to-text` endpoint, one clip of at most 30 s (multipart).
+  Sarvam's real-time endpoint does not support diarisation; diarised clips use the batch job path.
 * `transcribe_long` / `run_batch_job` - the batch job API (`/speech-to-text/job/v1/...`) for recordings up to a few
   hours: create a job, get signed upload URLs, PUT the audio, start, poll, download the JSON output. The request
   bodies, paths and headers mirror what the `sarvamai` SDK (0.1.40, `client.speech_to_text_job.create_job(...)
@@ -14,7 +15,7 @@ Two transcription paths, both diarised:
 
 `split_wav_windows` cuts a long WAV into <= 28 s windows for the short endpoint when the batch API is not available
 on an account; `transcribe_windows` runs them and shifts the timestamps back onto the recording's timeline.
-Speaker labels are then per window (the service numbers speakers afresh in every request).
+The window fallback has one unknown speaker label because the real-time API cannot distinguish speakers.
 
 Retries: 429 and 5xx responses and transport errors are retried with exponential backoff (honouring `Retry-After`).
 Any other failure raises `SarvamError` carrying the service's own message. Responses are untrusted data: nothing is
@@ -310,21 +311,22 @@ class SarvamClient:
         *,
         language_code: str | None = None,
         keyterms: Sequence[str] | None = None,
-        diarize: bool = True,
+        diarize: bool = False,
         num_speakers: int | None = None,
     ) -> dict[str, Any]:
-        """`POST /speech-to-text` (multipart). Returns the raw response: `transcript`, `language_code`, `timestamps`
-        and, with diarisation, `diarized_transcript.entries[...]`. `keyterms` (<= 50) bias recognition toward the
-        repository's identifiers; the field is only sent for saaras:v4 (the only model that accepts it)."""
+        """`POST /speech-to-text` (multipart) for a non-diarized clip.
+
+        The real-time endpoint returns `transcript`, `language_code` and `timestamps`; Sarvam requires the batch
+        endpoint for speaker diarisation, so callers must use `run_batch_job` when `diarize=True` is needed.
+        `keyterms` (<= 50) bias recognition toward the repository's identifiers; the field is only sent for saaras:v4.
+        """
         duration = wav_duration_seconds(audio_bytes)
         if duration is not None and duration > SHORT_LIMIT_SECONDS:
             raise SarvamError(f"clip is {duration:.1f} s; the synchronous endpoint takes at most {SHORT_LIMIT_SECONDS:.0f} s (use transcribe_long or transcribe_windows)")
+        if diarize:
+            raise SarvamError("real-time speech-to-text does not support diarization; use the batch endpoint")
         data: dict[str, str] = {"model": self.model, "mode": self.mode, "with_timestamps": "true"}
         data["language_code"] = language_code or "unknown"
-        if diarize:
-            data["with_diarization"] = "true"
-            if num_speakers:
-                data["num_speakers"] = str(int(num_speakers))
         if keyterms and self.model.endswith("v4"):
             data["keyterms"] = json.dumps([str(k) for k in list(keyterms)[:MAX_KEYTERMS]], ensure_ascii=False)
         body = self._request("POST", "speech-to-text", data=data, files={"file": (filename, audio_bytes, mime_for(filename))})
@@ -343,12 +345,12 @@ class SarvamClient:
         seconds: float = WINDOW_SECONDS,
     ) -> dict[str, Any]:
         """Long WAV through the short endpoint: <= 28 s windows, timestamps shifted back. Returns one document in the
-        batch shape (`diarized_transcript.entries`, `language_code`, `windows`). Speaker ids are per window."""
+        batch shape (`diarized_transcript.entries`, `language_code`, `windows`) with one unknown speaker label."""
         entries: list[dict[str, Any]] = []
         languages: dict[str, int] = {}
         windows = split_wav_windows(audio_bytes, seconds)
         for offset_ms, chunk in windows:
-            body = self.transcribe_short(chunk, filename, language_code=language_code, keyterms=keyterms, diarize=True, num_speakers=num_speakers)
+            body = self.transcribe_short(chunk, filename, language_code=language_code, keyterms=keyterms, diarize=False)
             got = entries_from_response(body, offset_ms=offset_ms)
             entries.extend(got)
             code = body.get("language_code")
