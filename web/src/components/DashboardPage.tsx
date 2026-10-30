@@ -12,6 +12,7 @@ import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDuration } from "@/lib/format";
+import { examplesFor } from "@/lib/examples";
 
 const SHORTCUTS = [
   { href: "/ask", label: "Ask", text: "Ask why a value, file or dependency is the way it is.", icon: MessageSquareText },
@@ -20,10 +21,11 @@ const SHORTCUTS = [
   { href: "/meetings", label: "Meetings", text: "Upload a handover call and read what was decided.", icon: AudioLines },
 ] as const;
 
-const STARTERS: Record<string, string[]> = {
-  "knadh/listmonk": ["why is app.concurrency set the way it is?", "do we still use github.com/lib/pq?", "who should I ask about internal/manager?"],
-};
-const DEFAULT_STARTERS = ["why do we use neo4j in pyproject.toml?", "do we still use fastapi?", "who should I ask about src/untangle/answer?"];
+
+function starters(repo: string) {
+  const e = examplesFor(repo);
+  return [e.trace, e.current, e.owner];
+}
 
 type Tone = "ok" | "warn" | "bad" | "idle";
 
@@ -112,7 +114,7 @@ function QuickAsk({ repo }: { repo: string }) {
         </button>
       </div>
       <div className="flex flex-wrap gap-1.5" aria-label="Example questions">
-        {(STARTERS[repo] ?? DEFAULT_STARTERS).map((q) => (
+        {starters(repo).map((q) => (
           <button key={q} type="button" className="btn btn-line btn-sm" onClick={() => open(q)}>
             {q}
           </button>

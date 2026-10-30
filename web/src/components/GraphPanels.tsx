@@ -9,8 +9,8 @@ import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime } from "@/lib/format";
+import { examplesFor } from "@/lib/examples";
 
-const SUGGESTIONS = ["neo4j", "concurrency", "docker-compose.yml", "README.md", "config"];
 
 /** What each node label means to someone browsing the graph. */
 const LABEL_NAMES: Record<string, string> = {
@@ -146,7 +146,7 @@ export function SearchPanel({ repo }: { repo: string }) {
         {!text ? (
           <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[0.8rem] text-ink-3">
             <span>Try</span>
-            {SUGGESTIONS.map((s) => (
+            {examplesFor(repo).search.map((s) => (
               <button key={s} type="button" className="btn btn-line btn-sm" onClick={() => setText(s)}>
                 {s}
               </button>
