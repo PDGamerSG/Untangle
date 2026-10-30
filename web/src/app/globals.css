@@ -1,43 +1,51 @@
 @import "tailwindcss";
 
-/* ---------- Design tokens ---------- */
+/* ---------- Design tokens ----------
+   Blue on white in every colour scheme: the app does not switch to a dark palette. */
 :root {
   color-scheme: light;
-  --bg: #faf8f4;
+  --bg: #f4f7fc;
   --surface: #ffffff;
-  --surface-2: #f3efe8;
-  --surface-3: #ebe6dd;
-  --ink: #15130f;
-  --ink-2: #4a463f;
-  --ink-3: #7a756c;
-  --rule: rgb(21 19 15 / 0.12);
-  --rule-strong: rgb(21 19 15 / 0.28);
-  --accent: #b4380b;
+  --surface-2: #edf2fa;
+  --surface-3: #dfe7f4;
+  --ink: #0c1d3b;
+  --ink-2: #3a4a66;
+  --ink-3: #66758f;
+  --rule: rgb(12 29 59 / 0.11);
+  --rule-strong: rgb(12 29 59 / 0.26);
+  --accent: #1f55e0;
   --accent-ink: #ffffff;
-  --accent-soft: #fbe6da;
-  --ok: #1f8a4c;
+  --accent-soft: #e3ebfd;
+  --ok: #17845a;
   --warn: #a3690a;
   --bad: #c0392b;
   --bad-soft: #fbe3df;
-  --focus: #1d5fbf;
+  --focus: #1f55e0;
+
+  /* Sidebar: cyanotype blue with a faint drafting grid. */
+  --nav-bg: #0f3a99;
+  --nav-ink: #ffffff;
+  --nav-ink-2: rgb(255 255 255 / 0.74);
+  --nav-rule: rgb(255 255 255 / 0.14);
+  --nav-grid: rgb(255 255 255 / 0.055);
 
   /* Kind palette: decision / PR / issue / commit / comment / document / utterance / person / meeting / entities */
-  --k-decision: #b4380b;
-  --k-decision-bg: #fbe6da;
+  --k-decision: #1f55e0;
+  --k-decision-bg: #e3ebfd;
   --k-pr: #5b3fbf;
   --k-pr-bg: #ebe5fa;
   --k-issue: #c0392b;
   --k-issue-bg: #fbe3df;
   --k-commit: #0f766e;
   --k-commit-bg: #d9f1ee;
-  --k-comment: #1d5fbf;
-  --k-comment-bg: #dfe9fa;
+  --k-comment: #0369a1;
+  --k-comment-bg: #dceffa;
   --k-document: #2d7a2d;
   --k-document-bg: #dff1df;
   --k-utterance: #a8328a;
   --k-utterance-bg: #f8e1f1;
-  --k-person: #5a5550;
-  --k-person-bg: #ebe7e0;
+  --k-person: #4b5a75;
+  --k-person-bg: #e6ebf3;
   --k-meeting: #8a4b12;
   --k-meeting-bg: #f7e6d5;
   --k-config: #a65a00;
@@ -50,69 +58,13 @@
   --k-dependency-bg: #d8eef4;
   --k-symbol: #6b21a8;
   --k-symbol-bg: #ede4f8;
-  --k-repo: #15130f;
-  --k-repo-bg: #ebe7e0;
-  --k-entity: #5a5550;
-  --k-entity-bg: #ebe7e0;
+  --k-repo: #0c1d3b;
+  --k-repo-bg: #e6ebf3;
+  --k-entity: #4b5a75;
+  --k-entity-bg: #e6ebf3;
 
   --font-ui: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-code: ui-monospace, "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #121110;
-    --surface: #1a1816;
-    --surface-2: #221f1c;
-    --surface-3: #2b2825;
-    --ink: #f1ece4;
-    --ink-2: #c9c2b7;
-    --ink-3: #928b7f;
-    --rule: rgb(241 236 228 / 0.14);
-    --rule-strong: rgb(241 236 228 / 0.3);
-    --accent: #ff8a5b;
-    --accent-ink: #1a0c05;
-    --accent-soft: rgb(255 138 91 / 0.16);
-    --ok: #4ccf7f;
-    --warn: #e0a93a;
-    --bad: #ff7b6b;
-    --bad-soft: rgb(255 123 107 / 0.16);
-    --focus: #7fb0ff;
-
-    --k-decision: #ff8a5b;
-    --k-decision-bg: rgb(255 138 91 / 0.16);
-    --k-pr: #b9a4ff;
-    --k-pr-bg: rgb(185 164 255 / 0.16);
-    --k-issue: #ff7b6b;
-    --k-issue-bg: rgb(255 123 107 / 0.16);
-    --k-commit: #5fd3c6;
-    --k-commit-bg: rgb(95 211 198 / 0.16);
-    --k-comment: #86b4ff;
-    --k-comment-bg: rgb(134 180 255 / 0.16);
-    --k-document: #7fd67f;
-    --k-document-bg: rgb(127 214 127 / 0.16);
-    --k-utterance: #ff8ed9;
-    --k-utterance-bg: rgb(255 142 217 / 0.16);
-    --k-person: #cfc7bb;
-    --k-person-bg: rgb(207 199 187 / 0.14);
-    --k-meeting: #e8a86a;
-    --k-meeting-bg: rgb(232 168 106 / 0.16);
-    --k-config: #f0b35a;
-    --k-config-bg: rgb(240 179 90 / 0.16);
-    --k-file: #aab7c8;
-    --k-file-bg: rgb(170 183 200 / 0.14);
-    --k-module: #b6c2d2;
-    --k-module-bg: rgb(182 194 210 / 0.14);
-    --k-dependency: #6cc9e0;
-    --k-dependency-bg: rgb(108 201 224 / 0.16);
-    --k-symbol: #d0a9ff;
-    --k-symbol-bg: rgb(208 169 255 / 0.16);
-    --k-repo: #f1ece4;
-    --k-repo-bg: rgb(207 199 187 / 0.14);
-    --k-entity: #cfc7bb;
-    --k-entity-bg: rgb(207 199 187 / 0.14);
-  }
 }
 
 @theme inline {
@@ -133,6 +85,10 @@
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
   --color-focus: var(--focus);
+  --color-nav: var(--nav-bg);
+  --color-nav-ink: var(--nav-ink);
+  --color-nav-ink-2: var(--nav-ink-2);
+  --color-nav-rule: var(--nav-rule);
   --font-sans: var(--font-ui);
   --font-mono: var(--font-code);
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -170,7 +126,7 @@ body {
   font-weight: 500;
   letter-spacing: -0.015em;
   line-height: 1.1;
-  font-variation-settings: "opsz" 72, "SOFT" 40;
+  font-variation-settings: "opsz" 72, "SOFT" 0;
 }
 
 
@@ -191,6 +147,19 @@ body {
   text-transform: uppercase;
 }
 
+/* The sidebar's drafting grid. */
+.blueprint {
+  background-color: var(--nav-bg);
+  background-image:
+    linear-gradient(var(--nav-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nav-grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--nav-ink);
+}
+.blueprint :focus-visible {
+  outline-color: #ffffff;
+}
+
 .surface-soft {
   background: var(--surface-2);
   border: 1px solid var(--rule);
@@ -203,7 +172,7 @@ body {
 .pulse-risk:hover,
 .pulse-risk:focus-within {
   border-color: var(--rule-strong);
-  box-shadow: 0 12px 28px rgb(21 19 15 / 0.06);
+  box-shadow: 0 12px 28px rgb(12 29 59 / 0.08);
   transform: translateY(-1px);
 }
 .pulse-stat {
