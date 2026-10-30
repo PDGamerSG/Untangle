@@ -7,25 +7,21 @@ import { RepoSelect } from "@/components/RepoSelect";
 import { useRepo } from "@/components/RepoContext";
 import { ErrorState, Skeleton, SkeletonLines } from "@/components/states";
 import { api, errorMessage } from "@/lib/api";
+import { examplesFor } from "@/lib/examples";
 import { useResource } from "@/lib/hooks";
 import type { AskRequest, AskResponse } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
 
-const EXAMPLES = [
-  { label: "Trace a decision", question: "why is app.concurrency set the way it is?", icon: Sparkles },
-  { label: "Check what is current", question: "do we still use github.com/lib/pq?", icon: CheckCircle2 },
-  { label: "Find the right owner", question: "who should I ask about internal/manager?", icon: GitBranch },
-  { label: "See what changed", question: "what changed in docker-compose.yml?", icon: ArrowRight },
-  { label: "Try an honest refusal", question: "why does listmonk use MongoDB?", icon: ShieldCheck },
-];
-
-const UNTANGLE_EXAMPLES = [
-  { label: "Trace a decision", question: "why do we use neo4j in pyproject.toml?", icon: Sparkles },
-  { label: "Check what is current", question: "do we still use fastapi?", icon: CheckCircle2 },
-  { label: "Find the right owner", question: "who should I ask about src/untangle/answer?", icon: GitBranch },
-  { label: "See what changed", question: "what changed in docker-compose.yml?", icon: ArrowRight },
-  { label: "Try an honest refusal", question: "why does Untangle use MongoDB?", icon: ShieldCheck },
-];
+function examplesOf(repo: string | null) {
+  const e = examplesFor(repo);
+  return [
+    { label: "Trace a decision", question: e.trace, icon: Sparkles },
+    { label: "Check what is current", question: e.current, icon: CheckCircle2 },
+    { label: "Find the right owner", question: e.owner, icon: GitBranch },
+    { label: "See what changed", question: e.changed, icon: ArrowRight },
+    { label: "Try an honest refusal", question: e.refusal, icon: ShieldCheck },
+  ];
+}
 
 interface Turn {
   req: AskRequest;
@@ -58,7 +54,7 @@ function AnswerSkeleton() {
 
 export function AskPage() {
   const { repo } = useRepo();
-  const examples = repo === "knadh/listmonk" ? EXAMPLES : UNTANGLE_EXAMPLES;
+  const examples = examplesOf(repo);
   const pulse = useResource(repo ? `pulse-teaser:${repo}` : null, (signal) => api.pulse(repo!, signal));
   const [question, setQuestion] = useState("");
   const [at, setAt] = useState("");
