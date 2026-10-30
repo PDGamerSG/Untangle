@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowUpRight, ExternalLink, GitCommitHorizontal, UserRound } from "lucide-react";
+import { KindTag } from "./Chip";
 import { DecisionCard } from "./DecisionCard";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
-import { fmtDay } from "@/lib/format";
+import { fmtDay, kindFromLabel } from "@/lib/format";
 import type { EntityResponse } from "@/lib/types";
 
 const HIDDEN_FIELDS = new Set(["id", "label", "name", "tokens", "repo", "embedding"]);
@@ -60,7 +61,7 @@ export function EntityPage() {
     <div className="space-y-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0 max-w-3xl">
-          <p className="eyebrow text-accent">{e.label}</p>
+          <KindTag kind={kindFromLabel(e.label)}>{e.label}</KindTag>
           <h1 className="t-display mt-2 break-words text-[2.2rem] leading-[1.04] text-ink sm:text-[2.8rem]">{name}</h1>
           {details.length ? (
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[0.88rem]">

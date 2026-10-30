@@ -74,11 +74,11 @@ export function WhyPanel({ why, defaultOpen = false }: { why: Why; defaultOpen?:
           </dd>
         </dl>
         <div>
-          <h4 className="mb-2 text-[0.78rem] font-bold uppercase tracking-wider text-ink-3">Cypher calls, in order</h4>
+          <h4 className="mb-2 text-[0.88rem] font-semibold text-ink">Cypher calls, in order</h4>
           <CypherList calls={why.cypher} />
         </div>
         <div>
-          <h4 className="mb-2 text-[0.78rem] font-bold uppercase tracking-wider text-ink-3">Subgraph read for this answer</h4>
+          <h4 className="mb-2 text-[0.88rem] font-semibold text-ink">Subgraph read for this answer</h4>
           <Subgraph subgraph={why.subgraph} />
         </div>
       </div>

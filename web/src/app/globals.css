@@ -29,39 +29,25 @@
   --nav-rule: rgb(255 255 255 / 0.14);
   --nav-grid: rgb(255 255 255 / 0.055);
 
-  /* Kind palette: decision / PR / issue / commit / comment / document / utterance / person / meeting / entities */
+  /* Kind palette: three tones, so a tag's word does the work and the colour only groups.
+     decision = blue; sources (PR, issue, commit, comment, document, call, person) = slate;
+     code entities (config key, file, module, dependency, symbol, repo) = white with a rule. */
   --k-decision: #1f55e0;
   --k-decision-bg: #e3ebfd;
-  --k-pr: #5b3fbf;
-  --k-pr-bg: #ebe5fa;
-  --k-issue: #c0392b;
-  --k-issue-bg: #fbe3df;
-  --k-commit: #0f766e;
-  --k-commit-bg: #d9f1ee;
-  --k-comment: #0369a1;
-  --k-comment-bg: #dceffa;
-  --k-document: #2d7a2d;
-  --k-document-bg: #dff1df;
-  --k-utterance: #a8328a;
-  --k-utterance-bg: #f8e1f1;
-  --k-person: #4b5a75;
-  --k-person-bg: #e6ebf3;
-  --k-meeting: #8a4b12;
-  --k-meeting-bg: #f7e6d5;
-  --k-config: #a65a00;
-  --k-config-bg: #fbead2;
-  --k-file: #475569;
-  --k-file-bg: #e4e8ee;
-  --k-module: #334155;
-  --k-module-bg: #e2e6ec;
-  --k-dependency: #0e7490;
-  --k-dependency-bg: #d8eef4;
-  --k-symbol: #6b21a8;
-  --k-symbol-bg: #ede4f8;
-  --k-repo: #0c1d3b;
-  --k-repo-bg: #e6ebf3;
-  --k-entity: #4b5a75;
-  --k-entity-bg: #e6ebf3;
+  --k-decision-line: rgb(31 85 224 / 0.3);
+  --k-source: #3a4a66;
+  --k-source-bg: #e8edf5;
+  --k-source-line: rgb(58 74 102 / 0.22);
+  --k-entity: #3a4a66;
+  --k-entity-bg: #ffffff;
+  --k-entity-line: var(--rule-strong);
+
+  /* Speakers in a transcript: blues of different depth, told apart by the name beside each dot. */
+  --speaker-1: #1f55e0;
+  --speaker-2: #0c1d3b;
+  --speaker-3: #66758f;
+  --speaker-4: #0369a1;
+  --speaker-5: #7b8fd6;
 
   --font-ui: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-code: ui-monospace, "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -92,7 +78,7 @@
   --font-sans: var(--font-ui);
   --font-mono: var(--font-code);
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --radius-card: 14px;
+  --radius-card: 10px;
 }
 
 /* ---------- Base ---------- */
@@ -129,7 +115,6 @@ body {
   font-variation-settings: "opsz" 72, "SOFT" 0;
 }
 
-
 .t-num {
   font-variant-numeric: tabular-nums;
 }
@@ -137,14 +122,6 @@ body {
 .t-code {
   font-family: var(--font-code);
   font-size: 0.82em;
-}
-
-.eyebrow {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  line-height: 1.2;
-  text-transform: uppercase;
 }
 
 /* The sidebar's drafting grid. */
@@ -158,30 +135,6 @@ body {
 }
 .blueprint :focus-visible {
   outline-color: #ffffff;
-}
-
-.surface-soft {
-  background: var(--surface-2);
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-}
-
-.pulse-risk {
-  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-}
-.pulse-risk:hover,
-.pulse-risk:focus-within {
-  border-color: var(--rule-strong);
-  box-shadow: 0 12px 28px rgb(12 29 59 / 0.08);
-  transform: translateY(-1px);
-}
-.pulse-stat {
-  background: linear-gradient(145deg, var(--surface), var(--surface-2));
-}
-@media (prefers-reduced-motion: reduce) {
-  .pulse-risk { transition: none; }
-  .pulse-risk:hover,
-  .pulse-risk:focus-within { transform: none; }
 }
 
 /* ---------- Components (layered so Tailwind utilities can override them) ---------- */
@@ -198,6 +151,55 @@ body {
   border-radius: var(--radius-card);
 }
 
+/* A row of figures in one frame: label over number, rules between cells. */
+.stat-strip {
+  display: grid;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: hidden;
+}
+.stat-strip > * {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  margin-top: -1px;
+  margin-left: -1px;
+}
+.stat-strip dt {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.stat-strip dd {
+  margin-top: 0.15rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+/* Section heading: the title on the left, a count or link on the right. */
+.sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.sec-head h2,
+.sec-head h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.sec-head .sec-hint {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -205,7 +207,7 @@ body {
   gap: 0.45rem;
   min-height: 2.5rem;
   padding: 0 1rem;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.92rem;
   font-weight: 600;
   line-height: 1;
@@ -249,7 +251,36 @@ body {
   min-height: 2rem;
   padding: 0 0.7rem;
   font-size: 0.82rem;
-  border-radius: 8px;
+  border-radius: 7px;
+}
+
+/* An example question: quiet text that reads as a link, not a button row. */
+.example {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background-color 120ms ease;
+}
+.example:hover:not(:disabled) {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.example:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .field {
@@ -257,7 +288,7 @@ body {
   background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--rule-strong);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0.6rem 0.8rem;
   font-size: 0.95rem;
   line-height: 1.4;
@@ -277,22 +308,23 @@ body {
   }
 }
 
-/* Kind-coloured chips. `data-kind` drives the colours. */
+/* Kind-coloured tags. `data-kind` picks one of the three tones. */
 .chip {
   --c: var(--k-entity);
   --c-bg: var(--k-entity-bg);
+  --c-line: var(--k-entity-line);
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   max-width: 100%;
-  padding: 0.12rem 0.55rem 0.12rem 0.45rem;
-  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  border-radius: 6px;
   background: var(--c-bg);
   color: var(--c);
-  border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+  border: 1px solid var(--c-line);
   font-size: 0.78rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.45;
   white-space: nowrap;
   text-decoration: none;
   vertical-align: baseline;
@@ -303,37 +335,39 @@ body {
 a.chip:hover,
 button.chip:hover {
   border-color: var(--c);
-  background: color-mix(in srgb, var(--c) 18%, var(--c-bg));
 }
 .chip .chip-kind {
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.85;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+.chip .chip-code {
+  font-family: var(--font-code);
+  font-size: 0.95em;
+  font-weight: 500;
+  color: var(--ink);
 }
 .chip-inline {
-  padding: 0 0.45rem;
+  padding: 0 0.4rem;
   font-size: 0.74em;
   margin: 0 0.12em;
   transform: translateY(-0.08em);
 }
-[data-kind="decision"] { --c: var(--k-decision); --c-bg: var(--k-decision-bg); }
-[data-kind="pr"] { --c: var(--k-pr); --c-bg: var(--k-pr-bg); }
-[data-kind="issue"] { --c: var(--k-issue); --c-bg: var(--k-issue-bg); }
-[data-kind="commit"] { --c: var(--k-commit); --c-bg: var(--k-commit-bg); }
-[data-kind="comment"] { --c: var(--k-comment); --c-bg: var(--k-comment-bg); }
-[data-kind="document"] { --c: var(--k-document); --c-bg: var(--k-document-bg); }
-[data-kind="utterance"] { --c: var(--k-utterance); --c-bg: var(--k-utterance-bg); }
-[data-kind="person"] { --c: var(--k-person); --c-bg: var(--k-person-bg); }
-[data-kind="meeting"] { --c: var(--k-meeting); --c-bg: var(--k-meeting-bg); }
-[data-kind="config"] { --c: var(--k-config); --c-bg: var(--k-config-bg); }
-[data-kind="file"] { --c: var(--k-file); --c-bg: var(--k-file-bg); }
-[data-kind="module"] { --c: var(--k-module); --c-bg: var(--k-module-bg); }
-[data-kind="dependency"] { --c: var(--k-dependency); --c-bg: var(--k-dependency-bg); }
-[data-kind="symbol"] { --c: var(--k-symbol); --c-bg: var(--k-symbol-bg); }
-[data-kind="repo"] { --c: var(--k-repo); --c-bg: var(--k-repo-bg); }
-[data-kind="entity"] { --c: var(--k-entity); --c-bg: var(--k-entity-bg); }
+[data-kind="decision"] { --c: var(--k-decision); --c-bg: var(--k-decision-bg); --c-line: var(--k-decision-line); }
+[data-kind="pr"],
+[data-kind="issue"],
+[data-kind="commit"],
+[data-kind="comment"],
+[data-kind="document"],
+[data-kind="utterance"],
+[data-kind="person"],
+[data-kind="meeting"] { --c: var(--k-source); --c-bg: var(--k-source-bg); --c-line: var(--k-source-line); }
+[data-kind="config"],
+[data-kind="file"],
+[data-kind="module"],
+[data-kind="dependency"],
+[data-kind="symbol"],
+[data-kind="repo"],
+[data-kind="entity"] { --c: var(--k-entity); --c-bg: var(--k-entity-bg); --c-line: var(--k-entity-line); }
 
 .status-dot {
   display: inline-block;

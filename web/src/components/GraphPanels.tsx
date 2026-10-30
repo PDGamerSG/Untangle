@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Database, Search, UserRound } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EntityChip } from "./Chip";
 import { useRepo } from "./RepoContext";
@@ -10,7 +10,6 @@ import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime } from "@/lib/format";
 import { examplesFor } from "@/lib/examples";
-
 
 /** What each node label means to someone browsing the graph. */
 const LABEL_NAMES: Record<string, string> = {
@@ -45,7 +44,7 @@ export function GraphStatsPanel({ repo }: { repo: string }) {
   const { current } = useRepo();
   const res = useResource(`stats:${repo}`, (signal) => api.stats(repo, signal));
   const counts = current?.counts;
-  const tiles = counts
+  const figures = counts
     ? [
         { label: "Commits", value: counts.commits },
         { label: "Pull requests", value: counts.prs },
@@ -59,49 +58,42 @@ export function GraphStatsPanel({ repo }: { repo: string }) {
 
   return (
     <section aria-labelledby="graph-heading" className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <p className="eyebrow flex items-center gap-2 text-ink-3">
-            <Database size={13} aria-hidden /> What Untangle has read
-          </p>
-          <h2 id="graph-heading" className="t-display mt-1 text-[1.7rem] text-ink">
-            The graph behind every answer
-          </h2>
-        </div>
-        {current?.ingested_at_iso ? <p className="t-num text-[0.8rem] text-ink-3">Ingested {fmtDateTime(current.ingested_at_iso)}</p> : null}
+      <div className="sec-head">
+        <h2 id="graph-heading">What Untangle has read</h2>
+        {current?.ingested_at_iso ? <p className="sec-hint t-num">Ingested {fmtDateTime(current.ingested_at_iso)}</p> : null}
       </div>
 
-      {tiles.length ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-          {tiles.map((t) => (
-            <div key={t.label} className="card p-4">
-              <p className="eyebrow text-ink-3">{t.label}</p>
-              <p className="t-display t-num mt-1 text-[1.8rem] text-ink">{t.value.toLocaleString("en")}</p>
+      {figures.length ? (
+        <dl className="stat-strip grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" aria-label="What was ingested">
+          {figures.map((f) => (
+            <div key={f.label}>
+              <dt>{f.label}</dt>
+              <dd className="t-num">{f.value.toLocaleString("en")}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       ) : null}
 
       {res.loading ? (
-        <div className="card p-5" role="status" aria-label="Loading graph statistics">
+        <div role="status" aria-label="Loading graph statistics">
           <Skeleton className="h-4 w-48" />
           <SkeletonLines rows={4} className="mt-4" />
         </div>
       ) : res.error ? (
         <ErrorState title="Could not load graph statistics" error={res.error} onRetry={res.reload} />
       ) : res.data ? (
-        <div className="card p-5">
+        <div>
           <p className="text-[0.9rem] text-ink-2">
             <span className="t-num font-semibold text-ink">{res.data.nodes.toLocaleString("en")}</span> nodes and{" "}
             <span className="t-num font-semibold text-ink">{res.data.relationships.toLocaleString("en")}</span> relationships in{" "}
             <span className="font-semibold text-ink">{repo}</span>.
           </p>
-          <ul className="mt-4 space-y-2" aria-label="Nodes by type">
+          <ul className="mt-3 space-y-2" aria-label="Nodes by type">
             {labels.map(([label, n]) => (
-              <li key={label} className="grid grid-cols-[9.5rem_1fr_4.5rem] items-center gap-3 text-[0.84rem]">
+              <li key={label} className="grid grid-cols-[8.5rem_1fr_4.5rem] items-center gap-3 text-[0.84rem] sm:grid-cols-[9.5rem_1fr_4.5rem]">
                 <span className="truncate text-ink-2">{LABEL_NAMES[label] ?? label}</span>
-                <span className="h-2 overflow-hidden rounded-full bg-surface-2" aria-hidden>
-                  <span className="block h-full rounded-full bg-accent" style={{ width: `${Math.max(2, (n / max) * 100)}%` }} />
+                <span className="h-1.5 overflow-hidden rounded-full bg-surface-3" aria-hidden>
+                  <span className="block h-full rounded-full bg-accent" style={{ width: `${Math.max(1.5, (n / max) * 100)}%` }} />
                 </span>
                 <span className="t-num text-right text-ink">{n.toLocaleString("en")}</span>
               </li>
@@ -122,32 +114,28 @@ export function SearchPanel({ repo }: { repo: string }) {
 
   return (
     <section aria-labelledby="search-heading" className="space-y-4">
-      <div>
-        <p className="eyebrow flex items-center gap-2 text-ink-3">
-          <Search size={13} aria-hidden /> Search the graph
-        </p>
-        <h2 id="search-heading" className="t-display mt-1 text-[1.7rem] text-ink">
-          Find a file, key, dependency or person
-        </h2>
+      <div className="sec-head">
+        <h2 id="search-heading">Search the graph</h2>
+        <p className="sec-hint">Files, config keys, symbols, dependencies and people</p>
       </div>
-      <div className="card p-4">
+      <div>
         <label htmlFor="explore-search" className="sr-only">
           Search {repo}
         </label>
         <input
           id="explore-search"
           type="search"
-          className="field w-full"
+          className="field w-full text-[1rem]"
           placeholder="Try a config key, file name, symbol or dependency"
           value={text}
           onChange={(e) => setText(e.target.value)}
           autoComplete="off"
         />
         {!text ? (
-          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[0.8rem] text-ink-3">
-            <span>Try</span>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[0.82rem] text-ink-3">
+            <span className="mr-0.5">Try</span>
             {examplesFor(repo).search.map((s) => (
-              <button key={s} type="button" className="btn btn-line btn-sm" onClick={() => setText(s)}>
+              <button key={s} type="button" className="example" onClick={() => setText(s)}>
                 {s}
               </button>
             ))}
@@ -160,10 +148,10 @@ export function SearchPanel({ repo }: { repo: string }) {
       ) : res.error ? (
         <ErrorState title="Search failed" error={res.error} onRetry={res.reload} />
       ) : entities.length || people.length ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-          <div className="card divide-y divide-rule">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
+          <ul className="divide-y divide-rule border-y border-rule" aria-label="Matching entities">
             {entities.map((e) => (
-              <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+              <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div className="min-w-0">
                   <EntityChip entity={e} />
                   {e.path ? <p className="t-code mt-1 truncate text-[0.78rem] text-ink-3">{e.path}</p> : null}
@@ -174,17 +162,16 @@ export function SearchPanel({ repo }: { repo: string }) {
                 >
                   Ask why <ArrowUpRight size={13} aria-hidden />
                 </Link>
-              </div>
+              </li>
             ))}
-            {!entities.length ? <p className="px-4 py-3 text-[0.86rem] text-ink-3">No files, keys or symbols match.</p> : null}
-          </div>
-          <div className="card p-4">
-            <p className="eyebrow text-ink-3">People</p>
+            {!entities.length ? <li className="py-3 text-[0.86rem] text-ink-3">No files, keys or symbols match.</li> : null}
+          </ul>
+          <div>
+            <h3 className="text-[0.88rem] font-semibold text-ink">People</h3>
             {people.length ? (
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 divide-y divide-rule border-y border-rule">
                 {people.map((p) => (
-                  <li key={p.id} className="flex items-center gap-2 text-[0.9rem] text-ink">
-                    <UserRound size={14} className="text-ink-3" aria-hidden />
+                  <li key={p.id} className="py-2.5 text-[0.9rem] text-ink">
                     {p.login ? (
                       <a href={`https://github.com/${p.login}`} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
                         {p.name ?? p.login}
@@ -192,6 +179,7 @@ export function SearchPanel({ repo }: { repo: string }) {
                     ) : (
                       <span>{p.name}</span>
                     )}
+                    {p.login && p.name ? <span className="t-code ml-2 text-ink-3">@{p.login}</span> : null}
                   </li>
                 ))}
               </ul>

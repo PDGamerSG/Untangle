@@ -9,7 +9,7 @@ export function SupersessionBanner({ items }: { items: Supersession[] }) {
   return (
     <section aria-label="Supersession" className="space-y-2">
       {items.map((s) => (
-        <div key={`${s.newer}>${s.older}`} className="card flex gap-3 border-l-4 border-l-accent p-3.5">
+        <div key={`${s.newer}>${s.older}`} className="card flex gap-3 p-3.5">
           <History size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />
           <div className="min-w-0 text-[0.9rem] leading-relaxed">
             <p className="text-ink">

@@ -18,7 +18,7 @@ function audioSrc(uri: string): string {
   return uri.startsWith("/") ? `${API_BASE}${uri}` : uri;
 }
 
-const SPEAKER_TONES = ["var(--k-pr)", "var(--k-commit)", "var(--k-utterance)", "var(--k-document)", "var(--k-config)"];
+const SPEAKER_TONES = ["var(--speaker-1)", "var(--speaker-2)", "var(--speaker-3)", "var(--speaker-4)", "var(--speaker-5)"];
 
 function Transcript({ m }: { m: MeetingDetail }) {
   const audio = useRef<HTMLAudioElement>(null);
@@ -149,7 +149,7 @@ export function MeetingPage() {
         / <span className="text-ink-2">{m.title}</span>
       </nav>
       <header>
-        <p className="text-[0.76rem] font-semibold uppercase tracking-wider text-ink-3">
+        <p className="text-[0.85rem] text-ink-3">
           {m.language} · {m.source}
         </p>
         <h1 className="t-display mt-1 text-[1.9rem] leading-[1.1] text-ink sm:text-[2.3rem]">{m.title}</h1>

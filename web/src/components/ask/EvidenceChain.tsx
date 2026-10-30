@@ -51,7 +51,7 @@ export function EvidenceChain({ steps }: { steps: EvidenceStep[] }) {
           return (
             <li key={`${s.role}-${i}`} className="flex min-w-[13rem] max-w-[17rem] shrink-0 snap-start items-stretch">
               <div className="card flex w-full min-w-0 flex-col p-3" data-kind={kind}>
-                <p className="flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-wider" style={{ color: "var(--c)" }}>
+                <p className="flex items-center gap-1.5 text-[0.76rem] font-semibold" style={{ color: "var(--c)" }}>
                   <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "var(--c)" }} aria-hidden />
                   {ROLE_LABEL[s.role]}
                 </p>
