@@ -36,9 +36,11 @@ from untangle.answer.models import (
 from untangle.api import meetings as meeting_shape
 from untangle.api.english import to_english
 from untangle.api.health import shape_health
+from untangle.api.repositories import router as repositories_router
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
 from untangle.kt.sarvam import SarvamError
+from untangle.repositories.models import ImportProblem
 from untangle.repository_map.export import vault_zip
 from untangle.repository_map.service import repository_map
 
@@ -52,6 +54,7 @@ app.add_middleware(
     CORSMiddleware, allow_origins=list(settings().cors_origins) or ["http://localhost:3000"], allow_credentials=True,
     allow_methods=["*"], allow_headers=["*"],
 )
+app.include_router(repositories_router)
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -95,6 +98,11 @@ async def _not_found(request: Request, exc: service.NotFound) -> JSONResponse:
 @app.exception_handler(ValueError)
 async def _bad_value(request: Request, exc: ValueError) -> JSONResponse:
     return _error(400, str(exc), request_id=_request_id(request))
+
+
+@app.exception_handler(ImportProblem)
+async def _import_problem(request: Request, exc: ImportProblem) -> JSONResponse:
+    return _error(exc.status, str(exc), request_id=_request_id(request))
 
 
 @app.exception_handler(SarvamError)

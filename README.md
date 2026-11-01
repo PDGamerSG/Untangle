@@ -33,6 +33,11 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 
 ## 🚀 Three steps
 
+On the [live app](https://untangle-code.vercel.app/repositories), open **Repositories**, paste a public GitHub URL,
+and import it. Progress is saved while the background worker indexes the repository. Open its workspace when ready
+to use the tools below with your own repository. See [repository onboarding](docs/REPOSITORY_IMPORTS.md) for coverage,
+limits and worker configuration.
+
 1. **Ingest the history.** Load Git, GitHub, documents, configuration changes, and optional handover transcripts.
 2. **Ask a concrete question.** Name a value, dependency, file, module, or date in the CLI or web app.
 3. **Follow the evidence.** Read the decision chain, citations, supersession state, and person to ask.

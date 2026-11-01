@@ -1,0 +1,59 @@
+name: repository imports
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3-58/5 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-import-worker
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NEO4J_URI: ${{ secrets.NEO4J_URI }}
+      NEO4J_USER: ${{ secrets.NEO4J_USER }}
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+      NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+      # Importing is deterministic; paid model calls remain in the deployed Ask API.
+      LLM_BACKEND: fake
+      EMBED_BACKEND: fastembed
+      EMBED_MODEL: BAAI/bge-small-en-v1.5
+      EMBED_DIM: '384'
+      GITHUB_TOKEN: ${{ github.token }}
+      GIT_TERMINAL_PROMPT: '0'
+    steps:
+      - name: Check the import queue
+        id: queue
+        env:
+          IMPORT_API: https://untangle-code-api.vercel.app
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          with urllib.request.urlopen(os.environ['IMPORT_API'] + '/repository-imports', timeout=45) as response:
+              data = json.load(response)
+          pending = any(job['status'] == 'queued' for job in data['jobs'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f"pending={str(pending).lower()}\n")
+          print('Queued imports found.' if pending else 'No queued imports.')
+          PY
+      - uses: actions/checkout@v4
+        if: steps.queue.outputs.pending == 'true'
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v5
+        if: steps.queue.outputs.pending == 'true'
+      - if: steps.queue.outputs.pending == 'true'
+        run: uv python install 3.12
+      - if: steps.queue.outputs.pending == 'true'
+        run: uv sync --locked
+      # Only our trusted worker executes. Imported repositories are cloned without checkout
+      # and read as data; their workflows, build scripts, hooks and dependencies never run.
+      - if: steps.queue.outputs.pending == 'true'
+        run: uv run untangle import-worker --max-jobs 6

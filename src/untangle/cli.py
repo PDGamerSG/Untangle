@@ -14,7 +14,7 @@ from untangle import __version__
 
 log = logging.getLogger("untangle.cli")
 
-_PLUGINS = ("untangle.ingest.cli", "untangle.kt.cli", "untangle.eval.cli", "untangle.repository_map.service")
+_PLUGINS = ("untangle.ingest.cli", "untangle.kt.cli", "untangle.eval.cli", "untangle.repository_map.service", "untangle.repositories.worker")
 
 
 def build_parser() -> argparse.ArgumentParser:

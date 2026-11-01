@@ -24,6 +24,7 @@ log = logging.getLogger("untangle.graph")
 UNIQUE_ID_LABELS = [
     "Repo", "Person", "Identity", "Commit", "File", "Module", "Symbol", "ConfigKey", "Dependency",
     "PullRequest", "Issue", "Comment", "Document", "Chunk", "Decision", "Meeting", "Utterance", "Feature",
+    "RepositoryImport", "ImportControl",
 ]
 _INDEX_NAME = re.compile(r"CREATE\s+(?:FULLTEXT\s+|VECTOR\s+)?INDEX\s+(\w+)", re.IGNORECASE)
 
@@ -83,6 +84,11 @@ class Graph:
     def query(self, cypher: str, params: dict | None = None, timeout: int | None = None) -> QueryResult:
         """Write transaction."""
         return self._run(cypher, params, timeout, WRITE_ACCESS)
+
+    def transaction(self, work):
+        """Run related writes atomically with the driver's transient-error retries."""
+        with self._driver.session(database=self.database, default_access_mode=WRITE_ACCESS) as session:
+            return session.execute_write(work)
 
     def read(self, cypher: str, params: dict | None = None, timeout: int | None = None) -> QueryResult:
         """Read transaction (timeout in ms). A write clause raises `neo4j.exceptions.ClientError`."""

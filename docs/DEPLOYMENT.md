@@ -40,6 +40,7 @@ Set these on the **API project's Production environment**. Never put private cre
 | `EMBED_DIM` | `384`. |
 | `CORS_ORIGINS` | `https://untangle-code.vercel.app`. |
 | `UNTANGLE_DISPLAY_LANGUAGE` | `en` (default). Responses render stored Hindi and Hinglish in English; `original` turns this off. |
+| `REPO_IMPORTS_ENABLED` | `true` once the scheduled repository worker and its Actions secrets are configured. |
 
 The embedding model runs on CPU through ONNX and needs no paid API or key. Vercel instances download it into
 `/tmp/untangle`; a cold instance can take longer to answer. It does not silently substitute fake embeddings if
@@ -50,6 +51,10 @@ Leave `NEXT_PUBLIC_UNTANGLE_API` at its `/api` default and leave `NEXT_PUBLIC_UN
 Redeploy after environment changes.
 
 ## Load and update the graph
+
+Users can add a public GitHub repository from the Repositories page. The durable import queue is processed by
+the scheduled GitHub Actions worker. See [repository onboarding](REPOSITORY_IMPORTS.md) for setup, limits, recovery
+and API contracts. This reuses the ingestion pipeline below without running it inside a Vercel request.
 
 Store the same database and model settings in an ignored local `.env`. A `GITHUB_TOKEN` is optional for public
 repositories and raises GitHub's rate limit. Run ingestion from a workstation or a persistent worker, since a full
@@ -77,6 +82,8 @@ Interactive endpoint documentation is available at the API's `/docs` route.
 | --- | --- |
 | `GET /health` | Graph connection, configured model, embeddings, and Sarvam readiness. |
 | `GET /repos`, `GET /stats` | Ingested repositories and graph counts. |
+| `GET/POST /repository-imports`, `GET /repository-imports/{id}` | Add a public repository and track durable import progress. |
+| `GET /repository-overview` | Repository inventory, coverage and evidence-backed suggested questions. |
 | `POST /ask` | Question, repository, optional historical date, and graph/vector comparison mode. |
 | `GET /decisions/{id}`, `GET /entities/{id}` | Evidence chains and entities. |
 | `GET /search`, `GET /timeline`, `GET /pulse` | Entity search, decision history, and risk signals. |

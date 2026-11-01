@@ -129,6 +129,7 @@ class GitHubData:
     login_names: dict[str, str] = field(default_factory=dict)
     requests_made: int = 0
     cache_hits: int = 0
+    warnings: list[str] = field(default_factory=list)
 
 
 # -- helpers -------------------------------------------------------------------------------------------
@@ -378,11 +379,11 @@ class GitHubClient:
         ]
         return pr
 
-    def issues(self) -> tuple[list[IssueRecord], set[int]]:
+    def issues(self, max_issues: int | None = None) -> tuple[list[IssueRecord], set[int]]:
         """Real issues (entries carrying `pull_request` are PRs and only contribute their numbers)."""
         issues: list[IssueRecord] = []
         pr_numbers: set[int] = set()
-        for obj in self.paginate(self._repo("issues"), {"state": "all", "sort": "created", "direction": "desc"}):
+        for obj in self.paginate(self._repo("issues"), {"state": "all", "sort": "created", "direction": "desc"}, max_items=max_issues):
             if not isinstance(obj, dict) or not obj.get("number"):
                 continue
             if "pull_request" in obj:
@@ -411,6 +412,7 @@ class GitHubClient:
         self,
         *,
         max_prs: int | None = None,
+        max_issues: int | None = None,
         issue_comments: str = "incidents",
         progress: Callable[[str], None] | None = None,
     ) -> GitHubData:
@@ -426,6 +428,7 @@ class GitHubClient:
                 return self.enrich_pull(pr)
             except GitHubError as exc:
                 log.warning("PR #%s: %s", pr.number, exc)
+                data.warnings.append(f"Discussion for pull request #{pr.number} is incomplete.")
                 return pr
 
         with ThreadPoolExecutor(max_workers=self.workers) as pool:
@@ -438,7 +441,7 @@ class GitHubClient:
                         data.email_to_login.setdefault(c.author_email, c.author_login)
                         if c.author_name:
                             data.login_names.setdefault(c.author_login, c.author_name)
-        data.issues, data.pr_numbers = self.issues()
+        data.issues, data.pr_numbers = self.issues(max_issues)
         data.pr_numbers.update(pr.number for pr in data.prs)
         say(f"github: {len(data.issues)} issues ({sum(i.is_incident for i in data.issues)} incidents)")
         wanted = [i for i in data.issues if i.comments_count > 0 and (issue_comments == "all" or (issue_comments == "incidents" and i.is_incident))]

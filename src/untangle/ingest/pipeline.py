@@ -63,6 +63,7 @@ class _Timer:
     def stage(self, name: str) -> None:
         self.end()
         self._stage, self._stage_started = name, time.perf_counter()
+        self.progress(f"[{name}] started")
 
     def end(self, note: str = "") -> None:
         if self._stage is not None:
@@ -83,6 +84,7 @@ def ingest_repo(
     since: str | None = None,
     max_commits: int | None = None,
     max_prs: int | None = None,
+    max_issues: int | None = None,
     github: bool = True,
     embed: bool = True,
     llm_prs: int = 0,
@@ -100,6 +102,7 @@ def ingest_repo(
     `repo_path` points at an existing local git directory instead of cloning (tests); `github_client`, `embedder`
     and `llm` are injectable for the same reason. `reset=True` wipes the repository from the graph first."""
     timer = _Timer(progress)
+    warnings: list[str] = []
     repo = full_name
     own_graph = graph is None
     graph = graph or connect()
@@ -123,9 +126,14 @@ def ingest_repo(
             timer.stage("github")
             client = github_client or GitHubClient(full_name)
             try:
-                gh = client.fetch_all(max_prs=max_prs, issue_comments=issue_comments, progress=progress)
+                gh_options = {"max_prs": max_prs, "issue_comments": issue_comments, "progress": progress}
+                if max_issues is not None:
+                    gh_options["max_issues"] = max_issues
+                gh = client.fetch_all(**gh_options)
+                warnings.extend(gh.warnings)
             except GitHubError as exc:
                 log.error("GitHub stage failed, continuing with git only: %s", exc)
+                warnings.append("GitHub discussions could not be fully retrieved. Git history and code were still indexed.")
             finally:
                 if github_client is None:
                     client.close()
@@ -233,6 +241,7 @@ def ingest_repo(
             "dependencies": len(head_deps), "documents": len(docs), "decisions": decision_counts, "chunks": n_chunks,
             "github_requests": gh.requests_made, "github_cache_hits": gh.cache_hits, "timings": timer.timings, "total_seconds": timer.total,
             "stats": stats, "writes": loader.counts,
+            "warnings": warnings,
         }
         progress(f"ingested {repo}: {stats['nodes']} nodes, {stats['relationships']} relationships in {timer.total:.0f}s")
         return summary
