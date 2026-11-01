@@ -1,5 +1,17 @@
 # Untangle verification record
 
+## Repository onboarding — 2026-11-02
+
+- Durable imports validate GitHub URLs and public accessibility, coalesce duplicate jobs, enforce shared queue
+  and daily limits, recover interrupted jobs, and protect worker updates with a lease token.
+- Backend suite passed **263 tests** before three additional quota/refresh/pagination checks; focused import and
+  GitHub suite subsequently passed **38 tests**. Tests use disposable Neo4j, including concurrent admission and
+  claims, fixture ingestion, inventory, cited answers, repository isolation, and failure-message redaction.
+- Imports reuse the full Git/GitHub analysis pipeline and free embeddings. Optional paid rationale extraction
+  is disabled for hosted imports; the existing answer service retains its configured low-cost model.
+- The API and worker are deployed independently of the frontend. Production import validation is recorded in
+  the final handoff after a different repository completes through the hosted workflow.
+
 ## Feature and commit map — 2026-11-02
 
 - Backend: **234 passed** against disposable Neo4j 2025.09. New checks cover Python/JS/TS import resolution,

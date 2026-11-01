@@ -162,6 +162,37 @@ def test_worker_failure_is_persisted_without_leaking_exception_secrets(graph, me
     assert "secret-should-not-be-public" not in str(result)
 
 
+@pytest.mark.neo4j
+def test_completed_job_coalesces_until_refresh_interval_and_inventory_is_scoped(graph, metadata):
+    from untangle.repositories.jobs import claim_next, complete, enqueue
+    from untangle.repositories.models import ImportProblem
+    from untangle.repositories.service import overview
+    job = enqueue(graph, metadata)
+    claim = claim_next(graph)
+    assert complete(graph, job["id"], claim["lease_token"], {"commits": 4}, [])
+    assert enqueue(graph, metadata)["id"] == job["id"]
+    graph.query("MATCH (j:RepositoryImport {id:$id}) SET j.finished_at=0", {"id": job["id"]})
+    assert enqueue(graph, metadata)["id"] != job["id"]
+    with pytest.raises(ImportProblem) as error:
+        overview(metadata["full_name"] + "-not-ingested", graph)
+    assert error.value.status == 404
+
+
+@pytest.mark.neo4j
+def test_daily_quota_counts_completed_jobs_but_recent_duplicate_is_reusable(graph, metadata):
+    from untangle.repositories.jobs import clock_ms, enqueue
+    from untangle.repositories.models import ImportProblem
+    prefix = metadata["full_name"] + "-quota-"
+    now = clock_ms()
+    graph.query("UNWIND range(1,20) AS i CREATE (j:RepositoryImport {id:$prefix+toString(i),repo:$prefix+toString(i),status:'complete',created_at:$now})", {"prefix": prefix, "now": now})
+    try:
+        with pytest.raises(ImportProblem) as error:
+            enqueue(graph, metadata)
+        assert error.value.status == 429
+    finally:
+        graph.query("MATCH (j:RepositoryImport) WHERE j.repo STARTS WITH $prefix DETACH DELETE j", {"prefix": prefix})
+
+
 @pytest.mark.asyncio
 @pytest.mark.neo4j
 @respx.mock

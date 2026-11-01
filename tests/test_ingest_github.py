@@ -78,6 +78,19 @@ def test_max_prs_and_pagination(mocked, tmp_path):
         assert client.get("repos/acme/demo/releases/999") is None
 
 
+def test_hosted_issue_limit_stops_paginating_github_entries(tmp_path):
+    pages: list[str] = []
+
+    def serve(request):
+        pages.append(request.url.params["page"])
+        return httpx.Response(200, json=[{"number": i, "title": f"Issue {i}", "state": "open"} for i in range(1, 101)])
+
+    with GitHubClient("acme/demo", token=False, cache_dir=tmp_path, transport=httpx.MockTransport(serve)) as client:
+        issues, prs = client.issues(max_issues=3)
+    assert [issue.number for issue in issues] == [1, 2, 3] and not prs
+    assert pages == ["1"]
+
+
 def test_rate_limit_sleeps_until_reset(tmp_path):
     slept: list[float] = []
     reset = int(time.time()) + 5
