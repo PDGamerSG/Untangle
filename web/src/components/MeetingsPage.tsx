@@ -7,7 +7,7 @@ import { useRepo } from "./RepoContext";
 import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
-import { fmtDateTime, fmtDuration } from "@/lib/format";
+import { fmtDateTime, fmtDuration, meetingSourceLabel } from "@/lib/format";
 import { MeetingUpload } from "./MeetingUpload";
 
 export function NotConfigured() {
@@ -71,7 +71,7 @@ export function MeetingsPage() {
               <Link href={`/meetings/${encodeURIComponent(m.id)}`} className="card block h-full p-4 transition-colors hover:border-rule-strong">
                 <p className="flex items-center gap-2 text-[0.8rem] text-ink-3">
                   {m.audio_uri ? <AudioLines size={14} aria-hidden /> : <Mic size={14} aria-hidden />}
-                  {m.language} · {m.source}
+                  {m.language} · {meetingSourceLabel(m.source)}
                 </p>
                 <h2 className="t-display mt-1.5 text-[1.3rem] text-ink">{m.title}</h2>
                 <p className="t-num mt-1 text-[0.82rem] text-ink-3">

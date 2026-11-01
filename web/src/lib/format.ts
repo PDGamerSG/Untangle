@@ -178,6 +178,13 @@ export function signalLabel(s: string): string {
   return map[s] ?? s.replaceAll("_", " ");
 }
 
+/** Describe the recording source without exposing a speech provider's internal identifier. */
+export function meetingSourceLabel(source: string): string {
+  if (source.startsWith("sarvam")) return "Audio transcript";
+  if (source.startsWith("transcript")) return "Uploaded transcript";
+  return "Transcript";
+}
+
 export function truncate(s: string, n: number): string {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
 }

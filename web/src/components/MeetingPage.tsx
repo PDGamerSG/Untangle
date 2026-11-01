@@ -10,7 +10,7 @@ import { NotConfigured } from "./MeetingsPage";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
 import { api, API_BASE, SAMPLE_MODE } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
-import { fmtDateTime, fmtDuration, fmtOffset } from "@/lib/format";
+import { fmtDateTime, fmtDuration, fmtOffset, meetingSourceLabel } from "@/lib/format";
 import type { MeetingDetail } from "@/lib/types";
 
 function audioSrc(uri: string): string {
@@ -150,7 +150,7 @@ export function MeetingPage() {
       </nav>
       <header>
         <p className="text-[0.85rem] text-ink-3">
-          {m.language} · {m.source}
+          {m.language} · {meetingSourceLabel(m.source)}
         </p>
         <h1 className="t-display mt-1 text-[1.9rem] leading-[1.1] text-ink sm:text-[2.3rem]">{m.title}</h1>
         <p className="t-num mt-2 text-[0.85rem] text-ink-3">

@@ -22,11 +22,11 @@ const overview = {
   coverage: { commits: 2270, max_commits: null, max_prs: null, max_issues: null, map_scanned_files: 410, unresolved_imports: 0 },
   warnings: ["Dependencies are capped at 50 in this list."],
 };
-const importLimits = { max_repository_size_kb: 512000, max_commits: 5000, max_prs: 2000, max_issues: 2000, imports_per_day: 20 };
+const importLimits = { max_repository_size_kb: 100000, max_commits: 1000, max_prs: 50, max_issues: 100, imports_per_day: 20 };
 const importJob = (status: "queued" | "running" | "complete" | "failed", extra: Record<string, unknown> = {}) => ({
   id: "imp_1", repo: "octo-org/hello-world", url: "https://github.com/octo-org/hello-world", status,
   stage: { queued: "queued", running: "history", complete: "complete", failed: "failed" }[status],
-  progress: { queued: 0, running: 0.45, complete: 1, failed: 0.3 }[status], message: `Import ${status}`,
+  progress: { queued: 0, running: 45, complete: 100, failed: 30 }[status], message: `Import ${status}`,
   created_at_iso: "2026-11-01T10:00:00Z", updated_at_iso: "2026-11-01T10:05:00Z", started_at_iso: status === "queued" ? null : "2026-11-01T10:02:00Z",
   finished_at_iso: status === "complete" || status === "failed" ? "2026-11-01T10:09:00Z" : null,
   error: status === "failed" ? "GitHub returned 404: the repository is private or does not exist." : null,
@@ -139,6 +139,7 @@ test("Pulse links open an Ask question", async ({ page }) => {
 });
 
 test("upload a handover and open its transcript", async ({ page }) => {
+  await page.route("**/api/meetings/*", route => route.fulfill({ json: { ...meeting, source: "sarvam-batch" } }));
   await page.goto("/meetings");
   await page.getByLabel("Meeting title", { exact: true }).fill("Test handover");
   await page.getByLabel("Recording or transcript", { exact: true }).setInputFiles({ name: "handover.txt", mimeType: "text/plain", buffer: Buffer.from("Sam: We use Neo4j for decision history.") });
@@ -146,6 +147,8 @@ test("upload a handover and open its transcript", async ({ page }) => {
   await page.getByRole("link", { name: "View transcript and decisions" }).click();
   await expect(page.getByRole("list", { name: "Transcript", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Decisions from this call/ })).toBeVisible();
+  await expect(page.getByText(/Audio transcript/)).toBeVisible();
+  await expect(page.getByText("sarvam-batch", { exact: false })).toHaveCount(0);
 });
 
 test("API errors show the server message and recover on retry", async ({ page }) => {
@@ -424,6 +427,7 @@ test("adding a public repository follows the import across a reload and selects 
   await page.reload();
   await expect(page.getByRole("heading", { level: 2, name: "octo-org/hello-world" })).toBeVisible();
   await expect(page.getByText("is indexed and now selected")).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole("progressbar", { name: "Indexing octo-org/hello-world" })).toHaveAttribute("aria-valuenow", "100");
   await page.getByRole("button", { name: "Open octo-org/hello-world" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("octo-org/hello-world");

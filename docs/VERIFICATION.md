@@ -1,5 +1,30 @@
 # Untangle verification record
 
+## Combined production deployment — 2026-11-02
+
+- The Next.js frontend and FastAPI backend now deploy as two services in **one Vercel project**, `untangle-code`.
+  Both https://untangle-code.vercel.app and https://untangle.pallabdas.me point to it. The unused frontend project
+  was deleted after both domains passed verification. The old API hostname remains a compatibility alias.
+- `pnpm test:production` passed **5 live browser tests on each domain**. It covers real cited answers and vector
+  comparison, timeline/risk exports, graph inspection and commit impact, Obsidian downloads, landing/icons/mobile
+  navigation, restored import tracking, repository switching and the external repository's inventory/tools.
+  Root `AGENTS.md` requires both origins for every production verification.
+- **268 backend tests**, **34 contract/browser tests**, lint, TypeScript and production builds passed. The final
+  transcript-source label and integer-progress assertions were also exercised in targeted browser regressions.
+  Earlier mobile test failures came from matching a hidden cached dashboard as well as the active inventory;
+  the selector now targets the active repository inventory explicitly.
+- Actual browser form submissions verified a server-side validation error, reuse of a recent completed import,
+  a new queued import and recovery after reload. The hosted worker refreshed `PDGamerSG/Untangle` at `d8a7523`
+  with 61 commits and 605 decisions. [Worker run](https://github.com/PDGamerSG/Untangle/actions/runs/41343834067).
+- A synthetic text upload through the Vercel domain and generated WAV through the custom domain each produced
+  one utterance, one extracted decision and one embedded chunk. Audio used batch transcription. Both transcript
+  pages rendered; the temporary test repository was then removed from the database.
+- Both origins returned the expected CORS origin header. Their downloaded Untangle vaults contained **431 notes
+  and 1,559 valid internal links**, with no broken links. Counts are a snapshot, not a permanent corpus guarantee.
+- Desktop and phone screenshots were inspected with real data. The README architecture diagram parsed and
+  rendered successfully; the top live link uses only the custom domain. App status and transcript-source labels
+  describe capabilities without displaying model/provider identifiers; actual repository evidence is preserved.
+
 ## Repository onboarding — 2026-11-02
 
 - Durable imports validate GitHub URLs and public accessibility, coalesce duplicate jobs, enforce shared queue

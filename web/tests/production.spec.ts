@@ -125,6 +125,7 @@ test("live landing, application icons and phone navigation", async ({ page, requ
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/dashboard");
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("PDGamerSG/Untangle", { timeout: 30_000 });
+  await expect(page.getByLabel("Nodes by type", { exact: true })).toBeVisible({ timeout: 30_000 });
   const nav = page.getByRole("navigation", { name: "Primary", exact: true });
   for (const name of ["Dashboard", "Ask", "Map", "Timeline", "Pulse", "Meetings"]) {
     await expect(nav.getByRole("link", { name, exact: true })).toBeInViewport();
@@ -134,6 +135,8 @@ test("live landing, application icons and phone navigation", async ({ page, requ
   await page.getByRole("link", { name: "Repositories", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Repositories", level: 1 })).toBeVisible();
   await expect(page.getByLabel("GitHub repository", { exact: true })).toBeVisible();
+  await expect(page.locator("section[aria-labelledby='inventory-heading']").getByLabel("Indexed records", { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("Imported repositories are visible to everyone using this deployment.", { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("live-repositories-phone.png"), fullPage: true });
 });
 
@@ -165,6 +168,7 @@ test("live imported repository restores its job and uses its own inventory and t
   await expect(records).toContainText("File paths");
   await expect(records).toContainText("Current files");
   await expect(records).toContainText("Contributors");
+  await expect(page.getByLabel("Nodes by type", { exact: true })).toBeVisible({ timeout: 30_000 });
   await page.screenshot({ path: testInfo.outputPath("live-imported-dashboard.png"), fullPage: true });
   await page.goto("/repositories");
   const selected = page.locator("section[aria-labelledby='inventory-heading']");
