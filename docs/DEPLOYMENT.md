@@ -55,6 +55,12 @@ The embedding model runs on CPU through ONNX and needs no paid API or key. Verce
 `/tmp/untangle`; a cold instance can take longer to answer. It does not silently substitute fake embeddings if
 initialization fails. Sarvam is used for speech; no OpenAI key is needed for this deployment.
 
+Ask displays the graph answer before requesting the optional vector comparison. Each stage has its own wait
+estimate and cancellation control; comparison failure preserves the cited answer. Interactive answer clients
+use a 20-second response timeout without automatic retries, then composition can return its grounded template.
+Batch extraction retains its longer SDK budget. Browser requests also have deadlines (45 seconds for reads,
+60 for graph answers, 90 for comparisons, 300 for uploads), including stalled response bodies.
+
 Leave `NEXT_PUBLIC_UNTANGLE_API` at its `/api` default and leave `NEXT_PUBLIC_UNTANGLE_SAMPLE` unset.
 No external API URL is required in production. `UNTANGLE_API_URL` remains available for local Next.js testing;
 it defaults to `http://127.0.0.1:8090`. Redeploy after environment changes.
@@ -126,8 +132,10 @@ prove production credentials work.
 The opt-in production browser checks use the deployed API and real billed answer calls. Run them from `web`
 after every release. The command tests **both domains**, as required by root `AGENTS.md`, including the landing,
 icons, phone navigation, restored import status, selected inventory, cited answers, history, risks and exports.
-It reads `PDGamerSG/Untangle` and the completed `pallets/itsdangerous` smoke import without uploading data or
-starting new jobs:
+It reads `PDGamerSG/Untangle`, `pallets/itsdangerous`, and four independently owned test repositories
+(`jonschlinkert/is-number`, `pallets/markupsafe`, `spf13/cast`, `octocat/Hello-World`). Import those four first.
+It checks duplicate submission of recent completed imports, legacy maps, and actionable invalid/missing/oversize
+repository errors. It does not upload handover data. Re-running outside the one-hour reuse window may queue a refresh:
 
 ```bash
 pnpm test:production

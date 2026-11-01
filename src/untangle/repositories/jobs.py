@@ -22,12 +22,27 @@ def clock_ms() -> int:
     return int(time.time() * 1000)
 
 
-def _public(row: dict) -> dict:
+def _public(row: dict, *, now: int | None = None) -> dict:
+    now = clock_ms() if now is None else now
+    elapsed = max(0, ((row.get("finished_at") or now) - (row.get("created_at") or now)) // 1000)
+    size = json.loads(row.get("metadata") or "{}").get("size", 0)
+    # Planning ranges, not a countdown derived from stage percentages:
+    # GitHub volume, worker scheduling and embedding cold starts vary widely.
+    low, high = (120, 600) if size < 5000 else (300, 1200)
+    if row["status"] == "queued":
+        low, high = low + 60, high + 600
+        age = elapsed
+    else:
+        age = max(0, (now - (row.get("started_at") or now)) // 1000)
+    terminal = row["status"] in ("complete", "failed")
+    overdue = not terminal and age >= high
     return {
         "id": row["id"], "repo": row["repo"], "url": f"https://github.com/{row['repo']}",
         "status": row["status"], "stage": row["stage"], "progress": row.get("progress", 0),
         "message": row.get("message", ""), "error": row.get("error"), "warnings": row.get("warnings") or [],
         "summary": json.loads(row["summary"]) if row.get("summary") else None,
+        "estimate": {"elapsed_seconds": elapsed, "remaining_min_seconds": 0 if terminal else max(30, low - age),
+                     "remaining_max_seconds": 0 if terminal else None if overdue else max(60, high - age), "overdue": overdue},
         **{f"{key}_iso": iso(row.get(key)) for key in ("created_at", "updated_at", "started_at", "finished_at")},
     }
 

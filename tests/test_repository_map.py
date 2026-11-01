@@ -110,3 +110,39 @@ def test_map_indexes_git_parents_isolates_repositories_and_replaces_old_edges(gr
 
     with pytest.raises(NotFound):
         repository_map("different/repository", graph)
+
+
+def test_legacy_repository_exposes_file_and_commit_map_without_a_manual_index(graph, test_repo):
+    from untangle.repository_map.service import repository_map
+
+    graph.query("""CREATE (:Repo {id:'repo:'+$repo, full_name:$repo, head_sha:$sha, ingested_at:1000})
+      CREATE (f:File {id:'file:'+$repo+':src/main.go',repo:$repo,path:'src/main.go',alive:true})
+      CREATE (:File {id:'file:'+$repo+':removed.go',repo:$repo,path:'removed.go',alive:false})
+      CREATE (c:Commit {id:'commit:'+$repo+'@'+$sha,repo:$repo,sha:$sha,title:'Initial',authored_at:1000})
+      CREATE (c)-[:TOUCHED {change:'A'}]->(f)""", {"repo": test_repo, "sha": "a" * 40})
+    data = repository_map(test_repo, graph)
+    assert data["head_sha"] == "a" * 40
+    assert data["index_status"] == "basic"
+    assert data["features"][0]["entrypoints"] == ["src/main.go"]
+    assert data["commits"][0]["files"][0]["path"] == "src/main.go"
+    assert data["imports"] == []
+    assert any("not yet indexed" in warning for warning in data["warnings"])
+    assert repository_map(test_repo, graph, offset=1)["features"] == data["features"]
+    with zipfile.ZipFile(io.BytesIO(vault_zip(data))) as archive:
+        assert any(path.startswith("features/") for path in archive.namelist())
+
+
+def test_invalid_optional_feature_manifest_does_not_prevent_repository_map(graph, test_repo, tmp_path):
+    from ingest_fixture import git, write
+    from untangle.repository_map.service import refresh_map, repository_map
+
+    git(tmp_path, "init", "-q", "-b", "main")
+    write(tmp_path, "main.go", "package main\n")
+    write(tmp_path, ".untangle/features.json", '{"features": "invalid"}')
+    git(tmp_path, "add", "-A")
+    git(tmp_path, "commit", "-qm", "initial", date="2026-10-01T10:00:00Z")
+    refresh_map(test_repo, graph, tmp_path)
+    data = repository_map(test_repo, graph)
+    assert data["index_status"] == "ready"
+    assert data["features"] and all(f["source"] == "directory" for f in data["features"])
+    assert any("Invalid .untangle/features.json" in warning for warning in data["warnings"])

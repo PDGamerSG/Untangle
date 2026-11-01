@@ -1,4 +1,5 @@
 export interface MapFeature { id: string; name: string; description: string; source: "manifest" | "directory"; entrypoints: string[] }
+export interface RepositoryMap { index_status?: "ready" | "basic" }
 export interface MapImport { source: string; target: string; line: number; specifier: string }
 export interface MapCommit { sha: string; title: string; author: string | null; authored_at_iso: string | null; parents: string[]; parents_known: boolean; is_merge: boolean; files: { path: string; change: string; additions?: number; deletions?: number }[] }
 export interface RepositoryMap { repo: string; head_sha: string | null; indexed_at_iso: string | null; total_files: number; files: { path: string; alive: boolean }[]; features: MapFeature[]; imports: MapImport[]; commits: MapCommit[]; total_commits: number; offset: number; has_more: boolean; coverage: Record<string, number>; warnings: string[] }

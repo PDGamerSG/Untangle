@@ -320,6 +320,7 @@ export interface MeetingDetail extends MeetingSummary {
 export type ImportStatus = "queued" | "running" | "complete" | "failed";
 
 export interface ImportJob {
+  estimate?: { elapsed_seconds: number; remaining_min_seconds: number; remaining_max_seconds: number | null; overdue: boolean };
   id: string;
   repo: string;
   url: string;

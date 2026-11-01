@@ -38,19 +38,24 @@ export function errorMessage(e: unknown): string {
   return String(e);
 }
 
-async function request<T>(path: string, init?: RequestInit & { signal?: AbortSignal }): Promise<T> {
+async function request<T>(path: string, init?: RequestInit & { signal?: AbortSignal }, timeoutMs = 45_000): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const deadline = AbortSignal.timeout(timeoutMs);
+  const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
   let res: Response;
+  let text: string;
   try {
     res = await fetch(url, {
       ...init,
+      signal,
       headers: { Accept: "application/json", ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}), ...(init?.headers ?? {}) },
     });
+    text = await res.text();
   } catch (e) {
+    if (deadline.aborted) throw new ApiError(408, "This is taking longer than expected. Please retry shortly.");
     if (e instanceof DOMException && e.name === "AbortError") throw e;
     throw new ApiError(0, "Could not reach Untangle. Check your connection and try again.");
   }
-  const text = await res.text();
   let body: unknown = null;
   if (text) {
     try {
@@ -81,7 +86,7 @@ export const api = {
   repos: (signal?: AbortSignal): Promise<RepoSummary[]> => (SAMPLE_MODE ? sample.sampleRepos() : request("/repos", { signal })),
 
   ask: (body: AskRequest, signal?: AbortSignal): Promise<AskResponse> =>
-    SAMPLE_MODE ? sample.sampleAsk(body) : request("/ask", { method: "POST", body: JSON.stringify(body), signal }),
+    SAMPLE_MODE ? sample.sampleAsk(body) : request("/ask", { method: "POST", body: JSON.stringify(body), signal }, body.mode === "graph" ? 60_000 : 90_000),
 
   decision: (id: string, signal?: AbortSignal): Promise<WhyPath> =>
     SAMPLE_MODE ? sample.sampleDecision(id) : request(`/decisions/${encodeURIComponent(id)}`, { signal }),
@@ -129,7 +134,7 @@ export const api = {
 
   ingestMeeting: (body: FormData): Promise<{ meeting_id: string; utterances: number; decisions: number }> => {
     if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Uploads are available in the live app."));
-    return request("/kt/ingest", { method: "POST", body });
+    return request("/kt/ingest", { method: "POST", body }, 300_000);
   },
 };
 

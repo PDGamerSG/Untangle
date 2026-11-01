@@ -50,7 +50,7 @@ test.beforeEach(async ({ page }) => {
     else if (path.startsWith("/meetings/")) body = meeting;
     else if (path === "/ask") {
       const request = route.request().postDataJSON();
-      body = request.question.includes("MongoDB") ? refusal : { ...answer, baseline: request.mode === "both" ? answer.baseline : null };
+      body = request.question.includes("MongoDB") ? refusal : { ...answer, baseline: request.mode !== "graph" ? answer.baseline : null };
     } else if (path === "/timeline") body = await sampleTimeline(url.searchParams.get("at") ?? new Date().toISOString());
     else if (path.startsWith("/decisions/")) body = await sampleDecision(path.slice(11));
     else if (path === "/kt/ingest") body = { meeting_id: meeting.id, utterances: 40, decisions: 15 };
@@ -102,6 +102,67 @@ test("ask, compare, inspect evidence and follow a decision", async ({ page }) =>
   await expect(page.getByText("Could not load the decision")).toHaveCount(0);
   await page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Ask", exact: true }).click();
   await expect(page).toHaveURL(/\/ask$/);
+});
+
+test("slow comparison never hides the cited answer and can be cancelled", async ({ page }) => {
+  await page.route("**/api/ask", async route => {
+    const req = route.request().postDataJSON();
+    if (req.mode === "graph") await route.fulfill({ json: { ...answer, baseline: null } });
+    else await new Promise<void>(resolve => { page.once("close", () => resolve()); });
+  });
+  await page.goto("/ask");
+  await page.getByLabel("Your question", { exact: true }).fill("why is app.concurrency set the way it is?");
+  await page.getByLabel("Compare with vector-only search").check();
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect(page.getByRole("article", { name: "Answer", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Sources", exact: true })).toBeVisible();
+  await expect(page.getByText(/Estimated wait:.*seconds/)).toBeVisible();
+  await page.getByRole("button", { name: "Cancel comparison", exact: true }).click();
+  await expect(page.getByRole("article", { name: "Answer", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Cancel comparison", exact: true })).toHaveCount(0);
+});
+
+test("answer progress shows an estimate and repository changes discard stale answers", async ({ page }) => {
+  await page.route("**/api/repos", route => route.fulfill({ json: [...repos, { ...repos[0], full_name: "other/project" }] }));
+  await page.route("**/api/ask", async route => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    await route.fulfill({ json: answer }).catch(() => {});
+  });
+  await page.goto("/ask");
+  await page.getByLabel("Your question", { exact: true }).fill("why is app.concurrency set the way it is?");
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect(page.getByText(/Estimated wait:.*seconds/)).toBeVisible();
+  await page.getByRole("button", { name: "Cancel answer", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeEnabled();
+  await page.getByLabel("Repository", { exact: true }).selectOption("other/project");
+  await expect(page.getByRole("article", { name: "Answer", exact: true })).toHaveCount(0);
+});
+
+test("legacy map remains interactive and explains missing import connections", async ({ page }) => {
+  await page.route("**/api/repository-map?*", route => route.fulfill({ json: {
+    ...repositoryMap, index_status: "basic", imports: [],
+  } }));
+  await page.goto("/map");
+  await expect(page.getByText("File and commit map ready", { exact: true })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Repository graph", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toBeVisible();
+});
+
+test("repository onboarding accepts clone URLs and shows an import estimate", async ({ page }) => {
+  await page.route("**/api/repository-imports", async route => {
+    if (route.request().method() === "POST") {
+      expect(route.request().postDataJSON().repository).toBe("octo-org/hello-world");
+      await route.fulfill({ status: 202, json: importJob("queued") });
+    } else await route.fallback();
+  });
+  await page.route("**/api/repository-imports/imp_1", route => route.fulfill({ json: importJob("queued", {
+    estimate: { elapsed_seconds: 10, remaining_min_seconds: 120, remaining_max_seconds: 900, overdue: false },
+  }) }));
+  await page.goto("/repositories");
+  await page.getByLabel("GitHub repository", { exact: true }).fill("https://github.com/octo-org/hello-world.git/");
+  await page.getByRole("button", { name: "Add repository", exact: true }).click();
+  await expect(page.getByRole("progressbar", { name: "Indexing octo-org/hello-world" })).toBeVisible();
+  await expect(page.getByText(/Estimated time remaining/)).toBeVisible();
 });
 
 test("missing decisions and pages return to Ask", async ({ page }) => {
@@ -338,9 +399,9 @@ test("feature map explores dependencies and commit impact with evidence", async 
 });
 
 test("feature map handles repositories that have not been indexed", async ({ page }) => {
-  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, head_sha: null, features: [], imports: [] } }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, head_sha: null, files: [], commits: [], features: [], imports: [] } }));
   await page.goto("/map");
-  await expect(page.getByText("This repository needs a map index.", { exact: true })).toBeVisible();
+  await expect(page.getByText("No files or commits have been indexed yet.", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveCount(0);
 });
 
@@ -400,7 +461,7 @@ test("adding a public repository follows the import across a reload and selects 
   await page.route("**/api/repos", route => route.fulfill({ json: indexed ? [...repos, { ...repos[0], full_name: "octo-org/hello-world" }] : repos }));
   await page.route("**/api/repository-imports", async route => {
     if (route.request().method() !== "POST") return route.fallback();
-    expect(route.request().postDataJSON()).toEqual({ repository: "https://github.com/octo-org/hello-world" });
+    expect(route.request().postDataJSON()).toEqual({ repository: "octo-org/hello-world" });
     await route.fulfill({ status: 202, json: importJob("queued") });
   });
   await page.route("**/api/repository-imports/imp_1", route => {

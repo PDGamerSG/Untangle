@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarDays, Search } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { RepoSelect } from "@/components/RepoSelect";
 import { useRepo } from "@/components/RepoContext";
 import { ErrorState, Skeleton, SkeletonLines } from "@/components/states";
@@ -10,6 +10,7 @@ import { examplesFor } from "@/lib/examples";
 import type { AskRequest, AskResponse } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
 import { useStarterQuestions } from "@/components/RepositoryOverview";
+import { WaitStatus } from "@/components/WaitStatus";
 
 function examplesOf(repo: string | null) {
   const e = examplesFor(repo);
@@ -20,6 +21,8 @@ interface Turn {
   req: AskRequest;
   res?: AskResponse;
   error?: string;
+  comparing?: boolean;
+  comparisonError?: string;
 }
 
 function AnswerSkeleton() {
@@ -45,13 +48,14 @@ function AnswerSkeleton() {
   );
 }
 
-export function AskPage() {
-  const { repo } = useRepo();
+function AskWorkspace({ repo }: { repo: string | null }) {
   const examples = useStarterQuestions(repo, examplesOf(repo), 5);
   const [question, setQuestion] = useState("");
   const [at, setAt] = useState("");
   const [compare, setCompare] = useState(false);
   const [turn, setTurn] = useState<Turn | null>(null);
+  const active = useRef<AbortController | null>(null);
+  useEffect(() => () => active.current?.abort(), []);
   const qId = useId();
   const atId = useId();
   const cmpId = useId();
@@ -74,12 +78,27 @@ export function AskPage() {
   const ask = async (q: string) => {
     const text = q.trim();
     if (!text || !repo || busy) return;
+    active.current?.abort();
+    const controller = new AbortController();
+    active.current = controller;
     const req: AskRequest = { question: text, repo, at: at ? `${at}T23:59:59Z` : null, mode: compare ? "both" : "graph" };
     setTurn({ req });
     try {
-      const res = await api.ask(req);
-      setTurn((t) => (t && t.req === req ? { req, res } : t));
+      const res = await api.ask({ ...req, mode: "graph" }, controller.signal);
+      if (controller.signal.aborted) return;
+      setTurn((t) => (t && t.req === req ? { req, res, comparing: req.mode === "both" } : t));
+      if (req.mode === "both") {
+        try {
+          const comparison = await api.ask({ ...req, mode: "baseline" }, controller.signal);
+          if (controller.signal.aborted) return;
+          setTurn(t => t?.req === req ? { req, res: { ...res, mode: "both", baseline: comparison.baseline } } : t);
+        } catch (e) {
+          if (controller.signal.aborted) return;
+          setTurn(t => t?.req === req ? { req, res, comparisonError: errorMessage(e) } : t);
+        }
+      }
     } catch (e) {
+      if (controller.signal.aborted) return;
       setTurn((t) => (t && t.req === req ? { req, error: errorMessage(e) } : t));
     }
   };
@@ -181,12 +200,26 @@ export function AskPage() {
           {turn.error ? (
             <ErrorState title="The question could not be answered" error={turn.error} onRetry={() => void ask(turn.req.question)} />
           ) : turn.res ? (
-            <AnswerCard res={turn.res} atIso={turn.req.at} />
+            <div className="space-y-5">
+              {turn.comparing ? <WaitStatus key="comparison" label="Preparing the optional search comparison. Your cited answer is ready below." min={10} max={45}
+                cancelLabel="Cancel comparison" onCancel={() => { active.current?.abort(); setTurn(t => t ? { ...t, comparing: false } : t); }} /> : null}
+              {turn.comparisonError ? <p role="status" className="card-muted p-4 text-[0.85rem]">Comparison unavailable: {turn.comparisonError} Your graph answer is still available.</p> : null}
+              <AnswerCard res={turn.res} atIso={turn.req.at} />
+            </div>
           ) : (
-            <AnswerSkeleton />
+            <div className="space-y-5"><WaitStatus key="answer" label="Finding repository evidence and preparing your answer." cancelLabel="Cancel answer"
+              onCancel={() => { active.current?.abort(); setTurn(null); }} /><AnswerSkeleton /></div>
           )}
         </section>
       ) : null}
     </div>
   );
+}
+
+export function AskPage() {
+  const { repo, loading, error, reload } = useRepo();
+  if (error) return <ErrorState title="Could not load repositories" error={error} onRetry={reload} />;
+  if (loading) return <WaitStatus label="Loading repositories." min={1} max={5} />;
+  if (!repo) return <div className="card p-5">Add a public GitHub repository from <a href="/repositories" className="text-accent underline">Repositories</a> to ask about its code.</div>;
+  return <AskWorkspace key={repo} repo={repo} />;
 }

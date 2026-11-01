@@ -74,7 +74,7 @@ def get_llm() -> LLM:
     global _llm
     with _lock:
         if _llm is None:
-            _llm = make_llm()
+            _llm = make_llm(interactive=True)
         return _llm
 
 

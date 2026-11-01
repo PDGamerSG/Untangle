@@ -17,10 +17,7 @@ const POLL_MS = 7000;
 /** After a failed poll (network, 5xx), wait longer before asking again. */
 const POLL_BACKOFF_MS = 15000;
 
-/**
- * The two forms the API accepts, exactly: `owner/name` or `https://github.com/owner/name`. Anything else (http, www,
- * `.git`, trailing slashes, other hosts) is refused here with the same wording, rather than sent and rejected.
- */
+/** Validate after removing GitHub's optional clone suffix and trailing slash. */
 const REPO_PATTERN = /^(?:https:\/\/github\.com\/)?[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9._-]{1,100}$/;
 
 const STAGES = [
@@ -239,6 +236,13 @@ function JobTracker({
               Large histories take longer. You can leave this page; the import keeps going and this page finds it again when you return.
             </p>
           ) : null}
+          {pending(job.status) ? <p className="text-[0.84rem] text-ink-2">
+            {job.estimate?.overdue ? "Taking longer than estimated. The worker has not reported completion; status will keep updating." :
+              job.estimate?.remaining_max_seconds != null ? `Estimated time remaining: ${Math.max(1, Math.ceil(job.estimate.remaining_min_seconds / 60))}–${Math.max(1, Math.ceil(job.estimate.remaining_max_seconds / 60))} minutes.` :
+                "Estimated time remaining: 3–20 minutes, including the worker queue."}
+            {job.estimate ? ` ${Math.floor(job.estimate.elapsed_seconds / 60)}m ${job.estimate.elapsed_seconds % 60}s elapsed.` : ""}
+            {" "}Estimates vary with repository size, queue delays and GitHub availability.
+          </p> : null}
         </div>
 
         {job.status !== "failed" ? (
@@ -379,8 +383,8 @@ function AddRepository({
   const disabled = imports.data?.enabled === false;
 
   const submit = async () => {
-    const repository = value.trim();
-    if (!REPO_PATTERN.test(repository)) {
+    const repository = value.trim().replace(/\/+$/, "").replace(/\.git$/, "").replace(/^https:\/\/github\.com\//, "");
+    if (!REPO_PATTERN.test(repository) || [".", ".."].includes(repository.split("/").at(-1) ?? "")) {
       setError("Enter a GitHub repository as owner/name, or as the full https://github.com/owner/name link.");
       return;
     }

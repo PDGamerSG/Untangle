@@ -14,6 +14,33 @@ test("backend errors retain the actionable message", async () => {
   } finally { globalThis.fetch = original; }
 });
 
+test("stalled response bodies time out with a retry message", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalTimeout = AbortSignal.timeout;
+  const deadline = new AbortController();
+  AbortSignal.timeout = () => deadline.signal;
+  globalThis.fetch = async (_url, init) => ({ text: () => new Promise((_resolve, reject) => {
+    init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason), { once: true });
+    queueMicrotask(() => deadline.abort(new DOMException("Timed out", "TimeoutError")));
+  }) }) as Response;
+  try {
+    await expect(api.repos()).rejects.toThrow("taking longer than expected");
+  } finally { globalThis.fetch = originalFetch; AbortSignal.timeout = originalTimeout; }
+});
+
+test("cancelling an answer aborts the network request", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async (_url, init) => new Promise((_resolve, reject) => {
+    init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason), { once: true });
+  });
+  try {
+    const controller = new AbortController();
+    const result = api.ask({ repo: "o/r", question: "why?", mode: "graph", at: null }, controller.signal);
+    controller.abort();
+    await expect(result).rejects.toMatchObject({ name: "AbortError" });
+  } finally { globalThis.fetch = original; }
+});
+
 test("utterance citations link to the actual meeting and numbered utterance", () => {
   expect(hrefFor("utt:mtg:PDGamerSG/Untangle:handover#0007", "utterance")).toEqual({
     href: "/meetings/mtg%3APDGamerSG%2FUntangle%3Ahandover#utt-7", external: false,

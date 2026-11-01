@@ -1,15 +1,40 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Download, ExternalLink, GitBranch, GitCommitHorizontal, Network, Search } from "lucide-react";
-import { api, API_BASE } from "@/lib/api";
-import { useResource } from "@/lib/hooks";
+import { api, API_BASE, errorMessage } from "@/lib/api";
+import { useResource, useStoredValue } from "@/lib/hooks";
 import { fmtDay, fmtDateTime } from "@/lib/format";
 import { commitImpact, featureFiles, mapGraph, type MapCommit, type MapNode, type RepositoryMap } from "@/lib/repository-map";
 import { useRepo } from "./RepoContext";
 import { RepoSelect } from "./RepoSelect";
 import { EmptyState, ErrorState, SkeletonLines } from "./states";
 import { RepositoryGraph } from "./RepositoryGraph";
+import { WaitStatus } from "./WaitStatus";
+
+function BasicMapNotice({ repo }: { repo: string }) {
+  const router = useRouter();
+  const [, setTracked] = useStoredValue("untangle.import");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function refresh() {
+    setBusy(true);
+    setError(null);
+    try {
+      const job = await api.importRepository(repo);
+      setTracked(job.id);
+      router.push("/repositories");
+    } catch (e) { setError(errorMessage(e)); setBusy(false); }
+  }
+  return <div className="card-muted space-y-2 p-4 text-[0.85rem]" role="status">
+    <p className="font-semibold">File and commit map ready</p>
+    <p>Explore directory groups, changed files and downloads below. Source import connections have not been indexed yet, so indirect impact is unknown.</p>
+    <button type="button" className="btn btn-line btn-sm" onClick={refresh} disabled={busy}>{busy ? "Requesting…" : "Build import connections"}</button>
+    <p className="text-ink-3">A repository refresh usually takes 3–20 minutes including the queue. Hosted size and history limits apply.</p>
+    {error ? <p role="alert" className="text-bad">{error}</p> : null}
+  </div>;
+}
 
 function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: number; setOffset: (offset: number) => void }) {
   const [mode, setMode] = useState<"features" | "impact" | "history">("features");
@@ -22,7 +47,7 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
   const impact = useMemo(() => commit ? commitImpact(data, commit) : null, [data, commit]);
   const graph = useMemo(() => mapGraph(data, featureId, mode === "features" ? null : commit, mode === "history"), [data, featureId, commit, mode]);
   const history = data.commits.filter(c => `${c.sha} ${c.title} ${c.author}`.toLowerCase().includes(query.toLowerCase().trim()));
-  const source = `https://github.com/${data.repo}/blob/${data.head_sha}/`;
+  const source = `https://github.com/${data.repo}/blob/${data.head_sha ?? "HEAD"}/`;
   const fileUrl = (path: string) => `${source}${path.split("/").map(encodeURIComponent).join("/")}`;
   function chooseCommit(c: MapCommit) { setCommitSha(c.sha); setFeatureId(null); setSelected({ id: c.sha, name: c.sha.slice(0, 7), kind: "commit" }); setMode("impact"); }
   function chooseNode(node: MapNode) {
@@ -33,6 +58,7 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
   function overview() { setMode("features"); setFeatureId(null); setCommitSha(null); setSelected(null); }
 
   return <>
+    {data.index_status === "basic" ? <BasicMapNotice repo={data.repo} /> : null}
     <dl className="stat-strip grid-cols-2 lg:grid-cols-4">
       <div><dt>Feature definitions</dt><dd>{data.features.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">{data.features.some(f => f.source === "manifest") ? "from repository manifest" : "inferred directory groups"}</p></div>
       <div><dt>Files in this map</dt><dd>{data.files.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">of {data.total_files} indexed paths</p></div>
@@ -106,8 +132,8 @@ function RepositoryMapBody({ repo }: { repo: string }) {
   const [offset, setOffset] = useState(0);
   const resource = useResource(`repository-map:${repo}:${offset}`, signal => api.repositoryMap(repo, offset, signal));
   if (resource.error) return <ErrorState title="Could not load the repository map" error={resource.error} onRetry={resource.reload} />;
-  if (!resource.data) return <div className="card p-6" role="status" aria-label="Loading repository map"><SkeletonLines rows={8} /></div>;
-  if (!resource.data.head_sha) return <EmptyState title="This repository needs a map index.">Run <code className="t-code">untangle map-index {repo}</code> from the configured ingestion environment, then reload this page.</EmptyState>;
+  if (!resource.data) return <div className="space-y-4"><WaitStatus label="Loading files, features and commit history." min={1} max={5} /><div className="card p-6" aria-label="Loading repository map"><SkeletonLines rows={8} /></div></div>;
+  if (!resource.data.files.length && !resource.data.commits.length) return <EmptyState title="No files or commits have been indexed yet.">Open Repositories to check this repository&apos;s import status and retry an interrupted import.</EmptyState>;
   return <Explorer key={`${repo}:${offset}:${resource.data.head_sha}`} data={resource.data} offset={offset} setOffset={setOffset} />;
 }
 

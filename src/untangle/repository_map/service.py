@@ -19,7 +19,13 @@ def index_repository_map(repo: str, git: GitRepo, graph: Graph) -> dict:
                    (p.endswith(SUPPORTED) or p.endswith(("tsconfig.json", "jsconfig.json")))][:MAX_MAP_FILES]
     content = git.read_at(interesting, max_bytes=MAX_FILE_BYTES)
     manifest = git.show("HEAD", ".untangle/features.json")
-    data = build_index(repo, git.head_sha(), content, list(paths), manifest)
+    try:
+        data = build_index(repo, git.head_sha(), content, list(paths), manifest)
+    except ValueError as exc:
+        if not str(exc).startswith("Invalid .untangle/features.json:"):
+            raise
+        data = build_index(repo, git.head_sha(), content, list(paths), None)
+        data["warnings"].append(f"{exc}. Using directory groups instead.")
     if len(paths) > MAX_MAP_FILES:
         data["warnings"].append("Only the first 2000 eligible source files are scanned; the displayed file graph is also capped at 2000 files.")
     data["coverage"]["eligible_files_read"] = len(content)
@@ -52,6 +58,18 @@ def repository_map(repo: str, graph: Graph, *, offset: int = 0, limit: int = 80)
         from untangle.answer.service import NotFound
         raise NotFound(f"Repository {repo} has not been ingested.")
     data = rows[0]
+    # Older ingestions already have files and commits. Expose that evidence immediately;
+    # never invent import edges or claim a source scan happened when it did not.
+    snapshot = data.pop("repository_head_sha", None)
+    ingested_at = data.pop("repository_ingested_at", None)
+    data["index_status"] = "ready" if data["head_sha"] else "basic"
+    if not data["head_sha"]:
+        data["head_sha"] = snapshot
+        data["indexed_at"] = ingested_at
+        inferred = build_index(repo, snapshot or "", {}, [f["path"] for f in data["files"] if f.get("alive")], None)
+        data["features"] = inferred["features"]
+        data["imports"] = []
+        data["warnings"] = [*(data["warnings"] or []), "Source import connections are not yet indexed. This map shows stored files, directory groups and commit changes; indirect impact is unknown."]
     data.update(repo=repo, offset=offset, has_more=offset + len(data["commits"]) < data["total_commits"])
     data["indexed_at_iso"] = iso(data.pop("indexed_at"))
     data["coverage"] = json.loads(data["coverage"] or "{}")

@@ -3,7 +3,7 @@ import type { Download } from "@playwright/test";
 import type { ImportJob, RepositoryOverview } from "../src/lib/types";
 
 // Explicit opt-in: these checks use the deployed database and real Claude billing.
-// No uploads or repository writes. Run separately from the recorded-contract suite.
+// No uploads. Fresh public imports are prepared separately; duplicate submissions verify job reuse.
 test.skip(process.env.UNTANGLE_LIVE_TESTS !== "1", "Set UNTANGLE_LIVE_TESTS=1 and E2E_BASE_URL to a live deployment.");
 test.setTimeout(180_000);
 
@@ -65,15 +65,17 @@ test("live Claude answers with citations and compares against vector retrieval",
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("PDGamerSG/Untangle", { timeout: 30_000 });
   await page.getByLabel("Your question", { exact: true }).fill("why do we use neo4j in pyproject.toml?");
   await page.getByLabel("Compare with vector-only search").check();
-  const response = page.waitForResponse(res => new URL(res.url()).pathname === "/api/ask" && res.request().method() === "POST");
+  const response = page.waitForResponse(res => new URL(res.url()).pathname === "/api/ask" && res.request().postDataJSON()?.mode === "graph");
+  const comparison = page.waitForResponse(res => new URL(res.url()).pathname === "/api/ask" && res.request().postDataJSON()?.mode === "baseline");
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   const result = await response;
   expect(result.ok()).toBe(true);
   const answer = await result.json();
   expect(answer.why.llm.used).toBe(true);
   expect(Object.keys(answer.citations).length).toBeGreaterThan(0);
-  expect(answer.baseline).not.toBeNull();
   await expect(page.getByText("Answer ready.", { exact: true })).toBeAttached();
+  expect((await (await comparison).json()).baseline).not.toBeNull();
+  await expect(page.getByRole("region", { name: "Graph answer compared with vector-only search" })).toBeVisible();
 });
 
 test("live feature map traces commits and downloads an Obsidian vault", async ({ page, request }, testInfo) => {
@@ -198,4 +200,87 @@ test("live imported repository restores its job and uses its own inventory and t
   await page.goto("/meetings");
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo);
   expect(errors).toEqual([]);
+});
+
+for (const repo of ["jonschlinkert/is-number", "pallets/markupsafe", "spf13/cast", "octocat/Hello-World"]) {
+  test(`independent repository: ${repo}`, async ({ page, request }, testInfo) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    const imports = await (await request.get("/api/repository-imports")).json();
+    const job = (imports.jobs as ImportJob[]).find(j => j.repo === repo);
+    expect(job?.status, JSON.stringify(job)).toBe("complete");
+    expect(job?.estimate?.remaining_max_seconds).toBe(0);
+    const duplicate = await request.post("/api/repository-imports", { data: { repository: `https://github.com/${repo}.git/` } });
+    expect(duplicate.status()).toBe(202);
+    expect((await duplicate.json()).id).toBe(job!.id);
+    await page.addInitScript(value => localStorage.setItem("untangle.repo", value), repo);
+    await page.goto("/dashboard");
+    await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
+    await expect(page.getByLabel("Indexed records", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByLabel("Nodes by type", { exact: true })).toBeVisible({ timeout: 30_000 });
+    const overviewResult = await request.get(`/api/repository-overview?repo=${encodeURIComponent(repo)}`);
+    expect(overviewResult.ok()).toBe(true);
+    const overview: RepositoryOverview = await overviewResult.json();
+    expect(overview.counts.current_files).toBeGreaterThan(0);
+    const mapResult = await request.get(`/api/repository-map?repo=${encodeURIComponent(repo)}&limit=40`);
+    expect(mapResult.ok()).toBe(true);
+    const map = await mapResult.json();
+    expect(map.index_status).toBe("ready");
+    expect(map.features.length).toBeGreaterThan(0);
+    expect(map.total_commits).toBeGreaterThan(0);
+    await page.goto("/map");
+    await expect(page.getByRole("group", { name: "Repository graph", exact: true }).getByRole("button").first()).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: `Inspect commit ${map.commits[0].sha.slice(0, 7)}`, exact: true }).click();
+    await expect(page.getByRole("region", { name: "Graph inspector" })).toContainText(map.commits[0].title);
+    const download = page.waitForEvent("download");
+    await page.getByRole("link", { name: "Export to Obsidian", exact: true }).click();
+    expect(await (await download).failure()).toBeNull();
+    if (map.has_more) {
+      await page.getByRole("button", { name: "Older commits", exact: true }).click();
+      await expect(page.getByText(/Showing 41–/)).toBeVisible({ timeout: 30_000 });
+    }
+    await page.goto("/ask");
+    await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo);
+    const question = overview.suggested_questions[0] ?? `What changed in ${map.files.find((f: { alive: boolean }) => f.alive).path}?`;
+    await page.getByLabel("Your question", { exact: true }).fill(question);
+    const answerResponse = page.waitForResponse(res => new URL(res.url()).pathname === "/api/ask" && res.request().postDataJSON()?.mode === "graph");
+    const start = Date.now();
+    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    const result = await answerResponse;
+    expect(result.ok()).toBe(true);
+    const answer = await result.json();
+    expect(answer.repo).toBe(repo);
+    if (overview.suggested_questions.length) expect(answer.refused).toBe(false);
+    if (!answer.refused) expect(Object.keys(answer.citations).length).toBeGreaterThan(0);
+    await expect(page.getByText("Answer ready.", { exact: true })).toBeAttached();
+    await testInfo.attach("answer-timing", { body: JSON.stringify({ repo, question, milliseconds: Date.now() - start, refused: answer.refused }), contentType: "application/json" });
+    await page.goto("/timeline");
+    await expect(page.getByLabel("Jump to", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: "Export view", exact: true })).toBeVisible({ timeout: 30_000 });
+    await page.goto("/pulse");
+    await expect(page.getByLabel("Knowledge radar summary", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await page.goto("/meetings");
+    await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo);
+    await expect(page.getByText("Could not load handover calls", { exact: true })).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("legacy repositories expose maps and hosted errors explain unsupported imports", async ({ request }) => {
+  for (const repo of ["usememos/memos", "imputnet/helium", "dcondrey/onrecord", "knadh/listmonk"]) {
+    const response = await request.get(`/api/repository-map?repo=${encodeURIComponent(repo)}&limit=1`);
+    expect(response.ok()).toBe(true);
+    const map = await response.json();
+    expect(map.head_sha).toBeTruthy();
+    expect(map.features.length).toBeGreaterThan(0);
+    expect(map.commits.length).toBe(1);
+    if (map.index_status === "basic") expect(map.warnings.join(" ")).toContain("not yet indexed");
+  }
+  for (const [repository, status] of [["https://example.com/owner/repo", 400], ["octocat/untangle-no-such-repo-20261102", 404], ["torvalds/linux", 413]] as const) {
+    const response = await request.post("/api/repository-imports", { data: { repository } });
+    expect(response.status()).toBe(status);
+    expect((await response.json()).error).toBeTruthy();
+  }
 });

@@ -33,7 +33,7 @@ def vault_zip(data: dict) -> bytes:
         metadata = ["---", f"title: {json.dumps(title)}", f"tags: [untangle, {kind}]", f"repository: {json.dumps(data['repo'])}", "---"]
         notes[f"{filenames[kind, identity]}.md"] = "\n".join([*metadata, f"# {_plain(title)}", "", *lines, ""])
 
-    source = f"https://github.com/{quote(data['repo'], safe='/')}/blob/{quote(data.get('head_sha') or '', safe='')}/"
+    source = f"https://github.com/{quote(data['repo'], safe='/')}/blob/{quote(data.get('head_sha') or 'HEAD', safe='')}/"
     for feature in data["features"]:
         note("features", feature["id"], feature["name"], [
             _plain(feature.get("description")), f"Definition: {_plain(feature['source'])}", "", "## Entry points",

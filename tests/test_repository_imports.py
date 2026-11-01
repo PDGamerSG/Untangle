@@ -55,6 +55,21 @@ def test_repository_names_cannot_escape_github_or_cache(value):
         normalize_repository(value)
 
 
+def test_import_estimate_reports_elapsed_and_overdue_without_false_completion():
+    from untangle.repositories.jobs import _public
+
+    row = {"id": "job", "repo": "o/r", "status": "running", "stage": "git", "progress": 5,
+           "created_at": 1000, "started_at": 1000, "metadata": '{"size": 50}'}
+    early = _public(row, now=31_000)["estimate"]
+    assert early["elapsed_seconds"] == 30
+    assert 0 < early["remaining_min_seconds"] < early["remaining_max_seconds"]
+    assert not early["overdue"]
+    late = _public(row, now=3_601_000)["estimate"]
+    assert late["overdue"] and late["remaining_max_seconds"] is None
+    done = _public({**row, "status": "complete", "finished_at": 61_000}, now=120_000)["estimate"]
+    assert done["elapsed_seconds"] == 60 and done["remaining_max_seconds"] == 0
+
+
 @respx.mock
 @pytest.mark.parametrize("body,status", [({"private": True}, 400), ({"disabled": True}, 400), ({"size": 100_001}, 413)])
 def test_private_disabled_and_large_repositories_are_rejected(body, status):

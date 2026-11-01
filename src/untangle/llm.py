@@ -62,12 +62,15 @@ class FakeLLM(LLM):
 class AnthropicLLM(LLM):
     backend = "anthropic"
 
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, *, interactive: bool = False):
         try:
             import anthropic
         except ImportError as exc:  # pragma: no cover
             raise LLMUnavailable("pip install anthropic (or `uv sync --extra llm`)") from exc
-        self.client = anthropic.Anthropic(api_key=api_key)
+        # A grounded template is already available to the caller. Avoid the SDK's
+        # ten-minute timeout and repeated requests blocking an interactive answer.
+        options = {"timeout": 20.0, "max_retries": 0} if interactive else {}
+        self.client = anthropic.Anthropic(api_key=api_key, **options)
         self.model = model
 
     def complete(self, system: str, user: str, *, temperature: float = 0.1, max_tokens: int = 1024) -> str:
@@ -129,13 +132,13 @@ def parse_json(text: str, schema: type[T]) -> T:
     return schema.model_validate(json.loads(m.group(0)))
 
 
-def make_llm(s: Settings | None = None) -> LLM:
+def make_llm(s: Settings | None = None, *, interactive: bool = False) -> LLM:
     s = s or settings()
     backend = s.llm_backend
     model = s.llm_model or DEFAULT_MODELS.get(backend, "")
     try:
         if backend == "anthropic" and s.anthropic_api_key:
-            return AnthropicLLM(s.anthropic_api_key, model)
+            return AnthropicLLM(s.anthropic_api_key, model, interactive=interactive)
         if backend == "sarvam" and s.sarvam_api_key:
             # sarvam-105b reasons by default; the answer text is what we want, so turn it off.
             return OpenAICompatibleLLM(
