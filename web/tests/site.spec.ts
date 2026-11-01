@@ -315,6 +315,41 @@ test("feature map handles repositories that have not been indexed", async ({ pag
   await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveCount(0);
 });
 
+test("connected features remain readable beside an isolated feature on desktop and phone", async ({ page }, testInfo) => {
+  const names = ["Ask & evidence", "Decision history", "Feature map", "Handover calls", "History ingestion", "Knowledge risks", "Landing experience", "Repository discovery"];
+  const features = names.map((name, i) => ({ ...repositoryMap.features[0], id: `feature:${i}`, name, entrypoints: [`entry-${i}.ts`] }));
+  const imports = features.filter((_, i) => i !== 6).map(feature => ({ source: feature.entrypoints[0], target: "shared.ts", line: 1, specifier: "./shared" }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, features, imports } }));
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/map");
+    const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+    await expect(graph.getByRole("button")).toHaveCount(8);
+    await expect.poll(async () => graph.getByRole("button").evaluateAll(nodes => {
+      const bounds = nodes.map(node => ({ name: node.getAttribute("aria-label"), rect: node.getBoundingClientRect() }));
+      return bounds.flatMap((a, i) => bounds.slice(i + 1).filter(b => a.rect.left < b.rect.right && a.rect.right > b.rect.left && a.rect.top < b.rect.bottom && a.rect.bottom > b.rect.top).map(b => `${a.name} / ${b.name}`));
+    })).toEqual([]);
+    await page.screenshot({ path: testInfo.outputPath(`connected-features-${width}.png`), fullPage: true });
+  }
+});
+
+test("dense graphs reveal source names on keyboard focus and keep selected files inspectable", async ({ page }) => {
+  const files = Array.from({ length: 20 }, (_, i) => ({ path: `dependency-${i}.ts`, alive: true }));
+  const imports = files.map(file => ({ source: "ask.ts", target: file.path, line: 1, specifier: `./${file.path}` }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, files: [...repositoryMap.files, ...files], imports } }));
+  await page.goto("/map");
+  const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+  await graph.getByRole("button", { name: "Feature Ask", exact: true }).click();
+  const file = graph.getByRole("button", { name: "File dependency-0.ts", exact: true });
+  await file.focus();
+  await expect(file.locator("text")).toHaveText("dependency-0.ts");
+  await expect(file.locator("text")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("region", { name: "Graph inspector" })).toContainText("dependency-0.ts");
+  await page.getByRole("button", { name: "Zoom in", exact: true }).focus();
+  await expect(file.locator("text")).toBeVisible();
+});
+
 test("commit history pagination loads older records and clears the selection", async ({ page }) => {
   await page.route("**/api/repository-map?**", route => {
     const offset = Number(new URL(route.request().url()).searchParams.get("offset"));

@@ -5,11 +5,16 @@
 - Backend: **234 passed** against disposable Neo4j 2025.09. New checks cover Python/JS/TS import resolution,
   feature definitions, unresolved imports, Git parents, pagination, repository isolation, stale-edge replacement,
   export filenames/link integrity, and HTTP validation/downloads.
-- Frontend: **28 checks passed** (27 in the complete contract/browser run, plus the new pagination regression).
+- Frontend: **30 checks passed** across the contract/browser suite and targeted regression runs.
   Includes reverse dependency traversal, cycles, unrelated-feature exclusion, absent historical paths, keyboard
-  graph selection, zoom/reset, impact paths, commit pagination, and unindexed repositories.
+  graph selection, zoom/reset, impact paths, commit pagination, and unindexed repositories. A dense eight-feature
+  regression verifies labels do not overlap on desktop or phone; dense-file keyboard selection is also covered.
 - Ruff, web lint, TypeScript, Next.js/landing production builds, and diff whitespace checks passed. The targeted
-  21st review returned no findings. Desktop and phone screenshots were inspected; graph labels retain readable size.
+  21st component review returned no findings. Desktop and phone screenshots with actual repository data were
+  inspected; disconnected components stay bounded, feature labels reserve space, and file/commit names appear
+  on hover, focus or selection in dense graphs. The token stylesheet review reports existing palette definitions.
+- Live production checks passed for the decision/risk exports, a cited Claude answer with vector comparison,
+  and the feature map/commit impact/Obsidian download. The exported vault was checked for valid internal links.
 - Existing entity-resolution tests now assert that both exact matches precede partial matches, without assuming
   an ordering between their corpus-dependent full-text scores. Answer behavior was not changed.
 - The map is a static estimate at indexed HEAD, not an executed revert. Computed runtime dependencies, HTTP calls,
