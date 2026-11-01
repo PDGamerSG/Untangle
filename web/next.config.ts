@@ -9,7 +9,9 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         { source: "/", destination: "/welcome/index.html" },
-        { source: "/api/:path*", destination: `${api}/:path*` },
+        // Vercel routes /api directly to the Python service in this same deployment.
+        // Local Next.js still proxies to `untangle serve` (or UNTANGLE_API_URL).
+        ...(process.env.VERCEL === "1" ? [] : [{ source: "/api/:path*", destination: `${api}/:path*` }]),
       ],
       afterFiles: [],
       fallback: [],

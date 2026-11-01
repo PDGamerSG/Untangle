@@ -32,7 +32,7 @@ jobs:
       - name: Check the import queue
         id: queue
         env:
-          IMPORT_API: https://untangle-code-api.vercel.app
+          IMPORT_API: https://untangle-code.vercel.app/api
         run: |
           python3 - <<'PY'
           import json, os, urllib.request

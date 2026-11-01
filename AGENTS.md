@@ -7,7 +7,8 @@ Whenever testing a release or reporting production verification, test **both** p
 - https://untangle-code.vercel.app
 - https://untangle.pallabdas.me
 
-Run the live browser suite against each origin after deploying. Check the landing page, repository onboarding
+Run `cd web && pnpm test:production` after deploying; it runs the live browser suite against both origins.
+These opt-in checks make real billed answer calls. Check the landing page, repository onboarding
 and selection, dashboard, Ask with citations, history, Pulse, feature/commit map, downloads, icons and mobile
 navigation. Report the exact results for each origin. A passing check on one domain does not verify the other.
 Local and mocked tests remain useful but do not replace these live checks. If a domain is unavailable, report

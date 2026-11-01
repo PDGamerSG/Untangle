@@ -1,10 +1,12 @@
-"""Production paths must remain writable and use the configured real embedder."""
+"""Production caches and both public API route prefixes must remain functional."""
 
+import importlib.util
 import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import httpx
 import pytest
 
 from untangle import embed
@@ -41,3 +43,22 @@ def test_model_download_caches_are_writable_on_vercel(monkeypatch):
     embed.FastEmbedder("BAAI/bge-small-en-v1.5", 384)
     assert Path(os.environ["HF_HOME"]).is_relative_to("/tmp/untangle")
     assert Path(os.environ["HF_XET_CACHE"]).is_relative_to("/tmp/untangle")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("prefix", ["", "/api"])
+async def test_vercel_mount_preserves_api_routes_validation_and_errors(prefix):
+    spec = importlib.util.spec_from_file_location("vercel_entrypoint", Path(__file__).parents[1] / "app.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=module.app), base_url="https://test") as client:
+        schema = await client.get(f"{prefix}/openapi.json")
+        assert schema.status_code == 200
+        assert "/repository-imports" in schema.json()["paths"]
+        assert "/ask" in schema.json()["paths"]
+        invalid = await client.post(f"{prefix}/repository-imports", json={"repository": "https://example.com/o/r"})
+        assert invalid.status_code == 400
+        assert "GitHub" in invalid.json()["error"]
+        assert invalid.headers.get("x-request-id")
+        missing = await client.get(f"{prefix}/not-a-route")
+        assert missing.status_code == 404

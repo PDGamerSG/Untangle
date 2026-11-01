@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "playwright test tests/api.test.ts",
-    "test:e2e": "playwright test tests/site.spec.ts"
+    "test:e2e": "playwright test tests/site.spec.ts",
+    "test:production": "node scripts/test-production.mjs"
   },
   "dependencies": {
     "d3-force": "^3.0.0",

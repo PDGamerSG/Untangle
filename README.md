@@ -6,6 +6,8 @@
 
 **Decision history · evidence chains · handover context**
 
+### [untangle.pallabdas.me](https://untangle.pallabdas.me)
+
 [![CI](https://img.shields.io/github/actions/workflow/status/PDGamerSG/Untangle/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/PDGamerSG/Untangle/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Neo4j](https://img.shields.io/badge/graph-Neo4j-008cc1?style=for-the-badge&logo=neo4j&logoColor=white)](https://neo4j.com/)
@@ -33,7 +35,7 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 
 ## 🚀 Three steps
 
-On the [live app](https://untangle-code.vercel.app/repositories), open **Repositories**, paste a public GitHub URL,
+On the live app, open **Repositories**, paste a public GitHub URL,
 and import it. Progress is saved while the background worker indexes the repository. Open its workspace when ready
 to use the tools below with your own repository. See [repository onboarding](docs/REPOSITORY_IMPORTS.md) for coverage,
 limits and worker configuration.
@@ -44,7 +46,7 @@ limits and worker configuration.
 
 ## 📥 Download and run
 
-Untangle is self-hosted. [Download the source ZIP](https://github.com/PDGamerSG/Untangle/archive/refs/heads/main.zip),
+You can also self-host Untangle. [Download the source ZIP](https://github.com/PDGamerSG/Untangle/archive/refs/heads/main.zip),
 or clone it with Git. Start Neo4j, then run the Python and web clients locally.
 
 ```bash
@@ -110,13 +112,69 @@ Build it with `pnpm build`; the generated `dist/` directory is deployable to any
 | Answer | Resolve the question, select active evidence, validate citations, and report supersession or refusal. |
 | Explain | Show the same answer through the CLI, FastAPI, Next.js UI, and graph-vs-vector comparison. |
 
-## ⚙️ How it works
+## ⚙️ Architecture
 
-```text
-Git + GitHub + docs ─┐
-KT transcripts      ├─► ingestion ─► Neo4j ─► answer service ─┬─► untangle CLI
-                    ┘                                      └─► FastAPI ─► web app
+```mermaid
+flowchart TB
+  Visitor["Your public GitHub repository<br/>Questions · optional handover uploads"]
+
+  subgraph Vercel["One Vercel project · untangle.pallabdas.me"]
+    Web["Next.js frontend<br/>Dashboard · Ask · Timeline · Pulse · Map · Meetings"]
+    API["FastAPI service · /api/*<br/>Repository admission, progress and inventory"]
+    Retrieve["Answer service<br/>Resolve entities · retrieve dated evidence · validate citations"]
+    Map["Feature and commit analysis<br/>Static dependency reachability · Obsidian export"]
+    KT["Handover ingestion<br/>Transcript · speaker · decision · source links"]
+    Web -->|"same-domain requests"| API
+    API --> Retrieve
+    API --> Map
+    API --> KT
+  end
+
+  subgraph Background["GitHub Actions · scheduled worker"]
+    Worker["Durable job claim and heartbeat"]
+    Ingest["Read Git history, PRs, issues, docs and code<br/>Extract symbols, decisions and static imports"]
+    Embed["Free CPU embeddings<br/>Searchable evidence chunks"]
+    Worker --> Ingest --> Embed
+  end
+
+  subgraph Storage["Neo4j Aura"]
+    Queue[("Import jobs<br/>Progress · leases · retry state")]
+    Graph[("Repository graph<br/>Features · files · commits · decisions · people<br/>Full-text and vector indexes")]
+  end
+
+  GitHub["Public GitHub repositories"]
+  Answers["Claude API<br/>Evidence-grounded answer wording"]
+  Speech["Sarvam API<br/>Audio transcription and translation"]
+
+  Visitor --> Web
+  API -->|"enqueue / check progress"| Queue
+  Worker <-->|"claim / update"| Queue
+  GitHub -->|"read only"| Ingest
+  Ingest -->|"entities and relationships"| Graph
+  Embed -->|"vectors"| Graph
+  Retrieve <-->|"graph + vector retrieval"| Graph
+  Retrieve <-->|"bounded evidence + citations"| Answers
+  Map -->|"read indexed relationships"| Graph
+  KT <-->|"optional audio / translation"| Speech
+  KT -->|"linked handover evidence"| Graph
+  KT <-->|"extract evidenced decisions"| Answers
+
+  classDef blue fill:#edf3ff,stroke:#1f55e0,color:#142d58;
+  classDef storage fill:#dce9ff,stroke:#0f3a99,color:#142d58;
+  classDef external fill:#ffffff,stroke:#7892ba,color:#142d58;
+  class Web,API,Retrieve,Map,KT,Worker,Ingest,Embed blue;
+  class Queue,Graph storage;
+  class Visitor,GitHub,Answers,Speech external;
 ```
+
+Repository imports run in the background and persist their progress in Neo4j, so closing the browser does not
+cancel them. Hosted imports use deterministic extraction and free embeddings; paid answer generation runs when
+you ask a question. Imported code is read as data and never executed. Commit impact shows potential downstream
+effects from indexed static imports; it does not execute a revert or prove which tests would fail.
+
+The graph links `Feature → entrypoint File → imported File` and `Commit → changed File`, while decisions connect
+to their subjects, evidence and contributors. Later decisions link to earlier ones through `SUPERSEDES`.
+See the [graph model](docs/GRAPH_MODEL.md) and [feature-map coverage](docs/FEATURE_MAP.md).
 
 | Component | Purpose | License |
 |---|---|---|
@@ -126,12 +184,13 @@ KT transcripts      ├─► ingestion ─► Neo4j ─► answer service ─�
 | Neo4j | Graph storage, full-text indexes, and the optional vector baseline. | Neo4j Community/Enterprise terms |
 | Sarvam AI | Optional speech-to-text and language services for KT recordings. | Sarvam terms |
 
-Backend settings live in `.env`; frontend overrides belong in `web/.env.local`. The web client calls `/api`, which
-Next.js proxies to `UNTANGLE_API_URL` (default `http://127.0.0.1:8090`). Rebuild after changing the proxy URL or any
+Backend settings live in `.env`; frontend overrides belong in `web/.env.local`. In production, Vercel routes `/api`
+to the Python service in the same project. Locally, Next.js proxies `/api` to `UNTANGLE_API_URL` (default
+`http://127.0.0.1:8090`). Rebuild after changing the local proxy URL or any
 `NEXT_PUBLIC_*` setting. `.env.example` selects Claude and the free local `BAAI/bge-small-en-v1.5` embedding model.
 For offline fixture tests, explicitly select `LLM_BACKEND=fake` and `EMBED_BACKEND=fake`.
 
-For the two-project Vercel setup, required credentials, and production checks, see [Deployment](docs/DEPLOYMENT.md).
+For the single-project Vercel setup, required credentials, and checks on both public domains, see [Deployment](docs/DEPLOYMENT.md).
 
 Decisions are keyed by subject and predicate. A later value links to the older value with `SUPERSEDES` and records
 `valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and

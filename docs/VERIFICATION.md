@@ -4,8 +4,8 @@
 
 - Durable imports validate GitHub URLs and public accessibility, coalesce duplicate jobs, enforce shared queue
   and daily limits, recover interrupted jobs, and protect worker updates with a lease token.
-- Backend suite passed **266 tests**; the focused import and GitHub suite passed **38 tests**. The inventory
-  refinement subsequently passed all **31 import tests**. Tests use disposable Neo4j, including concurrent admission and
+- The final backend suite passed **268 tests**, including two shared-domain routing checks. The inventory
+  refinement also passed all **31 import tests**. Tests use disposable Neo4j, including concurrent admission and
   claims, fixture ingestion, inventory, cited answers, repository isolation, and failure-message redaction.
 - Imports reuse the full Git/GitHub analysis pipeline and free embeddings. Optional paid rationale extraction
   is disabled for hosted imports; the existing answer service retains its configured low-cost model.

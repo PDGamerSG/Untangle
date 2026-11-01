@@ -5,6 +5,7 @@
     {"id": "pulse", "name": "Knowledge risks", "description": "Conflict, drift and ownership triage.", "entrypoints": ["web/src/app/pulse/page.tsx", "src/untangle/pulse.py"]},
     {"id": "meetings", "name": "Handover calls", "description": "Transcripts, Sarvam audio and extracted decisions.", "entrypoints": ["web/src/app/meetings/page.tsx", "src/untangle/kt/service.py"]},
     {"id": "dashboard", "name": "Repository discovery", "description": "Search, system status and entity exploration.", "entrypoints": ["web/src/app/dashboard/page.tsx", "web/src/components/EntityPage.tsx"]},
+    {"id": "repositories", "name": "Repository onboarding", "description": "Public GitHub imports, durable job progress and per-repository inventory.", "entrypoints": ["web/src/app/repositories/page.tsx", "src/untangle/api/repositories.py", "src/untangle/repositories/worker.py"]},
     {"id": "ingest", "name": "History ingestion", "description": "Git, GitHub, code and document ingestion into Neo4j.", "entrypoints": ["src/untangle/ingest/pipeline.py"]},
     {"id": "map", "name": "Feature map", "description": "Feature dependencies, commit impact and Obsidian export.", "entrypoints": ["web/src/app/map/page.tsx", "src/untangle/repository_map/service.py"]},
     {"id": "landing", "name": "Landing experience", "description": "The public introduction and route into the app.", "entrypoints": ["landing/src/main.ts"]}

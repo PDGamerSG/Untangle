@@ -1,18 +1,27 @@
 # Production deployment
 
-The public frontend is https://untangle-code.vercel.app. The landing page's **Open dashboard** buttons open `/dashboard`, the application's home.
-The FastAPI project is https://untangle-code-api.vercel.app; the frontend proxies `/api/*` to it.
-The selected repository is `PDGamerSG/Untangle`.
+The same public application is available at https://untangle.pallabdas.me and https://untangle-code.vercel.app.
+The landing page's **Open dashboard** buttons open `/dashboard`. New sessions default to `PDGamerSG/Untangle`;
+visitors can add and select their own public repositories.
 
-## Vercel projects
+## One Vercel project
 
-| Project | Root directory | Framework | Configuration |
+| Service in `untangle-code` | Root directory | Framework | Configuration |
 | --- | --- | --- | --- |
-| `untangle-code-api` | Repository root | FastAPI | `vercel.json`, `app.py` |
-| `untangle-code` | `web` | Next.js | `web/vercel.json` |
+| `api` | Repository root | FastAPI | `vercel.json`, `app.py` |
+| `web` | `web` | Next.js | `vercel.json`, `web/next.config.ts` |
 
-The API's `vercel.json` pins its function to `bom1` (Mumbai) because the Aura instance runs in GCP `asia-south1`.
-Keep the two in one region: every answer runs several Cypher round trips, and a function in Vercel's default `iad1`
+Vercel Services builds both runtimes into one deployment. `/api/*` routes directly to Python and all other
+requests go to Next.js. Both public domains point to this project. The former API hostname is retained as a
+compatibility alias routed to the API service; it is not a separate project. The hosted import worker calls
+`https://untangle-code.vercel.app/api`.
+
+Deploy from the repository root with `npx vercel deploy --prod --yes --project untangle-code`. The Vercel project
+root directory must be empty (repository root). To validate a release before switching domains, use
+`--prod --skip-domain`, test the deployment URL, then run `vercel promote <deployment-url>`.
+
+The root `vercel.json` pins functions to `bom1` (Mumbai) because the Aura instance runs in GCP `asia-south1`.
+Keep the API near the database: every answer runs several Cypher round trips, and a function in Vercel's default `iad1`
 paid about 230 ms per trip, which made simple pages take seconds and a handover transcript about ten.
 
 The frontend build needs files outside its root directory: `web/scripts/build-landing.mjs` builds the sibling
@@ -21,7 +30,7 @@ outside the root directory. Generated assets and private `.env` files are exclud
 
 ## Credentials and environment variables
 
-Set these on the **API project's Production environment**. Never put private credentials in `NEXT_PUBLIC_*` variables.
+Set these on the **single project's Production environment**. Never put private credentials in `NEXT_PUBLIC_*` variables.
 
 | Variable | Value / purpose |
 | --- | --- |
@@ -31,14 +40,14 @@ Set these on the **API project's Production environment**. Never put private cre
 | `NEO4J_DATABASE` | Database name, normally `neo4j`. |
 | `ANTHROPIC_API_KEY` | Claude API key with billing available. |
 | `LLM_BACKEND` | `anthropic` — Claude handles answers and decision extraction. |
-| `LLM_MODEL` | A Claude model ID available to the supplied API key. |
+| `LLM_MODEL` | Keep the configured lower-cost Claude model; do not switch to Sonnet or Opus. |
 | `SARVAM_API_KEY` | Sarvam key for speech transcription and translation. |
 | `SARVAM_STT_MODEL` | `saaras:v4`. |
 | `SARVAM_STT_MODE` | `codemix`. |
 | `EMBED_BACKEND` | `fastembed`. |
 | `EMBED_MODEL` | `BAAI/bge-small-en-v1.5`. |
 | `EMBED_DIM` | `384`. |
-| `CORS_ORIGINS` | `https://untangle-code.vercel.app`. |
+| `CORS_ORIGINS` | `https://untangle-code.vercel.app,https://untangle.pallabdas.me`. |
 | `UNTANGLE_DISPLAY_LANGUAGE` | `en` (default). Responses render stored Hindi and Hinglish in English; `original` turns this off. |
 | `REPO_IMPORTS_ENABLED` | `true` once the scheduled repository worker and its Actions secrets are configured. |
 
@@ -46,9 +55,9 @@ The embedding model runs on CPU through ONNX and needs no paid API or key. Verce
 `/tmp/untangle`; a cold instance can take longer to answer. It does not silently substitute fake embeddings if
 initialization fails. Sarvam is used for speech; no OpenAI key is needed for this deployment.
 
-Set `UNTANGLE_API_URL=https://untangle-code-api.vercel.app` on the **frontend project's Production environment**.
 Leave `NEXT_PUBLIC_UNTANGLE_API` at its `/api` default and leave `NEXT_PUBLIC_UNTANGLE_SAMPLE` unset.
-Redeploy after environment changes.
+No external API URL is required in production. `UNTANGLE_API_URL` remains available for local Next.js testing;
+it defaults to `http://127.0.0.1:8090`. Redeploy after environment changes.
 
 ## Load and update the graph
 
@@ -76,7 +85,8 @@ existing records. Do not use `--reset` unless deliberately rebuilding the reposi
 
 ## API surface
 
-Interactive endpoint documentation is available at the API's `/docs` route.
+Interactive endpoint documentation is available at `/api/docs` on either public domain. Prefix each endpoint
+below with `/api` when calling the deployed application (the local CLI server retains unprefixed routes).
 
 | Endpoint | Purpose |
 | --- | --- |
@@ -113,15 +123,17 @@ Browser integration tests intercept API calls with recorded contracts. They veri
 refusal states, evidence links, timeline changes, Pulse, uploads, error recovery, and mobile layout. They do not
 prove production credentials work.
 
-The opt-in production browser checks use the deployed API and real Claude calls. Run them from `web` after
-publishing a frontend change; they inspect the default Untangle repository and download evidence briefs without
-uploading data or changing repository records:
+The opt-in production browser checks use the deployed API and real billed answer calls. Run them from `web`
+after every release. The command tests **both domains**, as required by root `AGENTS.md`, including the landing,
+icons, phone navigation, restored import status, selected inventory, cited answers, history, risks and exports.
+It reads `PDGamerSG/Untangle` and the completed `pallets/itsdangerous` smoke import without uploading data or
+starting new jobs:
 
 ```bash
-UNTANGLE_LIVE_TESTS=1 E2E_BASE_URL=https://untangle-code.vercel.app pnpm exec playwright test tests/production.spec.ts
+pnpm test:production
 ```
 
-These checks require working Claude billing and indexed decisions/risks in `PDGamerSG/Untangle`. They are separate
+These checks require working Claude billing and indexed decisions/risks in both repositories. They are separate
 from CI's recorded-contract suite and do not re-test Sarvam audio ingestion.
 
 After deployment, separately verify health, repository counts, a cited Claude answer (with `llm.used` true in its

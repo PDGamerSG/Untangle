@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Download } from "@playwright/test";
+import type { ImportJob, RepositoryOverview } from "../src/lib/types";
 
 // Explicit opt-in: these checks use the deployed database and real Claude billing.
 // No uploads or repository writes. Run separately from the recorded-contract suite.
@@ -102,5 +103,95 @@ test("live feature map traces commits and downloads an Obsidian vault", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("live-commit-impact-phone.png"), fullPage: true });
+  expect(errors).toEqual([]);
+});
+
+test("live landing, application icons and phone navigation", async ({ page, request }, testInfo) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Open dashboard/i }).first()).toBeVisible();
+  expect(await page.locator("body").innerText()).not.toMatch(/\b(Claude|Haiku|Sonnet|Opus|GPT-\d)\b/i);
+  const icon = await request.get("/icon.svg");
+  expect(icon.ok()).toBe(true);
+  expect(await icon.text()).toContain("#1f55e0");
+  for (const path of ["/favicon.ico", "/apple-icon.png", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/icon-maskable-512.png"]) {
+    const response = await request.get(path);
+    expect(response.ok(), path).toBe(true);
+    expect(response.headers()["content-type"], path).toMatch(/^image\//);
+    expect((await response.body()).length, path).toBeGreaterThan(100);
+  }
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  expect((await manifest.json()).theme_color).toBe("#0f3a99");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/dashboard");
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("PDGamerSG/Untangle", { timeout: 30_000 });
+  const nav = page.getByRole("navigation", { name: "Primary", exact: true });
+  for (const name of ["Dashboard", "Ask", "Map", "Timeline", "Pulse", "Meetings"]) {
+    await expect(nav.getByRole("link", { name, exact: true })).toBeInViewport();
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("live-dashboard-phone.png"), fullPage: true });
+  await page.getByRole("link", { name: "Repositories", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Repositories", level: 1 })).toBeVisible();
+  await expect(page.getByLabel("GitHub repository", { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("live-repositories-phone.png"), fullPage: true });
+});
+
+test("live imported repository restores its job and uses its own inventory and tools", async ({ page, request }, testInfo) => {
+  const repo = "pallets/itsdangerous";
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const status = await request.get("/api/repository-imports");
+  expect(status.ok()).toBe(true);
+  const imports = await status.json();
+  expect(imports.enabled).toBe(true);
+  const job = (imports.jobs as ImportJob[]).find(j => j.repo === repo && j.status === "complete");
+  expect(job, "The external-repository smoke import must have completed").toBeTruthy();
+  const response = await request.get(`/api/repository-overview?repo=${encodeURIComponent(repo)}`);
+  expect(response.ok()).toBe(true);
+  const inventory: RepositoryOverview = await response.json();
+  expect(inventory.counts.current_files).toBeGreaterThan(0);
+  expect(inventory.counts.files).toBeGreaterThanOrEqual(inventory.counts.current_files);
+  expect(inventory.suggested_questions.length).toBeGreaterThan(0);
+
+  await page.addInitScript(id => localStorage.setItem("untangle.import", id), job!.id);
+  await page.goto("/repositories");
+  await expect(page.getByRole("progressbar", { name: `Indexing ${repo}` })).toHaveAttribute("aria-valuenow", "100", { timeout: 30_000 });
+  await page.reload();
+  await page.getByRole("button", { name: `Open ${repo}`, exact: true }).click();
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: `About ${repo}`, exact: true })).toBeVisible();
+  const records = page.getByLabel("Indexed records", { exact: true });
+  await expect(records).toContainText("File paths");
+  await expect(records).toContainText("Current files");
+  await expect(records).toContainText("Contributors");
+  await page.screenshot({ path: testInfo.outputPath("live-imported-dashboard.png"), fullPage: true });
+  await page.goto("/repositories");
+  const selected = page.locator("section[aria-labelledby='inventory-heading']");
+  await expect(selected.getByRole("heading", { name: repo, exact: true })).toBeVisible();
+  await expect(selected.getByRole("heading", { name: "Dependencies", exact: true })).toBeVisible();
+  await expect(selected.getByRole("heading", { name: "Documents", exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("live-repositories-desktop.png"), fullPage: true });
+  const answerResponse = page.waitForResponse(res => new URL(res.url()).pathname === "/api/ask" && res.request().method() === "POST");
+  await selected.getByRole("link", { name: inventory.suggested_questions[0], exact: true }).click();
+  await expect(page.getByLabel("Your question", { exact: true })).toHaveValue(inventory.suggested_questions[0]);
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo);
+  const answerResult = await answerResponse;
+  expect(answerResult.ok()).toBe(true);
+  expect(answerResult.request().postDataJSON().repo).toBe(repo);
+  const answer = await answerResult.json();
+  expect(answer.refused).toBe(false);
+  expect(Object.keys(answer.citations).length).toBeGreaterThan(0);
+  await expect(page.getByText("Answer ready.", { exact: true })).toBeAttached();
+  await page.goto("/map");
+  const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+  await expect(graph.getByRole("button").first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveAttribute("href", /repo=pallets%2Fitsdangerous/);
+  await page.goto("/timeline");
+  await expect(page.getByRole("region", { name: "Selected decision" })).toBeVisible({ timeout: 30_000 });
+  await page.goto("/pulse");
+  await expect(page.locator("article[data-risk]").first()).toBeVisible({ timeout: 30_000 });
+  await page.goto("/meetings");
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo);
   expect(errors).toEqual([]);
 });
