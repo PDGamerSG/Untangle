@@ -116,55 +116,39 @@ Build it with `pnpm build`; the generated `dist/` directory is deployable to any
 
 ```mermaid
 flowchart TB
-  Visitor["Your public GitHub repository<br/>Questions · optional handover uploads"]
+  Visitor["Browser · your repository and questions"]
 
   subgraph Vercel["One Vercel project · untangle.pallabdas.me"]
     Web["Next.js frontend<br/>Dashboard · Ask · Timeline · Pulse · Map · Meetings"]
-    API["FastAPI service · /api/*<br/>Repository admission, progress and inventory"]
-    Retrieve["Answer service<br/>Resolve entities · retrieve dated evidence · validate citations"]
-    Map["Feature and commit analysis<br/>Static dependency reachability · Obsidian export"]
-    KT["Handover ingestion<br/>Transcript · speaker · decision · source links"]
+    API["FastAPI service · /api/*<br/>Inventory · cited answers · commit impact<br/>Handovers · evidence and Obsidian exports"]
     Web -->|"same-domain requests"| API
-    API --> Retrieve
-    API --> Map
-    API --> KT
-  end
-
-  subgraph Background["GitHub Actions · scheduled worker"]
-    Worker["Durable job claim and heartbeat"]
-    Ingest["Read Git history, PRs, issues, docs and code<br/>Extract symbols, decisions and static imports"]
-    Embed["Free CPU embeddings<br/>Searchable evidence chunks"]
-    Worker --> Ingest --> Embed
   end
 
   subgraph Storage["Neo4j Aura"]
-    Queue[("Import jobs<br/>Progress · leases · retry state")]
-    Graph[("Repository graph<br/>Features · files · commits · decisions · people<br/>Full-text and vector indexes")]
+    Queue[("Durable import jobs<br/>Progress · leases · retries")]
+    Graph[("Repository knowledge graph<br/>Features · files · commits · decisions · people<br/>Full-text and vector indexes")]
   end
 
-  GitHub["Public GitHub repositories"]
-  Answers["Claude API<br/>Evidence-grounded answer wording"]
-  Speech["Sarvam API<br/>Audio transcription and translation"]
+  Worker["Scheduled GitHub Actions worker<br/>Read history and code · extract static relationships<br/>Create free CPU embeddings · save evidence"]
+  GitHub["Public GitHub repository<br/>Git · PRs · issues · docs"]
+  AI["Claude API<br/>Cited wording and decision extraction"]
+  Speech["Sarvam API<br/>Transcription and translation"]
 
   Visitor --> Web
+  API <-->|"retrieve / store evidence"| Graph
   API -->|"enqueue / check progress"| Queue
-  Worker <-->|"claim / update"| Queue
-  GitHub -->|"read only"| Ingest
-  Ingest -->|"entities and relationships"| Graph
-  Embed -->|"vectors"| Graph
-  Retrieve <-->|"graph + vector retrieval"| Graph
-  Retrieve <-->|"bounded evidence + citations"| Answers
-  Map -->|"read indexed relationships"| Graph
-  KT <-->|"optional audio / translation"| Speech
-  KT -->|"linked handover evidence"| Graph
-  KT <-->|"extract evidenced decisions"| Answers
+  Worker <-->|"claim / heartbeat / complete"| Queue
+  GitHub -->|"read only"| Worker
+  Worker -->|"entities, links and vectors"| Graph
+  API <-->|"bounded evidence"| AI
+  API <-->|"optional audio / translation"| Speech
 
   classDef blue fill:#edf3ff,stroke:#1f55e0,color:#142d58;
   classDef storage fill:#dce9ff,stroke:#0f3a99,color:#142d58;
   classDef external fill:#ffffff,stroke:#7892ba,color:#142d58;
-  class Web,API,Retrieve,Map,KT,Worker,Ingest,Embed blue;
+  class Web,API,Worker blue;
   class Queue,Graph storage;
-  class Visitor,GitHub,Answers,Speech external;
+  class Visitor,GitHub,AI,Speech external;
 ```
 
 Repository imports run in the background and persist their progress in Neo4j, so closing the browser does not
