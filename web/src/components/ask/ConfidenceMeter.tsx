@@ -6,7 +6,7 @@ export function ConfidenceMeter({ confidence }: { confidence: AskResponse["confi
   const tone = confidence.label === "high" ? "var(--ok)" : confidence.label === "medium" ? "var(--warn)" : "var(--bad)";
   return (
     <section aria-label="Confidence">
-      <SectionTitle hint="computed from graph signals only, never from the model">Confidence</SectionTitle>
+      <SectionTitle hint="computed from graph signals only">Confidence</SectionTitle>
       <div className="card p-3.5">
         <div className="flex items-center gap-3">
           <div

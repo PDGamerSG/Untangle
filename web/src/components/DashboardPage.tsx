@@ -7,6 +7,8 @@ import { ArrowUpRight, GitBranch, ShieldAlert } from "lucide-react";
 import { GraphStatsPanel, SearchPanel } from "./GraphPanels";
 import { EntityChip } from "./Chip";
 import { RepoSelect } from "./RepoSelect";
+import { answerLine } from "./HealthDot";
+import { RepositoryOverviewPanel, useStarterQuestions } from "./RepositoryOverview";
 import { useRepo } from "./RepoContext";
 import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
@@ -52,20 +54,20 @@ function SystemStatus() {
         <p className="text-[0.88rem] text-bad">The API is not reachable: {res.error}</p>
       ) : d ? (
         <dl className="divide-y divide-rule border-y border-rule">
-          <StatusRow label="Graph database" value={d.neo4j?.version ? `Neo4j ${d.neo4j.version}${d.neo4j.aura ? " on AuraDB" : ""}` : "Not connected"} tone={d.ok ? "ok" : "bad"} />
+          <StatusRow label="Graph database" value={d.neo4j?.version ? `Neo4j ${d.neo4j.version}${d.neo4j.aura ? ", hosted" : ""}` : "Not connected"} tone={d.ok ? "ok" : "bad"} />
           <StatusRow
-            label="Answer model"
-            value={d.llm.backend === "fake" ? "Deterministic answers" : `${d.llm.backend}${d.llm.model ? ` / ${d.llm.model}` : ""}`}
+            label="Answers"
+            value={answerLine(d)}
             tone={(d.llm.available ?? d.optional_backends?.llm.available) === false ? "warn" : "ok"}
           />
           <StatusRow
-            label="Embeddings"
-            value={`${d.embed.backend} (${d.embed.dim} dims)`}
+            label="Search index"
+            value={`Ready, ${d.embed.dim} dimensions`}
             tone={(d.embed.available ?? d.optional_backends?.embeddings.available) === false ? "warn" : "ok"}
           />
           <StatusRow
             label="Speech and translation"
-            value={(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? `Sarvam ${d.sarvam?.model ?? ""}`.trim() : "Not configured"}
+            value={(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "Ready" : "Not configured"}
             tone={(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "ok" : "idle"}
           />
         </dl>
@@ -76,6 +78,7 @@ function SystemStatus() {
 
 function QuickAsk({ repo }: { repo: string }) {
   const router = useRouter();
+  const examples = useStarterQuestions(repo, starters(repo));
   const [text, setText] = useState("");
   const open = (q: string) => router.push(`/ask?question=${encodeURIComponent(q)}`);
   return (
@@ -105,7 +108,7 @@ function QuickAsk({ repo }: { repo: string }) {
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[0.82rem] text-ink-3" aria-label="Example questions">
         <span className="mr-0.5">Try</span>
-        {starters(repo).map((q) => (
+        {examples.map((q) => (
           <button key={q} type="button" className="example" onClick={() => open(q)}>
             {q}
           </button>
@@ -222,6 +225,16 @@ export function DashboardPage() {
         <>
           <QuickAsk repo={repo} />
 
+          <section aria-labelledby="about-heading">
+            <div className="sec-head">
+              <h2 id="about-heading">About {repo}</h2>
+              <Link href="/repositories" className="sec-hint inline-flex items-center gap-0.5 font-semibold text-ink-2 underline-offset-4 hover:underline">
+                Full inventory <ArrowUpRight size={13} aria-hidden />
+              </Link>
+            </div>
+            <RepositoryOverviewPanel repo={repo} compact />
+          </section>
+
           <section className="grid gap-0 overflow-hidden rounded-xl border border-accent/20 bg-surface xl:grid-cols-2" aria-label="Investigation tools">
             <Link href="/timeline" className="group flex min-w-0 items-start gap-4 border-b border-rule p-5 transition-colors hover:bg-accent-soft/60 xl:border-b-0 xl:border-r">
               <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><GitBranch size={22} aria-hidden /></span>
@@ -243,8 +256,11 @@ export function DashboardPage() {
           <SystemStatus />
         </>
       ) : (
-        <EmptyState title="No repository has been ingested yet">
-          Run <code className="t-code">uv run untangle ingest owner/name</code>, then reload this page.
+        <EmptyState title="No repository has been indexed yet">
+          <Link href="/repositories" className="font-semibold text-accent underline-offset-4 hover:underline">
+            Add a public GitHub repository
+          </Link>{" "}
+          or run <code className="t-code">uv run untangle ingest owner/name</code>, then reload this page.
         </EmptyState>
       )}
     </div>

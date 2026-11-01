@@ -9,6 +9,7 @@ import { api, errorMessage } from "@/lib/api";
 import { examplesFor } from "@/lib/examples";
 import type { AskRequest, AskResponse } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
+import { useStarterQuestions } from "@/components/RepositoryOverview";
 
 function examplesOf(repo: string | null) {
   const e = examplesFor(repo);
@@ -46,7 +47,7 @@ function AnswerSkeleton() {
 
 export function AskPage() {
   const { repo } = useRepo();
-  const examples = examplesOf(repo);
+  const examples = useStarterQuestions(repo, examplesOf(repo), 5);
   const [question, setQuestion] = useState("");
   const [at, setAt] = useState("");
   const [compare, setCompare] = useState(false);

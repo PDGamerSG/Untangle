@@ -4,10 +4,13 @@ import type {
   EntityResponse,
   GraphStats,
   Health,
+  ImportJob,
   MeetingDetail,
   MeetingSummary,
   PulseResponse,
   RepoSummary,
+  RepositoryImports,
+  RepositoryOverview,
   SearchResponse,
   Timeline,
   WhyPath,
@@ -108,6 +111,21 @@ export const api = {
 
   meeting: (id: string, signal?: AbortSignal): Promise<MeetingDetail> =>
     SAMPLE_MODE ? sample.sampleMeeting(id) : request(`/meetings/${encodeURIComponent(id)}`, { signal }),
+
+  repositoryImports: (signal?: AbortSignal): Promise<RepositoryImports> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(400, "Adding repositories is available in the live app.")) : request("/repository-imports", { signal }),
+
+  repositoryImport: (id: string, signal?: AbortSignal): Promise<ImportJob> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(404, "Adding repositories is available in the live app.")) : request(`/repository-imports/${encodeURIComponent(id)}`, { signal }),
+
+  /** Queues a public GitHub repository, or returns the active or recent job for it. Posting a failed one retries it. */
+  importRepository: (repository: string): Promise<ImportJob> =>
+    SAMPLE_MODE
+      ? Promise.reject(new ApiError(400, "Adding repositories is available in the live app."))
+      : request("/repository-imports", { method: "POST", body: JSON.stringify({ repository }) }),
+
+  repositoryOverview: (repo: string, signal?: AbortSignal): Promise<RepositoryOverview> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(404, "The repository inventory is available in the live app.")) : request(`/repository-overview${q({ repo })}`, { signal }),
 
   ingestMeeting: (body: FormData): Promise<{ meeting_id: string; utterances: number; decisions: number }> => {
     if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Uploads are available in the live app."));

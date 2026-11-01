@@ -3,6 +3,13 @@
 import { api, API_BASE, SAMPLE_MODE } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 
+/** How answers are written, without naming the service behind the wording. */
+export function answerLine(d: { llm: { backend: string; available?: boolean }; optional_backends?: { llm: { available: boolean } } }): string {
+  if (d.llm.backend === "fake") return "built from the graph, with template wording";
+  const available = d.llm.available ?? d.optional_backends?.llm.available;
+  return available === false ? "built from the graph, with template wording" : "evidence-backed, with polished wording";
+}
+
 export function useHealth() {
   const health = useResource("health", (signal) => api.health(signal));
   const state = health.loading ? "loading" : health.error ? "down" : health.data?.ok ? "ok" : "warn";
@@ -15,10 +22,10 @@ export function useHealth() {
       ? [`API unreachable: ${health.error}`]
       : d
         ? [
-            `Neo4j ${d.neo4j.version}${d.neo4j.aura ? " (AuraDB)" : ""}`,
-            `LLM: ${d.llm.backend}${d.llm.model ? ` / ${d.llm.model}` : ""}`,
-            `Embeddings: ${d.embed.backend} (${d.embed.dim} dims)`,
-            `Speech and translation: ${(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "Sarvam ready" : "not configured"}`,
+            `Graph database: Neo4j ${d.neo4j.version}${d.neo4j.aura ? ", hosted" : ""}`,
+            `Answers: ${answerLine(d)}`,
+            `Search index: ${d.embed.available === false ? "unavailable" : "ready"} (${d.embed.dim} dimensions)`,
+            `Speech and translation: ${(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "ready" : "not configured"}`,
             SAMPLE_MODE ? "Sample mode (fixtures)" : API_BASE,
           ]
         : ["No health data"];

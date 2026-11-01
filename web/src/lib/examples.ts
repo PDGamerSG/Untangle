@@ -63,6 +63,11 @@ const GENERIC: RepoExamples = {
   search: ["README.md", "config", "test", "docs"],
 };
 
+/** True when `repo` has a hand-checked list above; imported repositories rely on the API's suggested questions. */
+export function hasCuratedExamples(repo: string | null | undefined): boolean {
+  return !!repo && repo in EXAMPLES;
+}
+
 export function examplesFor(repo: string | null | undefined): RepoExamples {
   return (repo && EXAMPLES[repo]) || GENERIC;
 }

@@ -53,24 +53,11 @@ export function WhyPanel({ why, defaultOpen = false }: { why: Why; defaultOpen?:
           <dd>
             <code className="t-code text-ink">{why.route}</code>
           </dd>
-          <dt className="text-ink-3">Language model</dt>
+          <dt className="text-ink-3">Wording</dt>
           <dd className="text-ink-2">
-            {llm.used ? (
-              <>
-                Composed by <code className="t-code text-ink">{llm.backend}</code>
-                {llm.model ? (
-                  <>
-                    {" "}
-                    / <code className="t-code text-ink">{llm.model}</code>
-                  </>
-                ) : null}
-                , citations validated against the evidence.
-              </>
-            ) : (
-              <>
-                Template answer rendered from the graph; no model call{llm.backend ? ` (backend: ${llm.backend}${llm.model ? ` / ${llm.model}` : ""})` : ""}.
-              </>
-            )}
+            {llm.used
+              ? "Written from the evidence, with every citation checked against the graph."
+              : "Built directly from the graph, so every sentence maps to a record."}
           </dd>
         </dl>
         <div>

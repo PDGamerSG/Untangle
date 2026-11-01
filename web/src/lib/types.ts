@@ -78,9 +78,11 @@ export interface GraphStats {
 
 export interface RepoSummary {
   full_name: string;
-  head_sha: string;
+  url?: string | null;
+  /** Null when the repository has no git history indexed (for example, only a handover call). */
+  head_sha: string | null;
   commit_count: number;
-  ingested_at_iso: string;
+  ingested_at_iso: string | null;
   counts: { commits: number; prs: number; issues: number; decisions: number; meetings: number };
 }
 
@@ -312,4 +314,64 @@ export interface MeetingDetail extends MeetingSummary {
   utterances: Utterance[];
   decisions: DecisionCard[];
   speakers: { label: string; person: PersonCard | null }[];
+}
+
+/* Repository imports and inventory: see the backend's `/repository-imports` and `/repository-overview`. */
+export type ImportStatus = "queued" | "running" | "complete" | "failed";
+
+export interface ImportJob {
+  id: string;
+  repo: string;
+  url: string;
+  status: ImportStatus;
+  stage: string;
+  progress: number;
+  message: string;
+  created_at_iso: string;
+  updated_at_iso: string;
+  started_at_iso: string | null;
+  finished_at_iso: string | null;
+  error: string | null;
+  summary: Record<string, number | string> | null;
+  warnings: string[];
+}
+
+export interface ImportLimits {
+  max_repository_size_kb: number;
+  max_commits: number;
+  max_prs: number;
+  max_issues: number;
+  imports_per_day: number;
+}
+
+export interface RepositoryImports {
+  enabled: boolean;
+  limits: ImportLimits;
+  worker: { last_seen_at_iso: string | null; scheduling: string };
+  jobs: ImportJob[];
+}
+
+export interface RepositoryOverview {
+  repo: string;
+  url: string | null;
+  description: string | null;
+  default_branch: string | null;
+  /** Null until git history is indexed; never substitute a placeholder. */
+  head_sha: string | null;
+  ingested_at_iso: string | null;
+  languages: string[];
+  counts: Record<string, number>;
+  dependencies: { id: string; name: string; ecosystem: string; version: string | null; path: string }[];
+  documents: { id: string; path: string; title: string | null }[];
+  features: { id: string; name: string; source: string; entrypoints: string[] }[];
+  suggested_questions: string[];
+  coverage: {
+    commits: number;
+    max_commits: number | null;
+    max_prs: number | null;
+    max_issues: number | null;
+    map_scanned_files: number;
+    unresolved_imports: number;
+  };
+  warnings: string[];
 }
