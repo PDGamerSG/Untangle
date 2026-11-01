@@ -137,6 +137,30 @@ body {
   outline-color: #ffffff;
 }
 
+/* The current page: a bar above the tab on phones, beside the link in the sidebar. */
+.nav-link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: -0.25rem;
+  left: 50%;
+  width: 1.5rem;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: #ffffff;
+  transform: translateX(-50%);
+}
+@media (min-width: 64rem) {
+  .nav-link[aria-current="page"]::before {
+    top: 0.45rem;
+    bottom: 0.45rem;
+    left: 0;
+    width: 3px;
+    height: auto;
+    border-radius: 0 3px 3px 0;
+    transform: none;
+  }
+}
+
 /* ---------- Components (layered so Tailwind utilities can override them) ---------- */
 @layer components {
 .map-canvas { position: relative; overflow: hidden; border: 1px solid var(--rule); border-radius: var(--radius-card); background-color: var(--surface); background-image: radial-gradient(var(--rule) 1px, transparent 1px); background-size: 20px 20px; }
@@ -181,6 +205,15 @@ body {
 .evidence-connections { display: grid; gap: 1.25rem; }
 .evidence-connection { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); gap: 0.75rem; }
 .evidence-connection > svg { margin-top: 2px; color: var(--accent); }
+
+/* A small label above a page title or panel. */
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
 
 .card {
   background: var(--surface);

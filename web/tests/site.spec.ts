@@ -10,6 +10,29 @@ import repositoryMap from "../sample/repository-map.json";
 import { sampleDecision, sampleTimeline } from "../src/lib/sample";
 
 // Browser integration tests use recorded API contracts. Live service checks run separately.
+// The inventory and import shapes the backend returns; values are illustrative, not a recorded snapshot.
+const overview = {
+  repo: "knadh/listmonk", url: "https://github.com/knadh/listmonk", description: "High performance, self-hosted newsletter and mailing list manager.",
+  default_branch: "master", head_sha: repos[0].head_sha, ingested_at_iso: repos[0].ingested_at_iso, languages: ["Go", "Vue"],
+  counts: { files: 410, dependencies: 2, documents: 1, features: 1, commits: 2270, prs: 896, issues: 2284, decisions: 2546, people: 120 },
+  dependencies: [{ id: "dep:knadh/listmonk:github.com/lib/pq", name: "github.com/lib/pq", ecosystem: "go", version: "1.10.9", path: "go.mod" }],
+  documents: [{ id: "doc:knadh/listmonk:README.md", path: "README.md", title: "listmonk" }],
+  features: [{ id: "feature:knadh/listmonk:campaigns", name: "Campaigns", source: "routes", entrypoints: ["cmd/campaigns.go"] }],
+  suggested_questions: ["why is app.concurrency set the way it is?"],
+  coverage: { commits: 2270, max_commits: null, max_prs: null, max_issues: null, map_scanned_files: 410, unresolved_imports: 0 },
+  warnings: ["Dependencies are capped at 50 in this list."],
+};
+const importLimits = { max_repository_size_kb: 512000, max_commits: 5000, max_prs: 2000, max_issues: 2000, imports_per_day: 20 };
+const importJob = (status: "queued" | "running" | "complete" | "failed", extra: Record<string, unknown> = {}) => ({
+  id: "imp_1", repo: "octo-org/hello-world", url: "https://github.com/octo-org/hello-world", status,
+  stage: { queued: "queued", running: "history", complete: "complete", failed: "failed" }[status],
+  progress: { queued: 0, running: 0.45, complete: 1, failed: 0.3 }[status], message: `Import ${status}`,
+  created_at_iso: "2026-11-01T10:00:00Z", updated_at_iso: "2026-11-01T10:05:00Z", started_at_iso: status === "queued" ? null : "2026-11-01T10:02:00Z",
+  finished_at_iso: status === "complete" || status === "failed" ? "2026-11-01T10:09:00Z" : null,
+  error: status === "failed" ? "GitHub returned 404: the repository is private or does not exist." : null,
+  summary: status === "complete" ? { commits: 42, decisions: 7 } : null, warnings: [], ...extra,
+});
+
 const concurrencyKey = { id: "cfg:knadh/listmonk:schema.sql::app.concurrency", label: "ConfigKey", name: "app.concurrency", path: "schema.sql", key: "app.concurrency", score: 1 };
 
 test.beforeEach(async ({ page }) => {
@@ -21,6 +44,8 @@ test.beforeEach(async ({ page }) => {
     else if (path === "/repos") body = repos;
     else if (path === "/pulse") body = pulse;
     else if (path === "/repository-map") body = repositoryMap;
+    else if (path === "/repository-overview") body = overview;
+    else if (path === "/repository-imports") body = { enabled: true, limits: importLimits, worker: { last_seen_at_iso: null, scheduling: "every 5 minutes" }, jobs: [] };
     else if (path === "/meetings") body = meetings;
     else if (path.startsWith("/meetings/")) body = meeting;
     else if (path === "/ask") {
@@ -136,14 +161,15 @@ test("phone layout stays within the viewport", async ({ page }, testInfo) => {
   const longRepo = "example-organization/a-repository-with-a-long-name";
   await page.route("**/api/repos", route => route.fulfill({ json: [{ ...repos[0], full_name: longRepo }] }));
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline", "/map"]) {
+  for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline", "/map", "/repositories"]) {
     await page.goto(path);
-    await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
+    if (path === "/repositories") await expect(page.getByRole("heading", { level: 2, name: longRepo })).toBeVisible();
+    else await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
     if (path === "/timeline") await expect(page.getByRole("region", { name: "Selected decision" })).toBeVisible();
     if (path === "/pulse") await expect(page.locator("article[data-risk]").first()).toBeVisible();
     if (path === "/map") await expect(page.getByRole("group", { name: "Repository graph", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
-    if (["/dashboard", "/timeline", "/pulse"].includes(path)) await page.screenshot({ path: testInfo.outputPath(`${path.slice(1)}-phone.png`), fullPage: true });
+    if (["/dashboard", "/timeline", "/pulse", "/repositories"].includes(path)) await page.screenshot({ path: testInfo.outputPath(`${path.slice(1)}-phone.png`), fullPage: true });
   }
 });
 
@@ -363,4 +389,78 @@ test("commit history pagination loads older records and clears the selection", a
   await expect(page.getByRole("button", { name: "Older commits", exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "Newer commits", exact: true }).click();
   await expect(page.getByRole("button", { name: "Inspect commit bbbbbbb", exact: true })).toBeVisible();
+});
+
+test("adding a public repository follows the import across a reload and selects it when complete", async ({ page }) => {
+  let polls = 0;
+  let indexed = false;
+  await page.route("**/api/repos", route => route.fulfill({ json: indexed ? [...repos, { ...repos[0], full_name: "octo-org/hello-world" }] : repos }));
+  await page.route("**/api/repository-imports", async route => {
+    if (route.request().method() !== "POST") return route.fallback();
+    expect(route.request().postDataJSON()).toEqual({ repository: "https://github.com/octo-org/hello-world" });
+    await route.fulfill({ status: 202, json: importJob("queued") });
+  });
+  await page.route("**/api/repository-imports/imp_1", route => {
+    polls += 1;
+    const status = polls < 3 ? "running" : "complete";
+    if (status === "complete") indexed = true;
+    return route.fulfill({ json: importJob(status) });
+  });
+  await page.goto("/dashboard");
+  await page.getByRole("link", { name: "Add repository" }).first().click();
+  await expect(page).toHaveURL(/\/repositories$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Repositories" })).toBeVisible();
+  const input = page.getByLabel("GitHub repository", { exact: true });
+  await input.fill("not a repository");
+  await page.getByRole("button", { name: "Add repository", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "owner/name" })).toBeVisible();
+  await input.fill("http://www.github.com/octo-org/hello-world.git");
+  await page.getByRole("button", { name: "Add repository", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "full https://github.com/owner/name link" })).toBeVisible();
+  await input.fill("https://github.com/octo-org/hello-world");
+  await page.getByRole("button", { name: "Add repository", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "octo-org/hello-world" })).toBeVisible();
+  await expect(page.getByRole("progressbar", { name: "Indexing octo-org/hello-world" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 2, name: "octo-org/hello-world" })).toBeVisible();
+  await expect(page.getByText("is indexed and now selected")).toBeVisible({ timeout: 30000 });
+  await page.getByRole("button", { name: "Open octo-org/hello-world" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("octo-org/hello-world");
+});
+
+test("a failed import explains why and can be retried", async ({ page }) => {
+  let posts = 0;
+  await page.addInitScript(() => window.localStorage.setItem("untangle.import", "imp_1"));
+  await page.route("**/api/repository-imports", async route => {
+    if (route.request().method() !== "POST") return route.fallback();
+    posts += 1;
+    await route.fulfill({ status: 202, json: importJob("queued") });
+  });
+  await page.route("**/api/repository-imports/imp_1", route => route.fulfill({ json: importJob(posts ? "queued" : "failed") }));
+  await page.goto("/repositories");
+  await expect(page.getByRole("alert").filter({ hasText: "private or does not exist" })).toBeVisible();
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(page.getByText("Waiting for the indexing worker")).toBeVisible();
+  expect(posts).toBe(1);
+});
+
+test("import errors from the API are shown beside the form", async ({ page }) => {
+  await page.route("**/api/repository-imports", route =>
+    route.request().method() === "POST" ? route.fulfill({ status: 429, json: { error: "The shared import limit for today has been reached." } }) : route.fallback());
+  await page.goto("/repositories");
+  await page.getByLabel("GitHub repository", { exact: true }).fill("octo-org/hello-world");
+  await page.getByRole("button", { name: "Add repository", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "shared import limit" })).toBeVisible();
+});
+
+test("the repositories page shows the indexed inventory of the selected repository", async ({ page }) => {
+  await page.goto("/repositories");
+  await expect(page.getByRole("heading", { level: 2, name: "knadh/listmonk" })).toBeVisible();
+  await expect(page.getByLabel("Indexed records")).toContainText("2,546");
+  await expect(page.getByText("github.com/lib/pq")).toBeVisible();
+  await expect(page.getByText("Dependencies are capped at 50")).toBeVisible();
+  await page.getByRole("link", { name: "why is app.concurrency set the way it is?" }).click();
+  await expect(page).toHaveURL(/\/ask/);
+  await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency set the way it is?");
 });

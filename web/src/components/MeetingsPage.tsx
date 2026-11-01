@@ -17,9 +17,9 @@ export function NotConfigured() {
         <Mic size={16} className="text-ink-3" /> KT ingestion not configured
       </p>
       <p className="mt-2 max-w-xl text-[0.9rem] leading-relaxed text-ink-2">
-        The API answered <code className="t-code">501</code>: handover-call ingestion is switched off on this server. Set{" "}
-        <code className="t-code">SARVAM_API_KEY</code> and run <code className="t-code">untangle kt ingest --repo owner/name --audio call.mp3</code> (or{" "}
-        <code className="t-code">--transcript call.json</code>) to add a meeting. Everything else works without it.
+        Handover-call ingestion is switched off on this server. An operator can turn on speech transcription in the server settings, then run{" "}
+        <code className="t-code">untangle kt ingest --repo owner/name --audio call.mp3</code> (or <code className="t-code">--transcript call.json</code>) to add a
+        meeting. Everything else works without it.
       </p>
     </div>
   );

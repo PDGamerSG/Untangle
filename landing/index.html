@@ -8,7 +8,8 @@
       name="description"
       content="Untangle reads a repository's commits, reviews, issues, docs and handover calls, then answers why the code is like this, with the evidence behind each decision."
     />
-    <meta name="theme-color" content="#0B1F4D" />
+    <meta name="theme-color" content="#0b1f4d" />
+    <meta name="color-scheme" content="dark" />
     <meta property="og:title" content="Untangle: why is the code like this?" />
     <meta
       property="og:description"
@@ -25,6 +26,11 @@
 
     <header class="nav" data-intro>
       <a class="brand" href="#top" aria-label="Untangle, back to top">
+        <svg class="brand__mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#1f55e0" />
+          <path d="M6.5 21.5c4.6 0 5.2-11 9.5-11s4.9 11 9.5 11" fill="none" stroke="#9db8ff" stroke-width="2.6" stroke-linecap="round" />
+          <path d="M6.5 10.5c4.6 0 5.2 11 9.5 11s4.9-11 9.5-11" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" />
+        </svg>
         <span class="brand__name">Untangle</span>
       </a>
       <a class="btn btn--red btn--small" href="/dashboard">
@@ -207,8 +213,8 @@
           <div class="copy">
             <h2 class="h2">Run it on your own repository.</h2>
             <p>
-              Open source under the MIT license. The default answer path is deterministic and works without a model
-              key. A model can improve the wording, but it can’t add uncited claims.
+              Open source under the MIT license. Answers are assembled from the graph itself, so the core works without
+              any external service. Optional wording polish can never add a claim without a citation.
             </p>
           </div>
           <ol class="steps">

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useId } from "react";
+import { Plus } from "lucide-react";
 import { useRepo } from "./RepoContext";
 import { fmtDay } from "@/lib/format";
 
@@ -23,7 +25,10 @@ export function RepoSelect({ compact = false }: { compact?: boolean }) {
   if (!repos?.length)
     return (
       <p className="text-[0.85rem] text-ink-3">
-        No repositories ingested yet. Run <code className="t-code">untangle ingest owner/name</code>.
+        No repositories indexed yet.{" "}
+        <Link href="/repositories" className="font-semibold text-accent underline-offset-4 hover:underline">
+          Add a repository
+        </Link>
       </p>
     );
   return (
@@ -38,6 +43,14 @@ export function RepoSelect({ compact = false }: { compact?: boolean }) {
           </option>
         ))}
       </select>
+      <Link
+        href="/repositories"
+        title="Add or switch repository"
+        className={`inline-flex shrink-0 items-center gap-1 rounded-md text-[0.82rem] font-semibold text-accent underline-offset-4 hover:underline ${compact ? "h-9 px-1.5" : "self-start"}`}
+      >
+        <Plus size={15} aria-hidden />
+        <span className={compact ? "sr-only sm:not-sr-only" : undefined}>Add repository</span>
+      </Link>
       {!compact && current ? (
         <p className="t-num text-[0.78rem] text-ink-3">
           {current.counts.commits.toLocaleString()} commits · {current.counts.prs.toLocaleString()} PRs · {current.counts.issues.toLocaleString()} issues ·{" "}

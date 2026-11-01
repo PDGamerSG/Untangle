@@ -33,7 +33,7 @@ export function MeetingUpload({ repo, onUploaded }: { repo: string | null; onUpl
       finally { setBusy(false); }
     }}>
       <h2 className="flex items-center gap-2 font-semibold"><Upload size={16} aria-hidden /> Add a handover</h2>
-      <p className="text-sm text-ink-2">Upload an audio recording or a JSON/text transcript to connect the conversation to {repo ?? "your repository"}. Audio is transcribed by Sarvam; Claude extracts the decisions.</p>
+      <p className="text-sm text-ink-2">Upload an audio recording or a JSON/text transcript to connect the conversation to {repo ?? "your repository"}. Audio is transcribed automatically, then the decisions in it are extracted and linked to the code.</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="space-y-1 text-sm">Meeting title<input name="title" className="field w-full" placeholder="Architecture handover" maxLength={200} disabled={busy} /></label>
         <label className="space-y-1 text-sm">Recording or transcript<input name="file" type="file" className="field w-full" accept="audio/*,.json,.txt" required disabled={busy} /></label>

@@ -172,8 +172,8 @@ export function signalLabel(s: string): string {
     revert_commit: "revert commit",
     pr_merge: "PR merge",
     supersedes_text: "'supersedes' in text",
-    llm_pr_thread: "LLM over PR thread",
-    llm_kt: "LLM over handover call",
+    llm_pr_thread: "PR discussion, summarised",
+    llm_kt: "handover call, summarised",
   };
   return map[s] ?? s.replaceAll("_", " ");
 }
@@ -185,4 +185,20 @@ export function truncate(s: string, n: number): string {
 /** Splits "owner/name" into a short display form. */
 export function shortRepo(fullName: string): string {
   return fullName.split("/").pop() ?? fullName;
+}
+
+/** "just now", "4 min ago", "3 h ago", "2 days ago", then the date. `now` is passed in so renders stay pure. */
+export function fmtRelative(iso: string | null | undefined, now: number): string {
+  if (!iso) return "";
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return iso;
+  const s = Math.round((now - t) / 1000);
+  if (s < 45) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} h ago`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d} day${d === 1 ? "" : "s"} ago`;
+  return fmtDay(iso);
 }

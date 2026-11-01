@@ -25,6 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#0f3a99",
   colorScheme: "light",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -39,9 +40,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
           <Nav />
-          <div className="flex flex-1 flex-col lg:pl-60">
+          <div className="flex flex-1 flex-col lg:pl-64">
             <SampleBanner />
-            <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 sm:px-6 lg:px-10 lg:pt-10">
+            <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 sm:px-6 lg:pb-16 lg:px-10 lg:pt-10">
               {children}
             </main>
           </div>
