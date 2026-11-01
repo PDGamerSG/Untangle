@@ -1,5 +1,25 @@
 # Untangle verification record
 
+## Decision workbench and Pulse triage — 2026-11-01
+
+- Fetched and pulled `origin/main`; all existing feature branches were already merged. The only pre-existing
+  local file was the development launch configuration, now tracked and using the landing-aware `pnpm dev` command.
+- Added a searchable Timeline workbench with decision-kind and temporal filters, source/code/person inspection,
+  date-aware Ask links, and Markdown evidence exports. A decision appearing in both timeline groups is shown once,
+  with historical membership kept separate from its current status.
+- Added Pulse category/search/critical filters and filtered risk exports. The dashboard links to both workflows.
+  Counts explicitly describe loaded results, and risk scores are shown out of 100 rather than as probabilities.
+- Full backend suite against disposable Neo4j 2025.09: **228 passed**, with fake model/embedding adapters.
+- Web contract/helper tests: **6 passed**. Browser integration tests: **18 passed**. Checks include downloaded
+  source links and filtered content, keyboard selection, temporal-group deduplication, invalid URL dates,
+  empty states, API error recovery, existing navigation/Ask/upload flows, and phone overflow after content loads.
+- Web lint, Next.js/landing production builds, repository-wide Ruff and `git diff --check`: **passed**.
+- Reviewed generated desktop and phone screenshots of Timeline and Pulse, plus the phone dashboard. Existing
+  blue-and-white tokens and evidence components are reused. No new UI dependency or API credential is required.
+- Search and export operate on the loaded timeline snapshot (up to 100 decisions) or the returned Pulse queue;
+  neither is a full repository audit. The new opt-in production tests check live graph/export flows and a real
+  cited Claude answer with vector comparison. Their invocation is documented in [Deployment](DEPLOYMENT.md).
+
 ## Production integration checks — 2026-10-30
 
 - Frontend landing branch is merged into `main` at `c556460`.

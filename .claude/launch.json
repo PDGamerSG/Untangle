@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-live-api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["UNTANGLE_API_URL=https://untangle-code-api.vercel.app", "pnpm", "--dir", "web", "dev", "--port", "3010"],
+      "port": 3010
+    }
+  ]
+}

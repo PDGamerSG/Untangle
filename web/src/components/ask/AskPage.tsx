@@ -59,7 +59,11 @@ export function AskPage() {
   // A question handed over in the URL (from the dashboard, Pulse or an entity page) is asked straight away.
   const [pending, setPending] = useState<string | null>(null);
   useEffect(() => {
-    const initial = new URLSearchParams(window.location.search).get("question");
+    const params = new URLSearchParams(window.location.search);
+    const initial = params.get("question");
+    const date = params.get("at");
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date))
+      && new Date(date).toISOString().slice(0, 10) === date) setAt(date);
     if (!initial) return;
     setQuestion(initial);
     setPending(initial);

@@ -27,10 +27,10 @@ export function PulseRiskCard({ risk }: { risk: PulseRisk }) {
   const question = riskQuestion(risk);
   return (
     <article id={risk.id} className="card overflow-hidden p-4 sm:p-5" data-risk={risk.category}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
           <p className={`flex items-center gap-1.5 text-[0.85rem] font-semibold ${category.color}`}>
-            <Icon size={15} aria-hidden />
+            <Icon size={15} className="shrink-0" aria-hidden />
             {category.label}
           </p>
           <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
@@ -39,19 +39,19 @@ export function PulseRiskCard({ risk }: { risk: PulseRisk }) {
           </div>
         </div>
         <div className="shrink-0 text-right">
-          <p className="t-num text-[1.15rem] font-semibold text-ink">{Math.round(risk.score * 100)}%</p>
+          <p className="t-num text-[1.15rem] font-semibold text-ink">{Math.round(risk.score * 100)}<span className="text-[0.75rem] font-normal text-ink-3">/100</span></p>
           <p className="text-[0.76rem] text-ink-3">risk score</p>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-        <div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+        <div className="min-w-0 break-words">
           <p className="text-[0.8rem] text-ink-3">Active decision</p>
           <p className="t-display mt-1 text-[1.35rem] text-ink">{risk.decision.object}</p>
           <p className="mt-1 text-[0.88rem] leading-relaxed text-ink-2">{risk.decision.text}</p>
         </div>
         <div className="min-w-32">
-          <div className="h-1.5 overflow-hidden rounded-full bg-surface-3" aria-label={`${Math.round(risk.score * 100)} percent risk`} role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(risk.score * 100)}>
+          <div className="h-1.5 overflow-hidden rounded-full bg-surface-3" aria-label="Risk score" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(risk.score * 100)} aria-valuetext={`${Math.round(risk.score * 100)} out of 100`}>
             <div className={`h-full rounded-full ${risk.score >= 0.72 ? "bg-bad" : risk.score >= 0.3 ? "bg-warn" : "bg-accent"}`} style={{ width: `${Math.round(risk.score * 100)}%` }} />
           </div>
           <p className="t-num mt-1 text-right text-[0.72rem] text-ink-3">since {fmtDay(risk.decision.valid_from_iso)}</p>

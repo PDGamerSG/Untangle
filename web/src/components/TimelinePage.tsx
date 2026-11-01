@@ -1,14 +1,13 @@
 "use client";
 
 import { useId, useState } from "react";
-import { DecisionCard } from "./DecisionCard";
+import { DecisionWorkbench } from "./DecisionWorkbench";
 import { RepoSelect } from "./RepoSelect";
 import { useRepo } from "./RepoContext";
-import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
+import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
 import { primeResource, useDebounced, useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";
-import type { DecisionCard as DecisionCardT } from "@/lib/types";
 
 const DAY_MS = 86_400_000;
 
@@ -34,35 +33,6 @@ function useBounds(repo: string | null) {
   });
 }
 
-function Column({ title, hint, items, muted, empty, loading }: { title: string; hint?: string; items?: DecisionCardT[]; muted: boolean; empty: string; loading: boolean }) {
-  return (
-    <section aria-label={title} className="min-w-0">
-      <SectionTitle hint={loading ? undefined : hint}>{title}</SectionTitle>
-      {loading ? (
-        <div className="space-y-3" role="status" aria-label="Loading">
-          {[0, 1].map((i) => (
-            <div key={i} className="card p-4">
-              <Skeleton className="h-3 w-32" />
-              <Skeleton className="mt-3 h-6 w-1/3" />
-              <SkeletonLines rows={2} className="mt-3" />
-            </div>
-          ))}
-        </div>
-      ) : items && items.length ? (
-        <ul className="space-y-3">
-          {items.map((d) => (
-            <li key={d.id}>
-              <DecisionCard decision={d} muted={muted} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <EmptyState title={empty} />
-      )}
-    </section>
-  );
-}
-
 export function TimelinePage() {
   const { repo } = useRepo();
   const bounds = useBounds(repo);
@@ -86,8 +56,7 @@ export function TimelinePage() {
         <div>
           <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">What was true, when</h1>
           <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">
-            Slide to any date and see the decisions in force then, and which of them have since been replaced. Belief at a date comes from{" "}
-            <code className="t-code">valid_from ≤ t &lt; valid_to</code> on every decision.
+            Explore the decisions in force on any date. Filter by code, reason or person, inspect the sources, and take the evidence into your next handover.
           </p>
         </div>
         <RepoSelect compact />
@@ -156,26 +125,11 @@ export function TimelinePage() {
 
       {timeline.error ? (
         <ErrorState title="Could not load the timeline" error={timeline.error} onRetry={timeline.reload} />
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Column
-            title={`In force on ${shownDay ? fmtDay(shownDay) : "…"}`}
-            hint={timeline.data ? `${timeline.data.active.length} active` : undefined}
-            items={timeline.data?.active}
-            muted={false}
-            empty="No decisions were in force on this date."
-            loading={timeline.loading || (!timeline.data && !timeline.error)}
-          />
-          <Column
-            title="Superseded since then"
-            hint={timeline.data ? `${timeline.data.superseded_since.length} replaced` : undefined}
-            items={timeline.data?.superseded_since}
-            muted
-            empty={atDay === null ? "Nothing is superseded after today." : "Nothing in force on this date has been replaced since."}
-            loading={timeline.loading || (!timeline.data && !timeline.error)}
-          />
-        </div>
-      )}
+      ) : repo && timeline.data ? (
+        <DecisionWorkbench key={`${repo}:${timeline.data.at_iso}`} repo={repo} snapshot={timeline.data} />
+      ) : repo ? (
+        <div className="card p-5" role="status" aria-label="Loading decisions"><Skeleton className="h-7 w-48" /><SkeletonLines rows={5} className="mt-5" /></div>
+      ) : <EmptyState title="Choose an ingested repository to explore decisions" />}
     </div>
   );
 }

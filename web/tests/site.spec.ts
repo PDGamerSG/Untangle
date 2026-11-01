@@ -130,14 +130,17 @@ test("API errors show the server message and recover on retry", async ({ page })
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("knadh/listmonk");
 });
 
-test("phone layout stays within the viewport", async ({ page }) => {
+test("phone layout stays within the viewport", async ({ page }, testInfo) => {
   const longRepo = "example-organization/a-repository-with-a-long-name";
   await page.route("**/api/repos", route => route.fulfill({ json: [{ ...repos[0], full_name: longRepo }] }));
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline"]) {
     await page.goto(path);
     await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
+    if (path === "/timeline") await expect(page.getByRole("region", { name: "Selected decision" })).toBeVisible();
+    if (path === "/pulse") await expect(page.locator("article[data-risk]").first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
+    if (["/dashboard", "/timeline", "/pulse"].includes(path)) await page.screenshot({ path: testInfo.outputPath(`${path.slice(1)}-phone.png`), fullPage: true });
   }
 });
 
@@ -186,4 +189,92 @@ test("every nav link opens its page", async ({ page }) => {
     await expect(page).toHaveURL(url);
     if (heading) await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
   }
+});
+
+test("decision workbench filters, inspects and exports the historical evidence", async ({ page }, testInfo) => {
+  const old = { ...pulse.risks[0].decision, id: "dec:knadh/listmonk:old-limit", subject: "app.concurrency", status: "superseded", valid_from_iso: "2020-01-01T00:00:00Z", valid_to_iso: "2021-01-01T00:00:00Z" };
+  const dependency = { ...old, id: "dec:knadh/listmonk:dependency", subject: "neo4j", kind: "dependency", text: "Use Neo4j for decision history", rationale: null, object: "5.28", status: "active", valid_to_iso: null, about: [{ id: "dep:knadh/listmonk:neo4j", name: "neo4j", label: "Dependency" }] };
+  await page.route("**/api/timeline?**", async route => {
+    const at = new URL(route.request().url()).searchParams.get("at")!;
+    await route.fulfill({ json: { at_iso: at, earliest_iso: "2020-01-01T00:00:00Z", active: [old, dependency], superseded_since: [old] } });
+  });
+  await page.goto("/timeline");
+  await page.getByLabel("Jump to", { exact: true }).fill("2020-07-10");
+  await expect(page.getByRole("region", { name: "Decision workbench" })).toContainText("10 Jul 2020");
+  await page.screenshot({ path: testInfo.outputPath("workbench-desktop.png"), fullPage: true });
+  await page.getByLabel("Filter decisions", { exact: true }).fill("app.concurrency");
+  await expect(page.getByRole("list", { name: "Matching decisions" }).getByRole("button")).toHaveCount(1);
+  await page.getByRole("button", { name: "Inspect app.concurrency", exact: true }).click();
+  const detail = page.getByRole("region", { name: "Selected decision" });
+  await expect(detail).toContainText("In force on 10 Jul 2020");
+  await expect(detail).toContainText("Superseded");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export view", exact: true }).click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  const parts: Buffer[] = [];
+  for await (const part of stream!) parts.push(Buffer.from(part));
+  const markdown = Buffer.concat(parts).toString();
+  expect(markdown).toContain(old.id);
+  expect(markdown).toContain(old.decided_in.url);
+  expect(markdown).toContain("2020-07-10");
+  expect(markdown).not.toContain(dependency.id);
+  await page.getByLabel("Filter decisions", { exact: true }).fill("nothing-matches-this");
+  await expect(page.getByText("No decisions match these filters.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Clear decision filters", exact: true }).click();
+  await page.getByRole("button", { name: "Inspect neo4j", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(detail.getByRole("heading", { name: "neo4j", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Replaced since 1", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Matching decisions" }).getByRole("button")).toHaveCount(1);
+  await expect(detail.getByRole("heading", { name: "app.concurrency", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "All loaded 2", exact: true }).click();
+  await page.getByLabel("Decision type", { exact: true }).selectOption("dependency");
+  await expect(page.getByRole("list", { name: "Matching decisions" }).getByRole("button")).toHaveCount(1);
+  await expect(detail).toContainText("No reason recorded.");
+  const request = page.waitForRequest(req => req.url().endsWith("/api/ask") && req.method() === "POST");
+  await detail.getByRole("link", { name: "Ask about this date", exact: true }).click();
+  expect((await request).postDataJSON().at).toBe("2020-07-10T23:59:59Z");
+});
+
+test("Pulse triage filters risks and exports only the visible evidence", async ({ page }, testInfo) => {
+  await page.goto("/pulse");
+  await expect(page.locator("article[data-risk]")).toHaveCount(3);
+  await page.screenshot({ path: testInfo.outputPath("pulse-desktop.png"), fullPage: true });
+  await page.getByLabel("Filter risks", { exact: true }).fill("nothing-matches-this");
+  await expect(page.getByText("No risks match these filters.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Export risks", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Clear risk filters", exact: true }).click();
+  await page.getByRole("button", { name: /Ownership gaps \(1\)/ }).click();
+  await expect(page.locator("article[data-risk]")).toHaveCount(1);
+  await expect(page.locator("article[data-risk]")).toHaveAttribute("data-risk", "ownership_gap");
+  await page.getByLabel("Critical only", { exact: true }).check();
+  await expect(page.getByText("No risks match these filters.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Clear risk filters", exact: true }).click();
+  await expect(page.locator("article[data-risk]")).toHaveCount(3);
+  await page.getByRole("button", { name: /Conflicts \(1\)/ }).click();
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export risks", exact: true }).click();
+  const stream = await (await downloadPromise).createReadStream();
+  const parts: Buffer[] = [];
+  for await (const part of stream!) parts.push(Buffer.from(part));
+  const markdown = Buffer.concat(parts).toString();
+  expect(markdown).toContain(pulse.risks[0].id);
+  expect(markdown).not.toContain(pulse.risks[1].id);
+  expect(markdown).toContain(pulse.risks[0].reasons[0]);
+  expect(markdown).toContain(pulse.risks[0].contradictions[0].id);
+});
+
+test("invalid historical URL dates do not reach the answer API", async ({ page }) => {
+  const request = page.waitForRequest(req => req.url().endsWith("/api/ask") && req.method() === "POST");
+  await page.goto("/ask?question=why%20is%20app.concurrency%20like%20this&at=2020-02-31");
+  expect((await request).postDataJSON().at).toBeNull();
+});
+
+test("an empty timeline explains the snapshot and disables export", async ({ page }) => {
+  await page.route("**/api/timeline?**", route => route.fulfill({ json: { at_iso: new Date().toISOString(), active: [], superseded_since: [] } }));
+  await page.goto("/timeline");
+  await expect(page.getByText("No decisions recorded for this snapshot.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Export view", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Clear decision filters", exact: true })).toHaveCount(0);
 });

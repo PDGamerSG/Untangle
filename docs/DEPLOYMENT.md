@@ -105,6 +105,17 @@ Browser integration tests intercept API calls with recorded contracts. They veri
 refusal states, evidence links, timeline changes, Pulse, uploads, error recovery, and mobile layout. They do not
 prove production credentials work.
 
+The opt-in production browser checks use the deployed API and real Claude calls. Run them from `web` after
+publishing a frontend change; they inspect the default Untangle repository and download evidence briefs without
+uploading data or changing repository records:
+
+```bash
+UNTANGLE_LIVE_TESTS=1 E2E_BASE_URL=https://untangle-code.vercel.app pnpm exec playwright test tests/production.spec.ts
+```
+
+These checks require working Claude billing and indexed decisions/risks in `PDGamerSG/Untangle`. They are separate
+from CI's recorded-contract suite and do not re-test Sarvam audio ingestion.
+
 After deployment, separately verify health, repository counts, a cited Claude answer (with `llm.used` true in its
 trace), graph/vector comparison, decision and timeline routes, and a short Sarvam audio upload. Health's model
 availability checks configuration; a real completion is required to validate the key and selected model. Sarvam's

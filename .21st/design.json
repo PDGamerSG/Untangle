@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "project": {
+    "name": "Untangle",
+    "productType": "Repository decision history and evidence workspace",
+    "stack": [
+      "Next.js 16",
+      "React 19",
+      "Tailwind CSS 4",
+      "FastAPI",
+      "Neo4j"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "web/src/app/globals.css"
+    ],
+    "components": [
+      "web/src/components/Chip.tsx",
+      "web/src/components/DecisionCard.tsx",
+      "web/src/components/states.tsx"
+    ],
+    "assets": [
+      "web/src/components/Logo.tsx"
+    ],
+    "instructions": [
+      "web/AGENTS.md"
+    ]
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "background": "#f4f7fc",
+      "surface": "#ffffff",
+      "ink": "#0c1d3b",
+      "muted": "#66758f",
+      "accent": "#1f55e0",
+      "sidebar": "#0f3a99"
+    },
+    "typography": {
+      "body": "system sans-serif",
+      "display": "Fraunces / Georgia",
+      "code": "system monospace"
+    },
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "compact evidence lists, spacious selected detail"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [
+      "CitationChip",
+      "EntityChip",
+      "StatusMark",
+      "EmptyState",
+      "ErrorState"
+    ],
+    "patterns": [
+      "Searchable decision list with selected evidence inspector",
+      "Date-specific decision state",
+      "Risk category filters"
+    ]
+  },
+  "constraints": {
+    "must": [
+      "Preserve the blue-and-white sidebar design",
+      "Use existing APIs and source links",
+      "State snapshot and returned-result limits",
+      "Support keyboard, mobile and empty/error states"
+    ],
+    "avoid": [
+      "Invented evidence or rationale",
+      "New paid APIs or UI dependencies",
+      "Treating risk scores as probabilities"
+    ]
+  },
+  "decisions": [
+    "2026-11-01: retain existing palette and typography; make Timeline an interactive decision workbench and Pulse a filtered priority queue. Export the visible evidence to Markdown."
+  ],
+  "evidence": [
+    "Current repository components and tokens inspected",
+    "21st catalog search returned HTTP 401; no catalog code imported"
+  ],
+  "generatedAt": "2026-11-01T11:35:43.052Z"
+}

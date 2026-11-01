@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowUpRight, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { RepoSelect } from "./RepoSelect";
-import { PulseRiskCard } from "./PulseRiskCard";
+import { PulseQueue } from "./PulseQueue";
 import { useRepo } from "./RepoContext";
 import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
 import { api } from "@/lib/api";
@@ -48,9 +47,9 @@ export function PulsePage() {
         <>
           <dl className="stat-strip grid-cols-2 lg:grid-cols-4" aria-label="Knowledge radar summary">
             <div>
-              <dt>Coverage</dt>
-              <dd className="t-num">{Math.round(data.summary.coverage * 100)}%</dd>
-              <p className="mt-1 text-[0.78rem] text-ink-2">decisions without a flagged risk</p>
+              <dt>Returned risks</dt>
+              <dd className="t-num">{data.risks.length}</dd>
+              <p className="mt-1 text-[0.78rem] text-ink-2">in the current priority queue</p>
             </div>
             <div>
               <dt className="text-bad">Critical</dt>
@@ -70,26 +69,11 @@ export function PulsePage() {
           </dl>
 
           {data.risks.length ? (
-            <section aria-labelledby="risk-queue">
-              <div className="sec-head">
-                <h2 id="risk-queue">Knowledge risks</h2>
-                <p className="sec-hint t-num">
-                  {data.summary.risks} flagged of {data.summary.active_decisions} active decisions ·{" "}
-                  <Link href="/ask?question=what%20knowledge%20risks%20should%20I%20fix%20first%3F" className="inline-flex items-center gap-0.5 font-semibold text-ink-2 underline-offset-4 hover:underline">
-                    Ask the graph <ArrowUpRight size={13} aria-hidden />
-                  </Link>
-                </p>
-              </div>
-              <div className="grid gap-4 lg:grid-cols-2">
-                {data.risks.map((risk) => (
-                  <PulseRiskCard key={risk.id} risk={risk} />
-                ))}
-              </div>
-            </section>
+            <PulseQueue key={repo} repo={repo!} data={data} />
           ) : (
             <EmptyState title="No knowledge risks surfaced">
               <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 size={14} className="text-ok" aria-hidden /> The active decisions have enough ownership and evidence for now.
+                <CheckCircle2 size={14} className="text-ok" aria-hidden /> No risks were returned by this scan. Explore the timeline to inspect the recorded decisions.
               </span>
             </EmptyState>
           )}

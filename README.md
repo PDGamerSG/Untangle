@@ -27,6 +27,8 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 | 🗣️ **Keep handovers searchable** | Link Hinglish transcripts to files, keys, dependencies, and decisions without replacing code history. |
 | 🛑 **Refuse safely** | Unsupported questions get a clear refusal and nearby context instead of an invented explanation. |
 | 🔎 **Compare retrieval** | Put graph reasoning beside vector-only search over the same evidence. |
+| 🧰 **Investigate a snapshot** | Search Timeline by file, value, reason or person; inspect each decision's sources and ask about the selected date. |
+| 📋 **Take evidence into a review** | Filter Pulse by risk category or criticality and download the visible decisions or risks as a source-linked Markdown brief. |
 
 ## 🚀 Three steps
 
@@ -143,6 +145,7 @@ or people who have not agreed. See [data/kt/README.md](data/kt/README.md) for de
 - The deterministic answer path refuses when evidence is missing; optional models cannot add unsupported citations.
 - The `knadh/listmonk` repository and the transcript in `data/kt/` are demo fixtures. Fictional speaker explanations are labelled as synthetic.
 - Browser coverage is limited to the current Next.js, React, and pnpm toolchain used by CI.
+- Timeline filters and exports use the loaded snapshot (up to 100 decisions); Pulse filters and exports use the returned priority queue. These views do not represent a complete repository audit, and risk scores are heuristic signals, not probabilities.
 
 ## 🛠️ Development
 

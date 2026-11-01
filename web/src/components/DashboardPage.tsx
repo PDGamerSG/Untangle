@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, GitBranch, ShieldAlert } from "lucide-react";
 import { GraphStatsPanel, SearchPanel } from "./GraphPanels";
 import { EntityChip } from "./Chip";
 import { RepoSelect } from "./RepoSelect";
@@ -136,7 +136,7 @@ function TopRisks({ repo }: { repo: string }) {
             <li key={r.id} className="py-3">
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <EntityChip entity={r.entity} />
-                <span className="t-num text-[0.8rem] text-ink-3">{Math.round(r.score * 100)}% risk</span>
+                <span className="t-num text-[0.8rem] text-ink-3">{Math.round(r.score * 100)}/100 risk</span>
               </div>
               <p className="mt-1.5 text-[0.86rem] leading-relaxed text-ink-2">{r.reasons[0]}</p>
               <Link href={`/pulse#${encodeURIComponent(r.id)}`} className="mt-1 inline-block text-[0.8rem] font-semibold text-ink-2 underline-offset-4 hover:underline">
@@ -221,6 +221,17 @@ export function DashboardPage() {
       ) : repo ? (
         <>
           <QuickAsk repo={repo} />
+
+          <section className="grid gap-0 overflow-hidden rounded-xl border border-accent/20 bg-surface xl:grid-cols-2" aria-label="Investigation tools">
+            <Link href="/timeline" className="group flex min-w-0 items-start gap-4 border-b border-rule p-5 transition-colors hover:bg-accent-soft/60 xl:border-b-0 xl:border-r">
+              <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><GitBranch size={22} aria-hidden /></span>
+              <div className="min-w-0"><h2 className="text-[1rem] font-semibold text-ink">Explore decision history</h2><p className="mt-1 text-[0.85rem] leading-relaxed text-ink-2">Trace a value to its source. Filter the timeline, inspect the reason, and export the evidence.</p><span className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-accent">Open decision workbench <ArrowUpRight size={14} aria-hidden /></span></div>
+            </Link>
+            <Link href="/pulse" className="group flex min-w-0 items-start gap-4 p-5 transition-colors hover:bg-accent-soft/60">
+              <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><ShieldAlert size={22} aria-hidden /></span>
+              <div className="min-w-0"><h2 className="text-[1rem] font-semibold text-ink">Review knowledge risks</h2><p className="mt-1 text-[0.85rem] leading-relaxed text-ink-2">Focus on conflicts, drifting code or missing ownership. Take a source-linked brief into your next review.</p><span className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-accent">Open risk triage <ArrowUpRight size={14} aria-hidden /></span></div>
+            </Link>
+          </section>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
             <TopRisks repo={repo} />
