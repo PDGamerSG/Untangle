@@ -135,7 +135,9 @@ icons, phone navigation, restored import status, selected inventory, cited answe
 It reads `PDGamerSG/Untangle`, `pallets/itsdangerous`, and four independently owned test repositories
 (`jonschlinkert/is-number`, `pallets/markupsafe`, `spf13/cast`, `octocat/Hello-World`). Import those four first.
 It checks duplicate submission of recent completed imports, legacy maps, and actionable invalid/missing/oversize
-repository errors. It does not upload handover data. Re-running outside the one-hour reuse window may queue a refresh:
+repository errors. It does not upload handover data. Outside the one-hour reuse window it omits duplicate
+submissions to avoid queuing unnecessary refreshes. Per-origin results and answer timings are saved under
+`web/test-results/production-*/results.json`:
 
 ```bash
 pnpm test:production

@@ -1,5 +1,38 @@
 # Untangle verification record
 
+## Answer waits and repository map recovery — 2026-11-02
+
+- Released application commit `795938c` to both public origins. Graph answers now render before the optional
+  vector comparison. Waits show an estimated range and elapsed time, allow cancellation, and end with a retry
+  message on timeout. Interactive model calls have a 20-second response budget without automatic retries;
+  batch extraction retains its existing budget. The configured model was not changed.
+- `cd web && pnpm test:production` completed successfully after deployment:
+  **https://untangle-code.vercel.app: 10 passed, 0 failed, 0 skipped**;
+  **https://untangle.pallabdas.me: 10 passed, 0 failed, 0 skipped**.
+  Checks cover landing/icons/mobile navigation, repository selection and restored imports, inventories, real
+  cited answers, vector comparison, history and risk exports, feature/commit maps, pagination, Obsidian downloads,
+  meetings navigation, and invalid/missing/oversize repository errors. Detailed results and answer timings are
+  retained in `web/test-results/production-vercel/results.json` and `production-custom-domain/results.json`.
+- Fresh public imports completed through the hosted worker for `jonschlinkert/is-number` (JavaScript, 62 commits),
+  `pallets/markupsafe` (Python/C, 869), `spf13/cast` (Go, 289), and `octocat/Hello-World` (minimal repository, 3).
+  Each repository's workflows passed on each origin. The minimal repository correctly refused an unsupported
+  question rather than inventing evidence. [Worker run](https://github.com/PDGamerSG/Untangle/actions/runs/41347605501).
+- Rebuilt source maps at the exact stored repository versions for `usememos/memos` (2,561 import connections),
+  `imputnet/helium` (5), `dcondrey/onrecord` (73), and `knadh/listmonk` (55). Both domains returned ready maps.
+  Older repositories without a map can now display stored file/commit evidence immediately, label missing
+  import connections, and request a refresh from the UI. Invalid optional feature manifests fall back to directory groups.
+- Local verification passed **273 backend tests**, **40 browser/API tests**, Ruff, web lint, TypeScript, production
+  build, and diff whitespace checks. Regression coverage includes slow comparison, cancellation, response-body
+  timeout, import estimates, clone URLs, legacy maps, optional malformed manifests, and retained batch retries.
+- An initial live check matched both a cached dashboard and the current inventory. Its selector now targets the
+  active repository's region; the complete two-origin rerun passed. Verification avoids submitting old completed
+  imports outside their reuse window, so repeated tests do not consume the import quota.
+- Scope: public repositories within the hosted size/history limits; static source import analysis supports
+  Python/JS/TS. Other languages still have file/commit/directory evidence. These checks do not prove every GitHub
+  repository is supported, or that a static impact map predicts runtime failures. Live audio ingestion was not
+  repeated in this release; upload/extraction regressions passed locally. Separate landing edits were preserved
+  and excluded from this deployment.
+
 ## Combined production deployment — 2026-11-02
 
 - The Next.js frontend and FastAPI backend now deploy as two services in **one Vercel project**, `untangle-code`.

@@ -166,7 +166,7 @@ test("live imported repository restores its job and uses its own inventory and t
   await page.getByRole("button", { name: `Open ${repo}`, exact: true }).click();
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: `About ${repo}`, exact: true })).toBeVisible();
-  const records = page.getByLabel("Indexed records", { exact: true });
+  const records = page.getByRole("region", { name: `About ${repo}`, exact: true }).getByLabel("Indexed records", { exact: true });
   await expect(records).toContainText("File paths");
   await expect(records).toContainText("Current files");
   await expect(records).toContainText("Contributors");
@@ -210,9 +210,16 @@ for (const repo of ["jonschlinkert/is-number", "pallets/markupsafe", "spf13/cast
     const job = (imports.jobs as ImportJob[]).find(j => j.repo === repo);
     expect(job?.status, JSON.stringify(job)).toBe("complete");
     expect(job?.estimate?.remaining_max_seconds).toBe(0);
-    const duplicate = await request.post("/api/repository-imports", { data: { repository: `https://github.com/${repo}.git/` } });
-    expect(duplicate.status()).toBe(202);
-    expect((await duplicate.json()).id).toBe(job!.id);
+    // Completed jobs are reusable for one hour. Older jobs are valid fixtures too:
+    // a verification run must not consume the shared quota by refreshing them.
+    const finished = Date.parse(job!.finished_at_iso ?? "");
+    if (Number.isFinite(finished) && Date.now() - finished < 55 * 60_000) {
+      const duplicate = await request.post("/api/repository-imports", { data: { repository: `https://github.com/${repo}.git/` } });
+      expect(duplicate.status()).toBe(202);
+      expect((await duplicate.json()).id).toBe(job!.id);
+    } else {
+      testInfo.annotations.push({ type: "coverage", description: "Duplicate submission omitted outside the completed-job reuse window; covered by local tests." });
+    }
     await page.addInitScript(value => localStorage.setItem("untangle.repo", value), repo);
     await page.goto("/dashboard");
     await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
