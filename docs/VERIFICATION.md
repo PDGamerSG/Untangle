@@ -4,13 +4,17 @@
 
 - Durable imports validate GitHub URLs and public accessibility, coalesce duplicate jobs, enforce shared queue
   and daily limits, recover interrupted jobs, and protect worker updates with a lease token.
-- Backend suite passed **263 tests** before three additional quota/refresh/pagination checks; focused import and
-  GitHub suite subsequently passed **38 tests**. Tests use disposable Neo4j, including concurrent admission and
+- Backend suite passed **266 tests**; the focused import and GitHub suite passed **38 tests**. The inventory
+  refinement subsequently passed all **31 import tests**. Tests use disposable Neo4j, including concurrent admission and
   claims, fixture ingestion, inventory, cited answers, repository isolation, and failure-message redaction.
 - Imports reuse the full Git/GitHub analysis pipeline and free embeddings. Optional paid rationale extraction
   is disabled for hosted imports; the existing answer service retains its configured low-cost model.
-- The API and worker are deployed independently of the frontend. Production import validation is recorded in
-  the final handoff after a different repository completes through the hosted workflow.
+- A real hosted-worker import of `pallets/itsdangerous` completed: 677 commits, 108 historical/current file paths,
+  50 current files, 119 symbols and 692 embedded chunks. Inventory, timeline, Pulse and the feature map loaded;
+  a real generated answer had six citations and a vector comparison. The Obsidian export contained 318 notes
+  and 675 valid internal links, with no broken links. [Worker run](https://github.com/PDGamerSG/Untangle/actions/runs/41341557536).
+- Inventory distinguishes all indexed file paths from current files and counts PR/issue contributors as well
+  as commit authors, deduplicated within the repository.
 
 ## Feature and commit map — 2026-11-02
 

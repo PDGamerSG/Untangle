@@ -140,6 +140,13 @@ def test_import_worker_populates_all_repository_workflows(graph, metadata, tmp_p
     inventory = overview(metadata["full_name"], graph)
     assert inventory["counts"]["decisions"] == 12
     assert inventory["counts"]["people"] == 1 and inventory["counts"]["dependencies"] == 1
+    assert inventory["counts"]["files"] == 9 and inventory["counts"]["current_files"] == 8
+    # Contributors include people who only participate in issues or PRs, counted once.
+    graph.query("""CREATE (p:Person {id:$repo+'-reviewer'})
+      CREATE (i:Issue {id:$repo+'-issue',repo:$repo})
+      CREATE (pr:PullRequest {id:$repo+'-pr',repo:$repo})
+      CREATE (p)-[:AUTHORED]->(i) CREATE (p)-[:AUTHORED]->(pr)""", {"repo": metadata["full_name"]})
+    assert overview(metadata["full_name"], graph)["counts"]["people"] == 2
     assert inventory["dependencies"][0]["name"] == "github.com/lib/pq"
     assert inventory["suggested_questions"]
     assert repository_map(metadata["full_name"], graph)["total_commits"] == 6
