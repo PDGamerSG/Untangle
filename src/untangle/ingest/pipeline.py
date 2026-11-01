@@ -221,6 +221,8 @@ def ingest_repo(
             "id": ids.repo_id(repo), "full_name": repo, "url": f"https://github.com/{repo}", "default_branch": default_branch,
             "head_sha": head_sha, "ingested_at": int(time.time() * 1000), "commit_count": len(commits), "languages": languages(head_files),
         })
+        from untangle.repository_map.service import index_repository_map
+        index_repository_map(repo, git, graph)
         timer.end(f"{n_people[0]} people, {len(commit_rows_)} commits, {file_counts['files']} files, {gh_counts['prs']} PRs, "
                   f"{decision_counts['recorded']} decisions ({decision_counts['superseded']} superseded), {n_chunks} chunks")
 

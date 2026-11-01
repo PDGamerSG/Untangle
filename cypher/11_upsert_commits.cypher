@@ -5,7 +5,8 @@ UNWIND $rows AS r
 MERGE (c:Commit {id: r.id})
 SET c.repo = r.repo, c.sha = r.sha, c.title = r.title, c.message = r.message, c.authored_at = r.authored_at,
     c.committed_at = r.committed_at, c.is_merge = r.is_merge, c.is_revert = r.is_revert, c.reverts_sha = r.reverts_sha,
-    c.url = r.url, c.additions = r.additions, c.deletions = r.deletions, c.files_changed = r.files_changed
+    c.url = r.url, c.additions = r.additions, c.deletions = r.deletions, c.files_changed = r.files_changed,
+    c.parent_shas = r.parent_shas
 WITH c, r
 OPTIONAL MATCH (a:Person {id: r.author_id})
 OPTIONAL MATCH (k:Person {id: r.committer_id})

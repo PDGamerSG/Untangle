@@ -139,6 +139,9 @@ body {
 
 /* ---------- Components (layered so Tailwind utilities can override them) ---------- */
 @layer components {
+.map-canvas { position: relative; overflow: hidden; border: 1px solid var(--rule); border-radius: var(--radius-card); background-color: var(--surface); background-image: radial-gradient(var(--rule) 1px, transparent 1px); background-size: 20px 20px; }
+.map-node { cursor: pointer; outline: none; }
+.map-node:focus-visible .map-node-dot { stroke-width: 5; }
 .workbench {
   min-width: 0;
   overflow: hidden;

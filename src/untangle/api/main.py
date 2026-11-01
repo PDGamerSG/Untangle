@@ -16,7 +16,7 @@ from typing import Annotated, Any
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from neo4j.exceptions import Neo4jError
 from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
@@ -39,6 +39,8 @@ from untangle.api.health import shape_health
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
 from untangle.kt.sarvam import SarvamError
+from untangle.repository_map.export import vault_zip
+from untangle.repository_map.service import repository_map
 
 log = logging.getLogger("untangle.api")
 
@@ -165,6 +167,17 @@ def pulse(repo: str = Query(min_length=3), limit: int = Query(default=24, ge=1, 
 @app.get("/stats")
 def stats(repo: str | None = None) -> dict[str, Any]:
     return service.get_graph().stats(repo)
+
+
+@app.get("/repository-map")
+def feature_map(repo: str = Query(min_length=3, max_length=200), offset: int = Query(default=0, ge=0), limit: int = Query(default=80, ge=1, le=200)) -> dict:
+    return repository_map(repo, service.get_graph(), offset=offset, limit=limit)
+
+
+@app.get("/repository-map/obsidian")
+def feature_vault(repo: str = Query(min_length=3, max_length=200), offset: int = Query(default=0, ge=0), limit: int = Query(default=200, ge=1, le=200)) -> Response:
+    data = repository_map(repo, service.get_graph(), offset=offset, limit=limit)
+    return Response(vault_zip(data), media_type="application/zip", headers={"Content-Disposition": 'attachment; filename="untangle-obsidian.zip"'})
 
 
 # -- meetings / KT: owned by untangle.kt; delegated when present ----------------------------------------------------------

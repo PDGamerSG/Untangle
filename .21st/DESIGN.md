@@ -9,5 +9,6 @@ Untangle connects engineering decisions to their source, code, people and date. 
 - Pulse filters the returned priority queue. Counts describe loaded results, never a claim of complete coverage.
 - Exports preserve dates, current status, missing reasons, source IDs and links. No extra model generation.
 - Keyboard controls, focus outlines, wrapping long identifiers, and result limits are part of the design.
+- Repository Map uses a dotted graph canvas, blue feature nodes, neutral file nodes and amber commits. Red marks potential impact. Static layout is stable and pannable; node labels retain readable size on phones. The inspector keeps evidence and inference separate.
 
 The 21st catalog was unavailable (HTTP 401); these choices use inspected project components, with no imported catalog code.

@@ -1,0 +1,16 @@
+{
+  "repo": "knadh/listmonk", "head_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "indexed_at_iso": "2026-11-01T12:00:00Z",
+  "total_files": 4, "total_commits": 2, "offset": 0, "has_more": false, "warnings": [],
+  "coverage": {"scanned_files": 4, "resolved_imports": 2, "unresolved_local_imports": 0, "unsupported_files": 0},
+  "files": [{"path": "ask.ts", "alive": true}, {"path": "pulse.ts", "alive": true}, {"path": "shared.ts", "alive": true}, {"path": "unrelated.ts", "alive": true}],
+  "features": [
+    {"id": "feature:test:ask", "name": "Ask", "description": "Synthetic feature fixture", "source": "manifest", "entrypoints": ["ask.ts"]},
+    {"id": "feature:test:pulse", "name": "Pulse", "description": "Synthetic feature fixture", "source": "manifest", "entrypoints": ["pulse.ts"]},
+    {"id": "feature:test:other", "name": "Independent", "description": "Synthetic unrelated feature", "source": "manifest", "entrypoints": ["unrelated.ts"]}
+  ],
+  "imports": [{"source": "ask.ts", "target": "shared.ts", "line": 1, "specifier": "./shared"}, {"source": "pulse.ts", "target": "shared.ts", "line": 2, "specifier": "./shared"}],
+  "commits": [
+    {"sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "title": "Change shared retrieval", "author": "Sam", "authored_at_iso": "2026-11-01T12:00:00Z", "is_merge": false, "parents_known": true, "parents": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"], "files": [{"path": "shared.ts", "change": "M", "additions": 2, "deletions": 1}]},
+    {"sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "title": "Initial features", "author": "Sam", "authored_at_iso": "2026-10-30T12:00:00Z", "is_merge": false, "parents_known": true, "parents": [], "files": [{"path": "ask.ts", "change": "A"}, {"path": "pulse.ts", "change": "A"}, {"path": "shared.ts", "change": "A"}, {"path": "unrelated.ts", "change": "A"}]}
+  ]
+}

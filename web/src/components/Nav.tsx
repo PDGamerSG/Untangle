@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
-import { Activity, AudioLines, BookOpen, History, LayoutDashboard, MessageCircleQuestion } from "lucide-react";
+import { Activity, AudioLines, BookOpen, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
 import { HealthDot, HealthPanel, useHealth } from "./HealthDot";
 import { Logo } from "./Logo";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/ask", label: "Ask", icon: MessageCircleQuestion },
+  { href: "/map", label: "Map", icon: Network },
   { href: "/timeline", label: "Timeline", icon: History },
   { href: "/pulse", label: "Pulse", icon: Activity },
   { href: "/meetings", label: "Meetings", icon: AudioLines },
@@ -32,7 +33,7 @@ function NavLinks({ pathname }: { pathname: string | null }) {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`flex shrink-0 items-center gap-3 rounded-lg px-2 py-1.5 text-[0.85rem] font-medium transition-colors sm:px-3 sm:text-[0.9rem] lg:py-2.5 ${
+            className={`flex shrink-0 items-center gap-3 rounded-lg px-1 py-1.5 text-[0.8rem] font-medium transition-colors sm:px-3 sm:text-[0.9rem] lg:py-2.5 ${
               active ? "bg-white text-nav shadow-sm" : "text-nav-ink-2 hover:bg-white/10 hover:text-nav-ink"
             }`}
           >
@@ -53,22 +54,22 @@ function ActiveNavLinks() {
 
 /**
  * A fixed blue sidebar on wide screens. Narrower screens get the same panel as a bar across the top: phones use two
- * rows (name and status, then the five links) so every link stays visible.
+ * rows (name and status, then navigation) so every link stays reachable.
  */
 export function Nav() {
   const status = useHealth();
   return (
     <header className="blueprint sticky top-0 z-40 lg:fixed lg:inset-y-0 lg:left-0 lg:w-60 lg:border-r lg:border-nav-rule">
-      <div className="flex w-full flex-wrap items-center px-3 sm:h-14 sm:flex-nowrap sm:gap-3 sm:px-6 lg:h-full lg:flex-col lg:items-stretch lg:gap-0 lg:px-4 lg:py-6">
-        <div className="flex h-12 items-center sm:h-auto lg:px-3 lg:pb-8">
+      <div className="flex w-full flex-wrap items-center px-3 sm:px-6 lg:h-full lg:flex-col lg:items-stretch lg:gap-0 lg:px-4 lg:py-6">
+        <div className="flex h-12 items-center lg:h-auto lg:px-3 lg:pb-8">
           <Logo />
         </div>
-        <div className="ml-auto flex items-center sm:order-last sm:ml-0 lg:hidden">
+        <div className="ml-auto flex items-center lg:hidden">
           <HealthDot status={status} />
         </div>
         <nav
           aria-label="Primary"
-          className="flex h-9 w-full items-center justify-between pb-1 sm:ml-auto sm:h-auto sm:w-auto sm:justify-end sm:gap-1 sm:pb-0 lg:ml-0 lg:flex-col lg:items-stretch lg:justify-start"
+          className="flex h-10 w-full min-w-0 items-center justify-between gap-0.5 overflow-x-auto pb-1 lg:h-auto lg:flex-col lg:items-stretch lg:justify-start lg:overflow-visible"
         >
           <Suspense fallback={<NavLinks pathname={null} />}>
             <ActiveNavLinks />

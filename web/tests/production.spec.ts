@@ -74,3 +74,33 @@ test("live Claude answers with citations and compares against vector retrieval",
   expect(answer.baseline).not.toBeNull();
   await expect(page.getByText("Answer ready.", { exact: true })).toBeAttached();
 });
+
+test("live feature map traces commits and downloads an Obsidian vault", async ({ page, request }, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const response = await request.get("/api/repository-map?repo=PDGamerSG%2FUntangle&limit=40");
+  expect(response.ok()).toBe(true);
+  const data = await response.json();
+  expect(data.features.length).toBeGreaterThanOrEqual(8);
+  expect(data.imports.length).toBeGreaterThan(100);
+  expect(data.total_commits).toBeGreaterThan(1);
+  if (process.env.UNTANGLE_EXPECT_MAP_SHA) expect(data.head_sha).toBe(process.env.UNTANGLE_EXPECT_MAP_SHA);
+  await page.goto("/map");
+  const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+  await expect(graph.getByRole("button", { name: "Feature Ask & evidence", exact: true })).toBeVisible({ timeout: 30_000 });
+  await page.screenshot({ path: testInfo.outputPath("live-feature-map.png"), fullPage: true });
+  await graph.getByRole("button", { name: "Feature Ask & evidence", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Graph inspector" })).toContainText("Entry points");
+  await page.getByRole("button", { name: `Inspect commit ${data.commits[0].sha.slice(0, 7)}`, exact: true }).click();
+  await expect(page.getByRole("region", { name: "Graph inspector" })).toContainText("No revert has been run");
+  await page.screenshot({ path: testInfo.outputPath("live-commit-impact.png"), fullPage: true });
+  const download = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Export to Obsidian", exact: true }).click();
+  const vault = await download;
+  await vault.saveAs(testInfo.outputPath("untangle-obsidian.zip"));
+  expect(await vault.failure()).toBeNull();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("live-commit-impact-phone.png"), fullPage: true });
+  expect(errors).toEqual([]);
+});

@@ -115,7 +115,7 @@ def commit_rows(repo: str, commits: Iterable[CommitRecord], people: People) -> l
             "id": ids.commit_id(repo, c.sha), "repo": repo, "sha": c.sha, "title": c.title, "message": _clip(c.message),
             "authored_at": c.authored_at, "committed_at": c.committed_at, "is_merge": c.is_merge, "is_revert": c.is_revert,
             "reverts_sha": c.reverts_sha, "url": f"https://github.com/{repo}/commit/{c.sha}", "additions": c.additions,
-            "deletions": c.deletions, "files_changed": c.files_changed,
+            "deletions": c.deletions, "files_changed": c.files_changed, "parent_shas": c.parents,
             "author_id": people.for_email(c.author_name, c.author_email),
             "committer_id": people.for_email(c.committer_name, c.committer_email),
         })

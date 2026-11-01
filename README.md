@@ -29,6 +29,7 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 | 🔎 **Compare retrieval** | Put graph reasoning beside vector-only search over the same evidence. |
 | 🧰 **Investigate a snapshot** | Search Timeline by file, value, reason or person; inspect each decision's sources and ask about the selected date. |
 | 📋 **Take evidence into a review** | Filter Pulse by risk category or criticality and download the visible decisions or risks as a source-linked Markdown brief. |
+| 🕸️ **Map features to commits** | Explore feature entry points, shared code and Git parents. Select a commit to trace potential impact and export linked notes for Obsidian. |
 
 ## 🚀 Three steps
 
@@ -146,6 +147,7 @@ or people who have not agreed. See [data/kt/README.md](data/kt/README.md) for de
 - The `knadh/listmonk` repository and the transcript in `data/kt/` are demo fixtures. Fictional speaker explanations are labelled as synthetic.
 - Browser coverage is limited to the current Next.js, React, and pnpm toolchain used by CI.
 - Timeline filters and exports use the loaded snapshot (up to 100 decisions); Pulse filters and exports use the returned priority queue. These views do not represent a complete repository audit, and risk scores are heuristic signals, not probabilities.
+- The feature map uses static imports at the indexed HEAD. Commit impact is an estimate of dependency reachability, not a tested revert. Runtime calls, configuration effects and unsupported languages may introduce missing connections.
 
 ## 🛠️ Development
 
@@ -186,6 +188,7 @@ Useful guides:
 - [Demo runbook](docs/DEMO.md)
 - [KT guide](data/kt/README.md)
 - [Web guide](web/README.md)
+- [Feature map research and indexing](docs/FEATURE_MAP.md)
 
 ## 📄 License
 

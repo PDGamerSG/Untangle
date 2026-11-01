@@ -34,7 +34,8 @@ def _ask(graph, fx: Fixture, question: str, **kw):
 def test_resolution_prefers_exact_matches(graph, seeded):
     rec = Recorder(graph)
     hits = resolve_entities(rec, seeded.repo, route("why is app.concurrency 10 in config.toml?"))
-    assert [h.id for h in hits if h.matched][:2] == [seeded.cfg, seeded.file]
+    # Both exact mentions precede partial matches; their relative Lucene score is corpus-dependent.
+    assert {h.id for h in [hit for hit in hits if hit.matched][:2]} == {seeded.cfg, seeded.file}
     assert all(h.strength == 1.0 for h in hits[:2])
     assert rec.calls[0].name == "30_resolve_entities" and rec.calls[0].rows >= 2
 
@@ -58,7 +59,7 @@ def test_why_returns_active_value_with_citations_and_supersession(graph, seeded)
     assert r.supersession[0].signal == "config_diff"
     assert set(r.citations) >= {seeded.dec_new, seeded.pr, seeded.issue, seeded.dec_old}
     assert r.citations[seeded.pr].url.endswith("/pull/812")
-    assert [e.id for e in r.entities][:2] == [seeded.cfg, seeded.file]
+    assert {e.id for e in r.entities[:2]} == {seeded.cfg, seeded.file}
     names = [c.name for c in r.why.cypher]
     assert "30_resolve_entities" in names and "31_decisions_about" in names and "34_person_to_ask" in names and "37_neighbourhood" in names
     assert r.why.llm.used is False and r.why.route == "entity_why"

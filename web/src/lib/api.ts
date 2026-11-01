@@ -13,6 +13,7 @@ import type {
   WhyPath,
 } from "./types";
 import * as sample from "./sample";
+import type { RepositoryMap } from "./repository-map";
 
 export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "/api").replace(/\/+$/, "");
 export const SAMPLE_MODE = process.env.NEXT_PUBLIC_UNTANGLE_SAMPLE === "1";
@@ -92,6 +93,9 @@ export const api = {
     SAMPLE_MODE
       ? Promise.resolve({ nodes: 0, relationships: 0, labels: {}, relationship_types: {} })
       : request(`/stats${q({ repo })}`, { signal }),
+
+  repositoryMap: (repo: string, offset: number, signal?: AbortSignal): Promise<RepositoryMap> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(400, "Repository maps require a live indexed repository.")) : request(`/repository-map${q({ repo, offset: String(offset), limit: "40" })}`, { signal }),
 
   timeline: (repo: string, atIso: string, signal?: AbortSignal): Promise<Timeline> =>
     SAMPLE_MODE ? sample.sampleTimeline(atIso) : request(`/timeline${q({ repo, at: atIso })}`, { signal }),

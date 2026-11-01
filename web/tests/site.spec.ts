@@ -6,6 +6,7 @@ import meeting from "../sample/meeting.json";
 import answer from "../sample/ask/concurrency.json";
 import refusal from "../sample/ask/refusal.json";
 import pulse from "../sample/pulse.json";
+import repositoryMap from "../sample/repository-map.json";
 import { sampleDecision, sampleTimeline } from "../src/lib/sample";
 
 // Browser integration tests use recorded API contracts. Live service checks run separately.
@@ -19,6 +20,7 @@ test.beforeEach(async ({ page }) => {
     if (path === "/health") body = health;
     else if (path === "/repos") body = repos;
     else if (path === "/pulse") body = pulse;
+    else if (path === "/repository-map") body = repositoryMap;
     else if (path === "/meetings") body = meetings;
     else if (path.startsWith("/meetings/")) body = meeting;
     else if (path === "/ask") {
@@ -134,11 +136,12 @@ test("phone layout stays within the viewport", async ({ page }, testInfo) => {
   const longRepo = "example-organization/a-repository-with-a-long-name";
   await page.route("**/api/repos", route => route.fulfill({ json: [{ ...repos[0], full_name: longRepo }] }));
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline"]) {
+  for (const path of ["/dashboard", "/ask", "/pulse", "/meetings", "/timeline", "/map"]) {
     await page.goto(path);
     await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(longRepo);
     if (path === "/timeline") await expect(page.getByRole("region", { name: "Selected decision" })).toBeVisible();
     if (path === "/pulse") await expect(page.locator("article[data-risk]").first()).toBeVisible();
+    if (path === "/map") await expect(page.getByRole("group", { name: "Repository graph", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), path).toBe(true);
     if (["/dashboard", "/timeline", "/pulse"].includes(path)) await page.screenshot({ path: testInfo.outputPath(`${path.slice(1)}-phone.png`), fullPage: true });
   }
@@ -182,6 +185,7 @@ test("every nav link opens its page", async ({ page }) => {
     ["Ask", /\/ask$/, /Find the reason/],
     ["Timeline", /\/timeline$/, null],
     ["Pulse", /\/pulse$/, /What is the team about to forget/],
+    ["Map", /\/map$/, /How the repository fits together/],
     ["Meetings", /\/meetings$/, null],
     ["Dashboard", /\/dashboard$/, /^Dashboard$/],
   ] as const) {
@@ -277,4 +281,51 @@ test("an empty timeline explains the snapshot and disables export", async ({ pag
   await expect(page.getByText("No decisions recorded for this snapshot.", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Export view", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Clear decision filters", exact: true })).toHaveCount(0);
+});
+
+test("feature map explores dependencies and commit impact with evidence", async ({ page }, testInfo) => {
+  await page.goto("/map");
+  const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+  await expect(graph).toBeVisible();
+  await graph.getByRole("button", { name: "Feature Ask", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("region", { name: "Graph inspector" })).toContainText("ask.ts");
+  await page.getByRole("button", { name: "Inspect commit bbbbbbb", exact: true }).click();
+  const inspector = page.getByRole("region", { name: "Graph inspector" });
+  await expect(inspector).toContainText("2 potentially affected features");
+  await expect(inspector).toContainText("ask.ts → shared.ts");
+  await expect(inspector).not.toContainText("Independent");
+  await expect(inspector).toContainText("No revert has been run");
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Reset graph view", exact: true }).click();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: testInfo.outputPath("commit-impact-desktop.png"), fullPage: true });
+  await page.getByRole("button", { name: "Commit history", exact: true }).click();
+  await expect(graph.getByRole("button", { name: "Commit aaaaaaa", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveAttribute("href", /repository-map\/obsidian\?.*limit=200/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("commit-history-phone.png"), fullPage: true });
+});
+
+test("feature map handles repositories that have not been indexed", async ({ page }) => {
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, head_sha: null, features: [], imports: [] } }));
+  await page.goto("/map");
+  await expect(page.getByText("This repository needs a map index.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveCount(0);
+});
+
+test("commit history pagination loads older records and clears the selection", async ({ page }) => {
+  await page.route("**/api/repository-map?**", route => {
+    const offset = Number(new URL(route.request().url()).searchParams.get("offset"));
+    return route.fulfill({ json: { ...repositoryMap, offset, total_commits: 41, has_more: offset === 0, commits: [repositoryMap.commits[offset === 0 ? 0 : 1]] } });
+  });
+  await page.goto("/map");
+  await page.getByRole("button", { name: "Inspect commit bbbbbbb", exact: true }).click();
+  await page.getByRole("button", { name: "Older commits", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Inspect commit aaaaaaa", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Graph inspector" })).not.toContainText("Change shared retrieval");
+  await expect(page.getByRole("button", { name: "Older commits", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Newer commits", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Inspect commit bbbbbbb", exact: true })).toBeVisible();
 });

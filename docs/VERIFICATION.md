@@ -1,5 +1,21 @@
 # Untangle verification record
 
+## Feature and commit map — 2026-11-02
+
+- Backend: **234 passed** against disposable Neo4j 2025.09. New checks cover Python/JS/TS import resolution,
+  feature definitions, unresolved imports, Git parents, pagination, repository isolation, stale-edge replacement,
+  export filenames/link integrity, and HTTP validation/downloads.
+- Frontend: **28 checks passed** (27 in the complete contract/browser run, plus the new pagination regression).
+  Includes reverse dependency traversal, cycles, unrelated-feature exclusion, absent historical paths, keyboard
+  graph selection, zoom/reset, impact paths, commit pagination, and unindexed repositories.
+- Ruff, web lint, TypeScript, Next.js/landing production builds, and diff whitespace checks passed. The targeted
+  21st review returned no findings. Desktop and phone screenshots were inspected; graph labels retain readable size.
+- Existing entity-resolution tests now assert that both exact matches precede partial matches, without assuming
+  an ordering between their corpus-dependent full-text scores. Answer behavior was not changed.
+- The map is a static estimate at indexed HEAD, not an executed revert. Computed runtime dependencies, HTTP calls,
+  unsupported languages and configuration effects are outside its coverage. Merge commits without a parent-specific
+  diff are explicitly identified. See [research and usage](FEATURE_MAP.md).
+
 ## Decision workbench and Pulse triage — 2026-11-01
 
 - Fetched and pulled `origin/main`; all existing feature branches were already merged. The only pre-existing

@@ -80,6 +80,7 @@ Interactive endpoint documentation is available at the API's `/docs` route.
 | `POST /ask` | Question, repository, optional historical date, and graph/vector comparison mode. |
 | `GET /decisions/{id}`, `GET /entities/{id}` | Evidence chains and entities. |
 | `GET /search`, `GET /timeline`, `GET /pulse` | Entity search, decision history, and risk signals. |
+| `GET /repository-map`, `GET /repository-map/obsidian` | Feature/import graph and paginated commit history; linked Obsidian vault ZIP. |
 | `GET /meetings`, `GET /meetings/{id}` | Handover summaries and transcripts. |
 | `POST /kt/ingest` | Multipart upload containing `repo`, optional `title`, and exactly one `audio` or `transcript` file. |
 
