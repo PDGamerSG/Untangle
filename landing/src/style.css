@@ -339,7 +339,9 @@ code {
 
 .hero__title {
   margin: 0 0 2rem;
-  font-size: clamp(3.3rem, 1rem + 8.6vw, 10.25rem);
+  /* Bounded by height too, so the actions stay above the fold on short laptop screens. */
+  font-size: clamp(3.3rem, min(1rem + 8.6vw, 35vh - 9.5rem), 10.25rem);
+  font-size: clamp(3.3rem, min(1rem + 8.6vw, 35svh - 9.5rem), 10.25rem);
   line-height: 0.9;
   font-weight: 700;
   letter-spacing: -0.035em;
@@ -358,8 +360,12 @@ code {
   transform: translateY(var(--dy, 0));
 }
 
+/* The rolling word keeps its own line, so words of different widths never
+   reflow the rest of the headline or move the copy below it. The em width
+   breaks the rest after "code" at every font size. */
 .hero__rest {
-  display: inline;
+  display: block;
+  max-width: 6.5em;
 }
 
 .roller {
@@ -369,7 +375,6 @@ code {
   vertical-align: bottom;
   overflow: hidden;
   transition: width 0.9s var(--ease-thread);
-  margin-right: 0.22em;
 }
 
 .roller__word {
@@ -1395,6 +1400,13 @@ code {
     display: none;
   }
 
+  /* Chapters scroll under the nav here, so it needs a real backing. */
+  .nav.is-solid {
+    background: rgb(11 31 77 / 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
   .hero {
     justify-content: flex-end;
     padding-bottom: 7.5rem;
@@ -1402,6 +1414,11 @@ code {
 
   .hero__inner {
     max-width: none;
+  }
+
+  /* The ball of yarn sits behind the headline on portrait screens. */
+  .hero__title {
+    text-shadow: 0 0.04em 0.35em rgb(11 31 77 / 0.8);
   }
 
   .cue {
@@ -1426,6 +1443,16 @@ code {
     top: auto;
     bottom: 1.5rem;
     max-width: none;
+  }
+
+  /* The refused question is the point of its chapter, so wrap it rather than cut it. */
+  .query--static {
+    max-width: 100%;
+    border-radius: 1.25rem;
+  }
+
+  .query--static .query__text {
+    white-space: normal;
   }
 
   .chapter--pull .answer {
@@ -1466,12 +1493,24 @@ code {
     display: none;
   }
 
+  /* Stack the risks above the copy so the two never overlap on short screens. */
+  .chapter--pulse .stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
   .risks {
-    left: var(--gutter);
-    right: var(--gutter);
-    top: 5rem;
+    order: -1;
+    position: static;
+    margin: 4.75rem var(--gutter) 0;
     width: auto;
     transform: none;
+  }
+
+  .chapter--pulse .copy--left {
+    position: static;
+    padding-top: 1.5rem;
   }
 
   .chapter--pulse .copy--left .pulse__summary {
@@ -1523,6 +1562,32 @@ code {
 
   .tag__title {
     font-size: var(--fs-base);
+  }
+
+  .risk {
+    padding-block: 0.8rem;
+  }
+
+  .risk__score {
+    grid-row: span 2;
+    font-size: 1.6rem;
+  }
+
+  .risk__reason {
+    display: none;
+  }
+
+  /* Wrap long commands instead of hiding them behind a sideways scroll. */
+  .terminal__body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Short phone screens, such as small phones with the browser toolbars showing. */
+@media (max-width: 900px) and (max-height: 600px) {
+  .pulse__hint {
+    display: none;
   }
 }
 

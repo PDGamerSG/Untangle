@@ -2,7 +2,8 @@ import { WHYS } from "../data";
 
 /**
  * Rolls the first word of the headline through "why" in other languages.
- * The roller's width eases to each word so the rest of the line slides with it.
+ * The roller sits on its own line and its width eases to each word, so the
+ * rest of the headline never reflows.
  */
 export function startRoller(root: HTMLElement, reduced: boolean) {
   const first = root.querySelector<HTMLElement>(".roller__word")!;
