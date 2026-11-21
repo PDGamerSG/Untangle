@@ -10,7 +10,7 @@
   --surface-3: #dfe7f4;
   --ink: #0c1d3b;
   --ink-2: #3a4a66;
-  --ink-3: #66758f;
+  --ink-3: #5a6982; /* 5.2:1 on the page background, 4.9:1 on surface-2 (WCAG AA) */
   --rule: rgb(12 29 59 / 0.11);
   --rule-strong: rgb(12 29 59 / 0.26);
   --accent: #1f55e0;

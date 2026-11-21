@@ -12,10 +12,22 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const SITE = "https://untangle.pallabdas.me";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
   title: { default: "Untangle", template: "%s · Untangle" },
   description: "Why is the code like this? Answers from the repository's own history, with a chain of evidence.",
   applicationName: "Untangle",
+  openGraph: {
+    type: "website",
+    siteName: "Untangle",
+    url: SITE,
+    title: "Untangle: why is the code like this?",
+    description: "Answers from the repository's own history, with the evidence behind every decision.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Untangle: ask why the code is like this, with the evidence behind every answer." }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

@@ -411,11 +411,11 @@ code {
   max-width: 28rem;
   margin: 0;
   font-size: var(--fs-sm);
-  color: var(--cotton-3);
+  color: var(--cotton-2);
 }
 
 .hero__foot a {
-  color: var(--cotton-2);
+  color: var(--cotton);
 }
 
 .cue {
@@ -1048,22 +1048,24 @@ code {
   transform: translateY(-50%);
 }
 
+/* Lines not yet spoken are dimmed with colour, not opacity, so every line keeps WCAG AA contrast (4.5:1)
+   against the navy background while the current line still stands out. */
 .line {
   position: relative;
   padding: 0.95rem 0 0.95rem 1.4rem;
   border-left: 1px solid var(--rule);
-  opacity: 0.12;
+  color: rgb(255 255 255 / 0.62);
   transition:
-    opacity 0.6s var(--ease-out),
+    color 0.6s var(--ease-out),
     border-color 0.6s;
 }
 
 .line.is-heard {
-  opacity: 0.55;
+  color: rgb(255 255 255 / 0.8);
 }
 
 .line.is-now {
-  opacity: 1;
+  color: var(--cotton);
   border-color: var(--cotton);
 }
 

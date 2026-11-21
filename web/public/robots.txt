@@ -14,3 +14,5 @@ Disallow: /repositories
 Disallow: /decisions
 Disallow: /entities
 Disallow: /agents
+
+Sitemap: https://untangle.pallabdas.me/sitemap.xml

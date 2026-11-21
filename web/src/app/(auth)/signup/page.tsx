@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 
-export const metadata: Metadata = { title: "Create an account" };
+export const metadata: Metadata = { title: "Create an account", alternates: { canonical: "/signup" } };
 
 export default function Page() {
   return (

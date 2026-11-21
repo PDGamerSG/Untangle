@@ -699,3 +699,20 @@ test("a member creates an agent token, copies the connection command and revokes
   await page.getByRole("button", { name: "Revoke Claude Code laptop" }).click();
   await expect(page.getByText("No tokens yet.", { exact: false })).toBeVisible();
 });
+
+test("public pages meet WCAG AA in an automated check and publish sharing metadata", async ({ page, request }) => {
+  const { default: AxeBuilder } = await import("@axe-core/playwright");
+  await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  for (const path of ["/", "/login", "/signup"]) {
+    await page.context().clearCookies();
+    await page.goto(path);
+    await page.waitForTimeout(1000);
+    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+    const serious = result.violations.filter(v => v.impact === "serious" || v.impact === "critical");
+    expect(serious.map(v => `${path} ${v.id}: ${v.nodes.map(n => n.target.join(" ")).slice(0, 3).join(", ")}`)).toEqual([]);
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+    await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
+  }
+  expect((await request.get("/sitemap.xml")).ok()).toBe(true);
+  expect((await request.get("/og.png")).headers()["content-type"]).toBe("image/png");
+});
