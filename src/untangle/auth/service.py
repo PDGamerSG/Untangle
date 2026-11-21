@@ -7,6 +7,7 @@ avoid a database read on every request; sign-out removes the local entry immedia
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 import secrets
 import threading
@@ -52,6 +53,31 @@ class User:
                 "created_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at / 1000))}
 
 
+# Account constraints are applied once per process before the first sign-up, so a deployment whose schema step
+# was skipped still cannot hold two accounts with one email. Every statement is idempotent.
+_ACCOUNT_SCHEMA = (
+    "CREATE CONSTRAINT user_email IF NOT EXISTS FOR (n:User) REQUIRE n.email IS UNIQUE",
+    "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (n:User) REQUIRE n.id IS UNIQUE",
+    "CREATE CONSTRAINT session_id IF NOT EXISTS FOR (n:Session) REQUIRE n.id IS UNIQUE",
+    "CREATE CONSTRAINT ratelimit_id IF NOT EXISTS FOR (n:RateLimit) REQUIRE n.id IS UNIQUE",
+    "CREATE CONSTRAINT apitoken_id IF NOT EXISTS FOR (n:ApiToken) REQUIRE n.id IS UNIQUE",
+    "CREATE INDEX session_expires IF NOT EXISTS FOR (n:Session) ON (n.expires_at)",
+    "CREATE INDEX ratelimit_expires IF NOT EXISTS FOR (n:RateLimit) ON (n.expires_at)",
+)
+_schema_ready = False
+
+
+def ensure_account_schema(graph: Graph) -> None:
+    global _schema_ready
+    if _schema_ready:
+        return
+    try:
+        graph.run_many(list(_ACCOUNT_SCHEMA))
+        _schema_ready = True
+    except Exception:  # noqa: BLE001 - existing duplicate data or permissions: MERGE in 80 still blocks duplicates
+        logging.getLogger("untangle.auth").exception("could not apply account constraints")
+
+
 def normalize_email(value: str) -> str:
     email = unicodedata.normalize("NFKC", value or "").strip().lower()
     if len(email) > 254 or not _EMAIL.fullmatch(email):
@@ -93,10 +119,13 @@ def register(graph: Graph, email: str, password: str, name: str | None, *, ip: s
         raise AuthProblem(429, str(exc), retry_after=exc.retry_after) from exc
     row = {"id": f"user:{uuid.uuid4().hex}", "email": email, "name": normalize_name(name, email), "role": "member",
            "password_hash": passwords.hash_password(password), "created_at": int(time.time() * 1000)}
+    ensure_account_schema(graph)
     try:
         created = graph.run_named("auth_create_user", {"u": row}, write=True).records
     except ConstraintError as exc:
         raise AuthProblem(409, "An account with this email already exists. Sign in instead.") from exc
+    if not created or not created[0]["created"]:
+        raise AuthProblem(409, "An account with this email already exists. Sign in instead.")
     user = _user(created[0])
     return user, _start_session(graph, user.id)
 

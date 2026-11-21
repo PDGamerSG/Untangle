@@ -221,6 +221,23 @@ async def test_register_sign_in_session_and_sign_out(anon, graph, clean_accounts
 
 @pytest.mark.neo4j
 @pytest.mark.real_auth
+async def test_one_email_cannot_hold_two_accounts_even_without_the_constraint(anon, graph, clean_accounts):
+    graph.query("DROP CONSTRAINT user_email IF EXISTS")
+    accounts._schema_ready = True  # simulate a deployment whose schema step was skipped
+    try:
+        email = _email()
+        assert (await _register(anon, email)).status_code == 201
+        anon.cookies.clear()
+        assert (await _register(anon, email)).status_code == 409
+        assert graph.read("MATCH (u:User {email: $e}) RETURN count(u) AS c", {"e": email}).scalar() == 1
+    finally:
+        accounts._schema_ready = False
+        accounts.ensure_account_schema(graph)
+    assert graph.read("SHOW CONSTRAINTS YIELD name WHERE name = 'user_email' RETURN count(*) AS c").scalar() == 1
+
+
+@pytest.mark.neo4j
+@pytest.mark.real_auth
 async def test_sign_up_rules(anon, clean_accounts):
     email = _email()
     assert (await _register(anon, email)).status_code == 201
