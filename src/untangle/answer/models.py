@@ -1,4 +1,4 @@
-"""Pydantic models for the answer service and the HTTP API, matching `docs/CONTRACTS.md` §6 field for field.
+"""Pydantic models for the answer service and the HTTP API, matching `docs/architecture/CONTRACTS.md` §6 field for field.
 Timestamps are rendered as `*_iso` strings here; the graph keeps epoch milliseconds."""
 
 from __future__ import annotations

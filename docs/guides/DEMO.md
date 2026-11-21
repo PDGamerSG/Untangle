@@ -31,7 +31,7 @@ recording, and the answer shows the recorded question. Unknown questions return 
 
 ## Run against a live graph
 
-Prepare Neo4j and `.env` as described in the [root README](../README.md). Then run:
+Prepare Neo4j and `.env` as described in the [root README](../../README.md). Then run:
 
 ```bash
 uv sync --all-extras
@@ -67,4 +67,4 @@ uv run python scripts/export_sample.py --repo knadh/listmonk
 ```
 
 Review the generated files before committing. Keep synthetic labels intact, and report the evaluation timestamp,
-backend, and gold-set limits when presenting metrics. See [EVAL.md](EVAL.md) and the [KT guide](../data/kt/README.md).
+backend, and gold-set limits when presenting metrics. See [EVAL.md](../development/EVAL.md) and the [KT guide](../../data/kt/README.md).

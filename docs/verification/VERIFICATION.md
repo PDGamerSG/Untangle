@@ -93,7 +93,7 @@
   an ordering between their corpus-dependent full-text scores. Answer behavior was not changed.
 - The map is a static estimate at indexed HEAD, not an executed revert. Computed runtime dependencies, HTTP calls,
   unsupported languages and configuration effects are outside its coverage. Merge commits without a parent-specific
-  diff are explicitly identified. See [research and usage](FEATURE_MAP.md).
+  diff are explicitly identified. See [research and usage](../guides/FEATURE_MAP.md).
 
 ## Decision workbench and Pulse triage — 2026-11-01
 
@@ -113,7 +113,7 @@
   blue-and-white tokens and evidence components are reused. No new UI dependency or API credential is required.
 - Search and export operate on the loaded timeline snapshot (up to 100 decisions) or the returned Pulse queue;
   neither is a full repository audit. The new opt-in production tests check live graph/export flows and a real
-  cited Claude answer with vector comparison. Their invocation is documented in [Deployment](DEPLOYMENT.md).
+  cited Claude answer with vector comparison. Their invocation is documented in [Deployment](../development/DEPLOYMENT.md).
 
 ## Production integration checks — 2026-10-30
 
@@ -147,7 +147,7 @@
   API health reports Neo4j Aura, Claude, FastEmbed, and Sarvam as available; the live calls above verify the services
   beyond their configuration flags.
 
-See [Deployment](DEPLOYMENT.md) for the production environment, API surface, and verification commands. Browser
+See [Deployment](../development/DEPLOYMENT.md) for the production environment, API surface, and verification commands. Browser
 uploads are limited to 4 MB; use the CLI for longer recordings. Re-ingest after code changes to refresh the graph.
 
 ## Earlier migration verification

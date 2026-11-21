@@ -68,7 +68,7 @@ it defaults to `http://127.0.0.1:8090`. Redeploy after environment changes.
 ## Load and update the graph
 
 Users can add a public GitHub repository from the Repositories page. The durable import queue is processed by
-the scheduled GitHub Actions worker. See [repository onboarding](REPOSITORY_IMPORTS.md) for setup, limits, recovery
+the scheduled GitHub Actions worker. See [repository onboarding](../guides/REPOSITORY_IMPORTS.md) for setup, limits, recovery
 and API contracts. This reuses the ingestion pipeline below without running it inside a Vercel request.
 
 Store the same database and model settings in an ignored local `.env`. A `GITHUB_TOKEN` is optional for public

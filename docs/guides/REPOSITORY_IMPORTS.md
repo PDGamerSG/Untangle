@@ -6,7 +6,8 @@ The selected repository applies to the dashboard, Ask, Timeline, Pulse, Map, mee
 Clone URLs ending in `.git` and links with a trailing slash are accepted too.
 
 The tracker shows elapsed time and an estimated remaining range. Small imports are budgeted at 2–10 minutes
-once running; larger imports at 5–20 minutes. Queued estimates add 1–10 minutes for scheduling. These are planning
+once running; larger imports at 5–20 minutes. Queued estimates add 1–10 minutes for scheduling and 2–20 minutes
+per repository ahead in the queue. These are planning
 ranges, not measured completion guarantees: GitHub traffic, queue depth and first-time model setup can extend them.
 When the range is exceeded the tracker says so instead of counting down to a false completion.
 
@@ -31,8 +32,14 @@ normal hosted refresh. An invalid optional feature manifest falls back to direct
 
 Hosted limits: GitHub-reported repository size at most 100,000 KB, 1,000 recent commits, 50 PRs, 100 entries from
 GitHub's combined issues endpoint, six pending imports, and twenty new jobs per rolling day across the deployment.
-Map coverage retains its 2,000-source-file bound. Inventory previews contain up to 50 dependencies, 50 documents,
+The map scans all eligible source files and pages through all indexed paths and import connections. Inventory previews contain up to 50 dependencies, 50 documents,
 and 60 feature groups; counts describe all indexed records. The CLI supports larger history imports.
+
+The dashboard inventory displays an estimated wait and elapsed time. Import completion invalidates cached
+inventory, map and tool data, so reimporting the selected repository refreshes mounted views too. The worker
+checks persisted file, feature, entry-point and import counts before marking a job complete. Each scheduled run
+processes one job, avoiding interruption of a later job near the workflow's 40-minute limit. Failed or expired
+imports remain explicitly retryable; no time estimate is treated as proof of completion.
 
 ## Durable execution
 
@@ -44,7 +51,8 @@ can dispatch the workflow manually.
 An admission transaction locks one control record, coalesces duplicate submissions, and enforces global quotas.
 An atomic claim permits only one active ingestion. A random lease token owns progress/completion updates.
 Heartbeats run every 25 seconds; a running job without updates for three minutes becomes retryable. A queued job
-without a worker for an hour also becomes a visible failure. Re-adding a failed repository creates a new job;
+without a worker for five hours also becomes a visible failure; this allows a full queue to survive earlier
+jobs and scheduling delays. Re-adding a failed repository creates a new job;
 active or recently completed imports return the existing job. Completed imports can be refreshed after an hour.
 Failed refreshes preserve previously stored evidence and report partial-update risk.
 

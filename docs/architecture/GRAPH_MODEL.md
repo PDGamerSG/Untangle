@@ -79,4 +79,4 @@ A ranked contributor is a useful contact suggestion, not proof of current respon
 | Explanations | Citations and query traces expose the evidence actually read by the answer service. |
 
 See [CONTRACTS.md](CONTRACTS.md) for the complete node properties, relationships, CLI commands, and API shapes, and
-[EVAL.md](EVAL.md) for the recorded evaluation and its limits.
+[EVAL.md](../development/EVAL.md) for the recorded evaluation and its limits.

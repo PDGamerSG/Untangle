@@ -37,7 +37,7 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 
 On the live app, open **Repositories**, paste a public GitHub URL,
 and import it. Progress is saved while the background worker indexes the repository. Open its workspace when ready
-to use the tools below with your own repository. See [repository onboarding](docs/REPOSITORY_IMPORTS.md) for coverage,
+to use the tools below with your own repository. See [repository onboarding](docs/guides/REPOSITORY_IMPORTS.md) for coverage,
 limits and worker configuration.
 
 1. **Ingest the history.** Load Git, GitHub, documents, configuration changes, and optional handover transcripts.
@@ -158,7 +158,7 @@ effects from indexed static imports; it does not execute a revert or prove which
 
 The graph links `Feature → entrypoint File → imported File` and `Commit → changed File`, while decisions connect
 to their subjects, evidence and contributors. Later decisions link to earlier ones through `SUPERSEDES`.
-See the [graph model](docs/GRAPH_MODEL.md) and [feature-map coverage](docs/FEATURE_MAP.md).
+See the [graph model](docs/architecture/GRAPH_MODEL.md) and [feature-map coverage](docs/guides/FEATURE_MAP.md).
 
 | Component | Purpose | License |
 |---|---|---|
@@ -174,7 +174,7 @@ to the Python service in the same project. Locally, Next.js proxies `/api` to `U
 `NEXT_PUBLIC_*` setting. `.env.example` selects Claude and the free local `BAAI/bge-small-en-v1.5` embedding model.
 For offline fixture tests, explicitly select `LLM_BACKEND=fake` and `EMBED_BACKEND=fake`.
 
-For the single-project Vercel setup, required credentials, and checks on both public domains, see [Deployment](docs/DEPLOYMENT.md).
+For the single-project Vercel setup, required credentials, and checks on both public domains, see [Deployment](docs/development/DEPLOYMENT.md).
 
 Decisions are keyed by subject and predicate. A later value links to the older value with `SUPERSEDES` and records
 `valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and
@@ -224,19 +224,22 @@ repositories. GitHub Actions runs the backend checks with a Neo4j service and bu
 | `eval/gold/` | Gold questions for the graph and vector baseline. |
 | `tests/` | Unit, API, ingestion, graph, and transcript coverage. |
 | `web/` | Next.js routes, components, client library, and sample fixtures. |
-| `docs/` | Contracts, graph model, evaluation notes, and demo runbook. |
+| `landing/` | Public landing page, scene code, and source assets. |
+| `docs/` | Architecture, development, product guides, and verification records. |
 | `scripts/` | Sample export and optional Sarvam audio helpers. |
 
 Useful guides:
 
-- [Graph model](docs/GRAPH_MODEL.md)
-- [Contracts](docs/CONTRACTS.md)
-- [Evaluation](docs/EVAL.md)
-- [Verification record](docs/VERIFICATION.md)
-- [Demo runbook](docs/DEMO.md)
+- [Documentation index](docs/README.md)
+- [Project structure](docs/development/PROJECT_STRUCTURE.md)
+- [Graph model](docs/architecture/GRAPH_MODEL.md)
+- [Contracts](docs/architecture/CONTRACTS.md)
+- [Evaluation](docs/development/EVAL.md)
+- [Verification record](docs/verification/VERIFICATION.md)
+- [Demo runbook](docs/guides/DEMO.md)
 - [KT guide](data/kt/README.md)
 - [Web guide](web/README.md)
-- [Feature map research and indexing](docs/FEATURE_MAP.md)
+- [Feature map research and indexing](docs/guides/FEATURE_MAP.md)
 
 ## 📄 License
 

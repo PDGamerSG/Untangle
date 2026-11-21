@@ -65,7 +65,7 @@ files can be opened at the exact indexed SHA. Search applies to the current page
 
 The **Export to Obsidian** action downloads a ZIP of Markdown notes with wikilinks. Extract it into a new folder,
 open that folder as an Obsidian vault, and use Graph view. The `features`, `files` and `commits` tags support colored
-groups. The export contains up to 200 recent indexed commits and the returned file graph (up to 2000 files).
+groups. The export contains up to 200 recent indexed commits and the full indexed file graph, assembled from bounded pages.
 It states its scope in README; no absent note is silently manufactured. Older commits can be exported with the
 endpoint's `offset` parameter.
 
@@ -84,11 +84,21 @@ Define features in the target repository's `.untangle/features.json`:
 ```
 
 Definitions are explicit, repository-owned labels. Untangle does not ask a language model to invent feature
-boundaries. Without a manifest it labels directory groups as inferred code areas. At most 60 definitions and
-2000 eligible source files are indexed. Python AST and literal JS/TS imports are extracted without executing code;
+boundaries. Without a manifest it labels every directory group as an inferred code area. Explicit manifests support
+up to 60 definitions; all eligible source files are read in batches of 250. Python AST and literal JS/TS imports are extracted without executing code;
 local tsconfig/jsconfig `paths` are supported, while inherited configs and package export maps are not.
 
-API: `GET /repository-map?repo=owner/name&offset=0&limit=40` and
+The map has an **All files** view, including isolated and historical file paths. Expanded views retain all nodes.
+Above 80 nodes the browser uses a deterministic, pannable layout instead of blocking on quadratic collision passes.
+Loading shows elapsed time, an approximate wait range and the actual number of records fetched. The browser checks
+totals and rejects missing pages or a snapshot change instead of presenting a partial graph as complete.
+
+API: `GET /repository-map?repo=owner/name&offset=0&limit=40&structure_page=0` and
 `GET /repository-map/obsidian?repo=owner/name&offset=0&limit=200`. The API requires only the existing Neo4j connection.
 `Feature` nodes have `ENTRYPOINT` links to files; `File` nodes have source-line-labelled `IMPORTS` links; commits
 retain `parent_shas`. Each reindex atomically replaces only map-owned imports and feature definitions.
+Each structure page includes at most 500 files, 2,000 imports and 100 features. Continue incrementing
+`structure_page` while `structure_has_more` is true; commit pagination remains independent. Connections can reference
+files on a later page, so assemble the full snapshot before traversing it. The export endpoint does this automatically.
+Imports verify stored file, feature, entry-point and import counts before reporting completion. Existing maps indexed
+under the old 2,000-source-file cap need reindexing to discover previously skipped imports.
