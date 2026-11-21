@@ -70,6 +70,16 @@ def test_import_estimate_reports_elapsed_and_overdue_without_false_completion():
     assert done["elapsed_seconds"] == 60 and done["remaining_max_seconds"] == 0
 
 
+def test_queued_estimate_includes_repositories_ahead_of_this_job():
+    from untangle.repositories.jobs import _public
+
+    row = {"id": "job", "repo": "o/r", "status": "queued", "stage": "queued", "created_at": 1000, "metadata": '{"size": 50}'}
+    first = _public({**row, "queue_ahead": 0}, now=1000)
+    waiting = _public({**row, "queue_ahead": 3}, now=1000)
+    assert waiting["estimate"]["remaining_min_seconds"] > first["estimate"]["remaining_min_seconds"] + 300
+    assert waiting["estimate"]["remaining_max_seconds"] >= 3600
+
+
 @respx.mock
 @pytest.mark.parametrize("body,status", [({"private": True}, 400), ({"disabled": True}, 400), ({"size": 100_001}, 413)])
 def test_private_disabled_and_large_repositories_are_rejected(body, status):
@@ -124,6 +134,11 @@ def test_queue_capacity_blocks_new_work_but_allows_duplicate_status(graph, metad
             enqueue(graph, {**metadata, "full_name": metadata["full_name"] + f"-{i}"})
         duplicate = enqueue(graph, {**metadata, "full_name": metadata["full_name"] + "-0"})
         assert duplicate["status"] == "queued"
+        last = enqueue(graph, {**metadata, "full_name": metadata["full_name"] + "-5"})
+        from untangle.repositories.jobs import get_job, list_jobs
+        assert duplicate["queue_ahead"] == 0 and last["queue_ahead"] == 5
+        assert get_job(graph, last["id"])["queue_ahead"] == 5
+        assert next(job for job in list_jobs(graph) if job["id"] == last["id"])["queue_ahead"] == 5
         with pytest.raises(ImportProblem) as error:
             enqueue(graph, {**metadata, "full_name": metadata["full_name"] + "-extra"})
         assert error.value.status == 429
@@ -182,6 +197,34 @@ def test_worker_failure_is_persisted_without_leaking_exception_secrets(graph, me
     result = get_job(graph, job["id"])
     assert result["status"] == "failed"
     assert "secret-should-not-be-public" not in str(result)
+
+
+@pytest.mark.neo4j
+def test_worker_does_not_report_complete_when_a_graph_connection_is_missing(graph, metadata, tmp_path, monkeypatch):
+    from ingest_fixture import build_repo
+    from untangle.ingest.pipeline import ingest_repo
+    from untangle.repositories.jobs import enqueue, get_job
+    from untangle.repositories.worker import process_one
+    from untangle.repository_map import service as maps
+
+    build_repo(tmp_path)
+    original = maps.index_repository_map
+
+    def incomplete(repo, git, graph, **kwargs):
+        data = original(repo, git, graph, **kwargs)
+        graph.query("MATCH (:Feature {repo:$repo})-[e:ENTRYPOINT]->() WITH e LIMIT 1 DELETE e", {"repo": repo})
+        return data
+
+    monkeypatch.setattr(maps, "index_repository_map", incomplete)
+    job = enqueue(graph, metadata)
+
+    def ingest(repo, **kwargs):
+        kwargs.pop("cache_dir")
+        return ingest_repo(repo, **{**kwargs, "repo_path": tmp_path, "github": False})
+
+    process_one(graph, ingester=ingest, validator=lambda repo: metadata)
+    result = get_job(graph, job["id"])
+    assert result["status"] == "failed" and result["progress"] < 100
 
 
 @pytest.mark.neo4j

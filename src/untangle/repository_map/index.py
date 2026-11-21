@@ -12,7 +12,6 @@ from typing import Any
 
 JS_EXTS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs")
 SUPPORTED = (*JS_EXTS, ".py")
-MAX_MAP_FILES = 2000
 _TOKEN = re.compile(r"(?P<comment>//[^\n]*|/\*[\s\S]*?\*/)|(?P<string>'(?:\\.|[^'\\])*'|\"(?:\\.|[^\"\\])*\"|`(?:\\.|[^`\\])*`)|(?P<word>[\w$]+)|(?P<punct>[^\s])")
 
 
@@ -159,10 +158,10 @@ def build_index(repo: str, head_sha: str, content: dict[str, str], paths: list[s
         groups = defaultdict(list)
         for path in paths:
             groups[str(PurePosixPath(path).parent)].append(path)
-        for directory, members in sorted(groups.items())[:60]:
+        for directory, members in sorted(groups.items()):
             features.append({"id": f"feature:{repo}:{directory}", "name": directory, "description": "Inferred directory group; not a verified product feature.",
                              "source": "directory", "entrypoints": members})
-        warnings.append("No feature manifest: showing up to 60 directory groups as code areas.")
+        warnings.append("No feature manifest: showing directory groups as code areas.")
     warnings.extend(f"Unresolved local import: {item}" for item in unresolved_examples)
     warnings.append("External and unresolved Python imports are not included. Dynamic dispatch and cross-service calls are not indexed.")
     return {"head_sha": head_sha, "features": features, "imports": list(edges.values()), "warnings": warnings,

@@ -230,7 +230,21 @@ def ingest_repo(
             "head_sha": head_sha, "ingested_at": int(time.time() * 1000), "commit_count": len(commits), "languages": languages(head_files),
         })
         from untangle.repository_map.service import index_repository_map
-        index_repository_map(repo, git, graph)
+        timer.end("Evidence saved")
+        timer.stage("map")
+        map_data = index_repository_map(repo, git, graph, progress=progress)
+        warnings.extend(map_data["warnings"])
+        timer.end(f"{map_data['coverage']['head_files']} current files mapped")
+        timer.stage("verify")
+        verified = graph.read("""MATCH (r:Repo {full_name:$repo})
+          CALL (r) { UNWIND $paths AS path MATCH (f:File {repo:$repo,path:path}) RETURN count(f) AS files }
+          CALL (r) { MATCH (:File {repo:$repo})-[e:IMPORTS {indexer:'repository-map-v1'}]->(:File {repo:$repo}) RETURN count(e) AS imports }
+          CALL (r) { MATCH (f:Feature {repo:$repo}) RETURN count(f) AS features }
+          CALL (r) { MATCH (:Feature {repo:$repo})-[e:ENTRYPOINT]->(:File {repo:$repo}) RETURN count(e) AS entrypoints }
+          RETURN r.map_head_sha AS head_sha, files, imports, features, entrypoints""",
+          {"repo": repo, "paths": list(head_files)}, timeout=20000).records
+        if not verified or verified[0] != {"head_sha": head_sha, "files": len(head_files), "imports": len(map_data["imports"]), "features": len(map_data["features"]), "entrypoints": sum(len(f["entrypoints"]) for f in map_data["features"])}:
+            raise RuntimeError("Repository map verification failed; import is incomplete.")
         timer.end(f"{n_people[0]} people, {len(commit_rows_)} commits, {file_counts['files']} files, {gh_counts['prs']} PRs, "
                   f"{decision_counts['recorded']} decisions ({decision_counts['superseded']} superseded), {n_chunks} chunks")
 
@@ -241,7 +255,7 @@ def ingest_repo(
             "dependencies": len(head_deps), "documents": len(docs), "decisions": decision_counts, "chunks": n_chunks,
             "github_requests": gh.requests_made, "github_cache_hits": gh.cache_hits, "timings": timer.timings, "total_seconds": timer.total,
             "stats": stats, "writes": loader.counts,
-            "warnings": warnings,
+            "warnings": warnings, "map_coverage": map_data["coverage"],
         }
         progress(f"ingested {repo}: {stats['nodes']} nodes, {stats['relationships']} relationships in {timer.total:.0f}s")
         return summary

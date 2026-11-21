@@ -25,6 +25,8 @@ STAGES = {
     "decisions": ("decisions", 62, "Connecting recorded decisions with their evidence."),
     "chunks": ("embeddings", 74, "Building the repository's search index with free local embeddings."),
     "write": ("write", 90, "Saving evidence and building the feature and import graph."),
+    "map": ("write", 94, "Mapping every file and its supported import connections."),
+    "verify": ("write", 98, "Checking saved file, feature and connection counts before completion."),
 }
 
 
@@ -57,6 +59,9 @@ def process_one(graph: Graph, *, ingester=ingest_repo, validator=fetch_public_re
         if stage in STAGES and message.endswith(" started"):
             key, percent, text = STAGES[stage]
             if not jobs.update_progress(graph, job_id, token, key, percent, text):
+                raise RuntimeError("Import lease was lost")
+        elif stage == "map":
+            if not jobs.update_progress(graph, job_id, token, "write", 95, message.split("]", 1)[-1].strip()):
                 raise RuntimeError("Import lease was lost")
 
     try:

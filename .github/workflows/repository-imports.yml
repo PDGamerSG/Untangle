@@ -56,4 +56,4 @@ jobs:
       # Only our trusted worker executes. Imported repositories are cloned without checkout
       # and read as data; their workflows, build scripts, hooks and dependencies never run.
       - if: steps.queue.outputs.pending == 'true'
-        run: uv run untangle import-worker --max-jobs 6
+        run: uv run untangle import-worker --max-jobs 1

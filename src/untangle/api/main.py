@@ -42,7 +42,7 @@ from untangle.graph.db import GraphUnavailable
 from untangle.kt.sarvam import SarvamError
 from untangle.repositories.models import ImportProblem
 from untangle.repository_map.export import vault_zip
-from untangle.repository_map.service import repository_map
+from untangle.repository_map.service import complete_repository_map, repository_map
 
 log = logging.getLogger("untangle.api")
 
@@ -178,13 +178,13 @@ def stats(repo: str | None = None) -> dict[str, Any]:
 
 
 @app.get("/repository-map")
-def feature_map(repo: str = Query(min_length=3, max_length=200), offset: int = Query(default=0, ge=0), limit: int = Query(default=80, ge=1, le=200)) -> dict:
-    return repository_map(repo, service.get_graph(), offset=offset, limit=limit)
+def feature_map(repo: str = Query(min_length=3, max_length=200), offset: int = Query(default=0, ge=0), limit: int = Query(default=80, ge=1, le=200), structure_page: int = Query(default=0, ge=0)) -> dict:
+    return repository_map(repo, service.get_graph(), offset=offset, limit=limit, structure_page=structure_page)
 
 
 @app.get("/repository-map/obsidian")
 def feature_vault(repo: str = Query(min_length=3, max_length=200), offset: int = Query(default=0, ge=0), limit: int = Query(default=200, ge=1, le=200)) -> Response:
-    data = repository_map(repo, service.get_graph(), offset=offset, limit=limit)
+    data = complete_repository_map(repo, service.get_graph(), offset=offset, limit=limit)
     return Response(vault_zip(data), media_type="application/zip", headers={"Content-Disposition": 'attachment; filename="untangle-obsidian.zip"'})
 
 

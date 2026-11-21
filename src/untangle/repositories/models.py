@@ -4,7 +4,8 @@ LIMITS = {"max_repository_size_kb": 100_000, "max_commits": 1000, "max_prs": 50,
 MAX_PENDING = 6
 REFRESH_INTERVAL_MS = 60 * 60 * 1000
 LEASE_TIMEOUT_MS = 3 * 60 * 1000
-QUEUE_TIMEOUT_MS = 60 * 60 * 1000
+# A full queue must survive the preceding jobs' workflow budgets and scheduling.
+QUEUE_TIMEOUT_MS = MAX_PENDING * 50 * 60 * 1000
 
 
 class ImportProblem(Exception):

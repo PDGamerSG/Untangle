@@ -10,6 +10,62 @@ from untangle.repository_map.export import vault_zip
 from untangle.repository_map.index import build_index
 
 
+def test_directory_groups_cover_every_file_beyond_sixty_directories():
+    paths = [f"area-{i}/file.go" for i in range(85)]
+    result = build_index("o/r", "a", {}, paths, None)
+    assert {p for f in result["features"] for p in f["entrypoints"]} == set(paths)
+
+
+def test_map_scans_every_eligible_file_in_bounded_batches():
+    from untangle.repository_map.service import index_repository_map
+
+    class Git:
+        def files_at_head(self):
+            return {f"file_{i:04}.py": 20 for i in range(2101)}
+
+        def read_at(self, paths, **kwargs):
+            assert len(paths) <= 250
+            return {p: "import file_2100\n" for p in paths}
+
+        def head_sha(self):
+            return "a" * 40
+
+        def show(self, *args):
+            return None
+
+    class Graph:
+        def run_named(self, *args, **kwargs):
+            pass
+
+    result = index_repository_map("o/r", Git(), Graph())
+    assert result["coverage"]["scanned_files"] == 2101
+    assert result["coverage"]["resolved_imports"] == 2100
+
+
+def test_map_pages_cover_all_files_and_edges(graph, test_repo):
+    from untangle.repository_map.service import complete_repository_map, repository_map
+
+    graph.query("CREATE (:Repo {id:'repo:'+$repo, full_name:$repo,map_head_sha:'a',map_coverage:'{}'})", {"repo": test_repo})
+    graph.query("""UNWIND range(0,2100) AS i
+      CREATE (:File {id:$repo+toString(i),repo:$repo,path:toString(i)+'.py',alive:true})""", {"repo": test_repo})
+    graph.query("""MATCH (f:File {repo:$repo}), (target:File {repo:$repo})
+      WHERE target.path IN ['0.py','1.py','2.py','3.py','4.py','5.py'] AND f <> target
+      CREATE (f)-[:IMPORTS {indexer:'repository-map-v1',line:1,specifier:'target'}]->(target)""", {"repo": test_repo})
+    data = repository_map(test_repo, graph)
+    files = data["files"][:]
+    imports = data["imports"][:]
+    while data.get("structure_has_more"):
+        data = repository_map(test_repo, graph, structure_page=data["structure_page"] + 1)
+        files.extend(data["files"])
+        imports.extend(data["imports"])
+    assert len(files) == len({f["path"] for f in files}) == 2101
+    assert len(imports) == len({(e["source"], e["target"]) for e in imports}) == 12600
+    complete = complete_repository_map(test_repo, graph)
+    assert len(complete["files"]) == 2101 and len(complete["imports"]) == 12600
+    with zipfile.ZipFile(io.BytesIO(vault_zip(complete))) as archive:
+        assert len([p for p in archive.namelist() if p.startswith("files/")]) == 2101
+
+
 def test_imports_resolve_python_relative_ts_aliases_and_skip_comments():
     content = {
         "src/pkg/__init__.py": "",
@@ -53,6 +109,7 @@ async def test_map_http_parameters_and_vault_download(monkeypatch):
     payload = {"repo": "o/r", "head_sha": "a" * 40, "features": [], "files": [], "imports": [], "commits": [], "offset": 0, "total_commits": 0, "coverage": {}, "warnings": []}
     monkeypatch.setattr(main.service, "get_graph", lambda: object())
     monkeypatch.setattr(main, "repository_map", lambda repo, graph, **kw: {**payload, "offset": kw["offset"]})
+    monkeypatch.setattr(main, "complete_repository_map", lambda repo, graph, **kw: {**payload, "offset": kw["offset"]})
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=main.app), base_url="http://test") as client:
         assert (await client.get("/repository-map", params={"repo": "o/r", "offset": -1})).status_code == 422
         assert (await client.get("/repository-map", params={"repo": "o/r", "limit": 201})).status_code == 422

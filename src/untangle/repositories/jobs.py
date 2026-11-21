@@ -29,8 +29,9 @@ def _public(row: dict, *, now: int | None = None) -> dict:
     # Planning ranges, not a countdown derived from stage percentages:
     # GitHub volume, worker scheduling and embedding cold starts vary widely.
     low, high = (120, 600) if size < 5000 else (300, 1200)
+    queue_ahead = int(row.get("queue_ahead", 0)) if row["status"] == "queued" else 0
     if row["status"] == "queued":
-        low, high = low + 60, high + 600
+        low, high = low + 60 + queue_ahead * 120, high + 600 + queue_ahead * 1200
         age = elapsed
     else:
         age = max(0, (now - (row.get("started_at") or now)) // 1000)
@@ -39,6 +40,7 @@ def _public(row: dict, *, now: int | None = None) -> dict:
     return {
         "id": row["id"], "repo": row["repo"], "url": f"https://github.com/{row['repo']}",
         "status": row["status"], "stage": row["stage"], "progress": row.get("progress", 0),
+        "queue_ahead": queue_ahead,
         "message": row.get("message", ""), "error": row.get("error"), "warnings": row.get("warnings") or [],
         "summary": json.loads(row["summary"]) if row.get("summary") else None,
         "estimate": {"elapsed_seconds": elapsed, "remaining_min_seconds": 0 if terminal else max(30, low - age),
@@ -61,7 +63,10 @@ def enqueue(graph: Graph, metadata: dict, *, now: int | None = None) -> dict:
         if previous:
             job = dict(previous["job"])
             if job["status"] in ("queued", "running") or (job["status"] == "complete" and job.get("finished_at", 0) > now - REFRESH_INTERVAL_MS):
-                return _public(job)
+                ahead = tx.run("""MATCH (j:RepositoryImport) WHERE j.status IN ['queued','running']
+                  AND (j.created_at < $created OR (j.created_at = $created AND j.id < $id)) RETURN count(j) AS n""",
+                  created=job["created_at"], id=job["id"]).single()["n"] if job["status"] == "queued" else 0
+                return _public({**job, "queue_ahead": ahead})
         counts = tx.run("MATCH (j:RepositoryImport) RETURN count(CASE WHEN j.status IN ['queued','running'] THEN 1 END) AS active, count(CASE WHEN j.created_at >= $day THEN 1 END) AS today", day=now - 86400000).single()
         if counts["active"] >= MAX_PENDING:
             raise ImportProblem(429, "The shared import queue is full. Please try again after an import finishes.")
@@ -71,20 +76,26 @@ def enqueue(graph: Graph, metadata: dict, *, now: int | None = None) -> dict:
                "message": "Waiting for the repository worker. You can leave this page and return later.",
                "metadata": json.dumps(metadata), "created_at": now, "updated_at": now, "warnings": []}
         tx.run("CREATE (j:RepositoryImport) SET j = $row", row=row).consume()
-        return _public(row)
+        return _public({**row, "queue_ahead": counts["active"]})
     return graph.transaction(work)
 
 
 def get_job(graph: Graph, job_id: str) -> dict:
-    rows = graph.read("MATCH (j:RepositoryImport {id: $id}) RETURN properties(j) AS job", {"id": job_id}).records
+    rows = graph.read("""MATCH (j:RepositoryImport {id: $id})
+      RETURN properties(j) AS job, COUNT { MATCH (ahead:RepositoryImport)
+        WHERE ahead.status IN ['queued','running'] AND (ahead.created_at < j.created_at OR
+          (ahead.created_at = j.created_at AND ahead.id < j.id)) } AS queue_ahead""", {"id": job_id}).records
     if not rows:
         raise ImportProblem(404, "This repository import was not found.")
-    return _public(rows[0]["job"])
+    return _public({**rows[0]["job"], "queue_ahead": rows[0]["queue_ahead"]})
 
 
 def list_jobs(graph: Graph) -> list[dict]:
-    rows = graph.read("MATCH (j:RepositoryImport) RETURN properties(j) AS job ORDER BY j.created_at DESC LIMIT 30").records
-    return [_public(row["job"]) for row in rows]
+    rows = graph.read("""MATCH (j:RepositoryImport) WITH j ORDER BY j.created_at DESC LIMIT 30
+      RETURN properties(j) AS job, COUNT { MATCH (ahead:RepositoryImport)
+        WHERE ahead.status IN ['queued','running'] AND (ahead.created_at < j.created_at OR
+          (ahead.created_at = j.created_at AND ahead.id < j.id)) } AS queue_ahead""").records
+    return [_public({**row["job"], "queue_ahead": row["queue_ahead"]}) for row in rows]
 
 
 def expire_stalled(graph: Graph, *, now: int | None = None) -> None:
@@ -105,7 +116,7 @@ def claim_next(graph: Graph, *, now: int | None = None) -> dict | None:
         # Only one active ingestion: shared people/file writes and CPU embeddings stay bounded.
         if tx.run("MATCH (j:RepositoryImport {status:'running'}) RETURN j.id LIMIT 1").single():
             return None
-        row = tx.run("""MATCH (j:RepositoryImport {status:'queued'}) WITH j ORDER BY j.created_at LIMIT 1
+        row = tx.run("""MATCH (j:RepositoryImport {status:'queued'}) WITH j ORDER BY j.created_at, j.id LIMIT 1
           SET j.status='running', j.stage='git', j.progress=5, j.started_at=$now, j.updated_at=$now,
               j.lease_token=$token, j.message='Reading repository metadata and Git history.'
           RETURN properties(j) AS job""", now=now, token=token).single()
