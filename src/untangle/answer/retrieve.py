@@ -246,7 +246,8 @@ def build_dossiers(versions: dict[str, Version]) -> list[Dossier]:
         members.sort(key=lambda v: (v.valid_from or 0, v.created_at or 0, v.id))
         members = members[-MAX_VERSIONS_PER_DOSSIER:]
         dossiers.append(Dossier(versions=members, score=max(v.score for v in members) + 0.001 * (len(members) - 1)))
-    dossiers.sort(key=lambda d: (d.score, 1 if d.top.active else 0, d.top.valid_from or 0), reverse=True)
+    # Repository evidence leads; notes recorded by coding agents support it and only lead when nothing else exists.
+    dossiers.sort(key=lambda d: (0 if d.top.kind == "agent" else 1, d.score, 1 if d.top.active else 0, d.top.valid_from or 0), reverse=True)
     return dossiers
 
 
@@ -274,7 +275,8 @@ def demote_moved(dossiers: list[Dossier], mentioned: set[str] | None = None) -> 
         named = path in mentioned or any(path.endswith("/" + m) for m in mentioned)
         if d.top.predicate == "config_value" and is_removed(d.top) and dotted_key(d.top) in live and not named:
             d.score -= 1.0
-    dossiers.sort(key=lambda d: (d.score, 1 if d.top.active else 0, d.top.valid_from or 0), reverse=True)
+    # Repository evidence leads; notes recorded by coding agents support it and only lead when nothing else exists.
+    dossiers.sort(key=lambda d: (0 if d.top.kind == "agent" else 1, d.score, 1 if d.top.active else 0, d.top.valid_from or 0), reverse=True)
     return dossiers
 
 

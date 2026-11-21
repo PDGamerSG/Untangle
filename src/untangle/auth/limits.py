@@ -22,6 +22,8 @@ class Limit:
 ASK = Limit("ask", 40, 3600)
 HANDOVER_UPLOAD = Limit("handover", 10, 86_400)
 IMPORT = Limit("import", 5, 86_400)
+AGENT_CALL = Limit("agent-call", 300, 3600)
+AGENT_NOTE = Limit("agent-note", 50, 86_400)
 SIGN_IN_IP = Limit("signin-ip", 20, 900)
 SIGN_IN_FAILURES = Limit("signin-fail", 5, 900)
 SIGN_UP_IP = Limit("signup-ip", 5, 3600)

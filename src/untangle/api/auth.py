@@ -14,12 +14,14 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from untangle.answer import service as answers
-from untangle.auth import limits
+from untangle.auth import limits, tokens
 from untangle.auth import service as accounts
 from untangle.auth.service import AuthProblem, User
 from untangle.config import settings
 
 PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me"})
+# Routes a coding agent may call with a personal access token instead of a browser session.
+TOKEN_ROUTES = frozenset({"/mcp"})
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 router = APIRouter(prefix="/auth")
@@ -81,6 +83,15 @@ def enforce_access(request: Request) -> None:
     route = request.scope.get("route")
     path = getattr(route, "path", request.url.path)
     if path in PUBLIC_ROUTES:
+        return
+    if path in TOKEN_ROUTES:
+        bearer = request.headers.get("authorization", "")
+        token = bearer[7:].strip() if bearer[:7].lower() == "bearer " else None
+        user = tokens.resolve(answers.get_graph(), token) if token else accounts.resolve(answers.get_graph(), session_token(request))
+        if user is None:
+            raise HTTPException(status_code=401, detail="Send a personal access token: Authorization: Bearer utg_…",
+                                headers={"WWW-Authenticate": 'Bearer realm="untangle"'})
+        request.state.user = user
         return
     user = accounts.resolve(answers.get_graph(), session_token(request))
     if user is None:
@@ -164,3 +175,28 @@ def delete_account(user: CurrentUser) -> Response:
     result = Response(status_code=204)
     _clear_cookie(result)
     return result
+
+
+class TokenRequest(BaseModel):
+    name: str | None = Field(default=None, max_length=120)
+
+
+@router.get("/tokens")
+def list_tokens(user: CurrentUser) -> dict:
+    return {"tokens": tokens.list_tokens(answers.get_graph(), user), "max": tokens.MAX_TOKENS}
+
+
+@router.post("/tokens", status_code=201)
+def create_token(body: TokenRequest, user: CurrentUser) -> dict:
+    """The token is in this response only; Untangle keeps just its hash."""
+    try:
+        return tokens.create(answers.get_graph(), user, body.name)
+    except AuthProblem as exc:
+        raise _problem(exc) from exc
+
+
+@router.delete("/tokens/{token_id}", status_code=204)
+def revoke_token(token_id: str, user: CurrentUser) -> Response:
+    if not tokens.revoke(answers.get_graph(), user, token_id[:32]):
+        raise HTTPException(status_code=404, detail="That token was not found.")
+    return Response(status_code=204)

@@ -24,7 +24,7 @@ log = logging.getLogger("untangle.graph")
 UNIQUE_ID_LABELS = [
     "Repo", "Person", "Identity", "Commit", "File", "Module", "Symbol", "ConfigKey", "Dependency",
     "PullRequest", "Issue", "Comment", "Document", "Chunk", "Decision", "Meeting", "Utterance", "Feature",
-    "RepositoryImport", "ImportControl", "User", "Session", "RateLimit",
+    "RepositoryImport", "ImportControl", "User", "Session", "RateLimit", "ApiToken",
 ]
 _INDEX_NAME = re.compile(r"CREATE\s+(?:FULLTEXT\s+|VECTOR\s+)?INDEX\s+(\w+)", re.IGNORECASE)
 

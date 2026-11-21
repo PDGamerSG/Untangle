@@ -213,6 +213,58 @@ def feature_vault(repo: str = Query(min_length=3, max_length=200), offset: int =
     return Response(vault_zip(data), media_type="application/zip", headers={"Content-Disposition": 'attachment; filename="untangle-obsidian.zip"'})
 
 
+# -- agents: the decision graph over the Model Context Protocol ------------------------------------------------------
+
+
+@app.post("/mcp")
+async def mcp_endpoint(request: Request, user: CurrentUser) -> Response:
+    """Streamable HTTP, stateless: one JSON-RPC message per POST, answered with JSON (see `untangle.mcp_server`)."""
+    import json
+
+    from untangle import mcp_server
+
+    try:
+        message = json.loads(await request.body() or b"null")
+    except ValueError:
+        return JSONResponse(mcp_server._error(None, -32700, "Parse error: the body must be one JSON-RPC message."), status_code=400)
+
+    def charge_call(kind: str) -> None:
+        if user.is_admin:
+            return
+        graph = service.get_graph()
+        limit = {"ask": limits.ASK, "write": limits.AGENT_NOTE}.get(kind)
+        try:
+            limits.hit(graph, limits.AGENT_CALL, user.id, "This token has made 300 tool calls in the last hour. Please wait.")
+            if limit is not None:
+                limits.hit(graph, limit, user.id, "This account reached its limit for this tool. Please try again later.")
+        except limits.LimitExceeded as exc:
+            raise mcp_server.ToolError(f"{exc} (retry in about {exc.retry_after} seconds)") from exc
+
+    reply = await run_in_threadpool(mcp_server.handle, message, user, charge=charge_call)
+    if reply is None:
+        return Response(status_code=202)
+    return JSONResponse(_english(reply) if "result" in reply else reply)
+
+
+@app.get("/agent-notes")
+def agent_notes(repo: str = Query(min_length=3, max_length=200), limit: int = Query(default=20, ge=1, le=50)) -> Any:
+    """Decisions that coding agents recorded through the MCP endpoint, newest first."""
+    from untangle import agent_memory
+
+    return _english({"repo": repo, "notes": agent_memory.memories(service.get_graph(), repo, limit=limit)})
+
+
+@app.get("/mcp")
+def mcp_stream() -> Response:
+    # No server-initiated stream: this server only answers requests.
+    return Response(status_code=405, headers={"Allow": "POST"})
+
+
+@app.delete("/mcp")
+def mcp_session_end() -> Response:
+    return Response(status_code=405, headers={"Allow": "POST"})
+
+
 # -- meetings / KT: owned by untangle.kt; delegated when present ----------------------------------------------------------
 
 _KT_MISSING = "handover-call (KT) support is not installed: untangle.kt.service is missing or has no %s()"
