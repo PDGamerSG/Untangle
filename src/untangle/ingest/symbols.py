@@ -452,6 +452,16 @@ def _strip_json_comments(text: str) -> str:
     return re.sub(r",(\s*[}\]])", r"\1", text)
 
 
+class _ConfigLoader(yaml.BaseLoader):
+    """Configuration values exactly as written (`on` stays `on`, `1.20` stays `1.20`), with aliases refused:
+    expanding `*anchor` references lets a few kilobytes of YAML describe millions of keys."""
+
+    def compose_node(self, parent, index):  # type: ignore[no-untyped-def]
+        if self.check_event(yaml.AliasEvent):
+            raise yaml.YAMLError("YAML aliases are not read from configuration files")
+        return super().compose_node(parent, index)
+
+
 def parse_config(path: str, text: str) -> dict[str, str]:
     """Dotted key -> scalar value for a configuration file; `{}` when the file is not config or does not parse."""
     fmt = config_format(path)
@@ -459,7 +469,7 @@ def parse_config(path: str, text: str) -> dict[str, str]:
         return {}
     try:
         if fmt == "yaml":
-            docs = [d for d in yaml.safe_load_all(text) if d is not None]
+            docs = [d for d in yaml.load_all(text, Loader=_ConfigLoader) if d is not None]
             data: Any = docs[0] if len(docs) == 1 else {str(i): d for i, d in enumerate(docs)} if docs else {}
         elif fmt == "toml":
             data = tomllib.loads(text)
