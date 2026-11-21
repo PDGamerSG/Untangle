@@ -19,12 +19,21 @@ export type DecisionStatus = "active" | "superseded" | "retracted";
 
 export type DecisionKind = "config_value" | "dependency" | "adr" | "revert" | "change" | "rationale" | "kt";
 
+export interface Account {
+  id: string;
+  email: string;
+  name: string;
+  role: "member" | "admin";
+  created_at_iso: string;
+}
+
 export interface Health {
   ok: boolean;
   status?: "ok" | "degraded";
-  neo4j: { version: string; aura: boolean };
-  graph?: { ok: boolean; version?: string | null; aura?: boolean; edition?: string | null };
-  llm: { backend: string; model: string; available?: boolean };
+  version?: string;
+  neo4j: { ok?: boolean; version?: string; aura: boolean };
+  graph?: { ok: boolean; aura?: boolean };
+  llm: { backend: string; model?: string; available?: boolean };
   embed: { backend: string; dim: number; available?: boolean };
   optional_backends?: {
     llm: { backend: string; available: boolean };
@@ -308,6 +317,9 @@ export interface MeetingSummary {
   summary: string | null;
   utterance_count: number;
   decision_count: number;
+  /** Set for the signed-in user: they uploaded this call, and whether they may delete it. */
+  uploaded_by_me?: boolean;
+  can_delete?: boolean;
 }
 
 export interface MeetingDetail extends MeetingSummary {

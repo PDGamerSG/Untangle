@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Activity, AudioLines, BookOpen, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
 import { HealthDot, HealthPanel, useHealth } from "./HealthDot";
 import { Logo } from "./Logo";
+import { AccountCard, SignOutButton } from "@/components/auth/AccountMenu";
 import { useRepo } from "@/components/repositories/RepoContext";
 import { fmtDay } from "@/lib/format";
 
@@ -114,7 +115,7 @@ function WorkspaceCard() {
         className="mt-2.5 flex items-center gap-2 rounded-md text-[0.8rem] font-semibold text-nav-ink underline-offset-4 hover:underline"
       >
         <FolderGit2 size={15} aria-hidden />
-        {repos && repos.length > 1 ? `All ${repos.length} repositories` : "Repositories"}
+        {repos && repos.length > 1 ? `All ${repos.length} repositories` : "Add a repository"}
       </Link>
     </div>
   );
@@ -139,6 +140,7 @@ export function Nav() {
             <FolderGit2 size={18} aria-hidden />
           </Link>
           <HealthDot status={status} />
+          <SignOutButton />
         </div>
       </div>
       <div className="hidden px-3 pb-5 lg:block">
@@ -163,6 +165,7 @@ export function Nav() {
           How Untangle works
         </a>
         <HealthPanel status={status} />
+        <AccountCard />
       </div>
     </header>
   );

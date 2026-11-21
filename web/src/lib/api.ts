@@ -1,4 +1,5 @@
 import type {
+  Account,
   AskRequest,
   AskResponse,
   EntityResponse,
@@ -65,12 +66,44 @@ async function request<T>(path: string, init?: RequestInit & { signal?: AbortSig
     }
   }
   if (!res.ok) {
-    const detail =
-      body && typeof body === "object" ? (body as { detail?: unknown; error?: unknown }).detail ?? (body as { error?: unknown }).error : typeof body === "string" ? body : null;
-    const msg = typeof detail === "string" ? detail : `${res.status} ${res.statusText} from ${path}`;
-    throw new ApiError(res.status, msg, body);
+    if (res.status === 401 && !path.startsWith("/auth/")) redirectToSignIn();
+    throw new ApiError(res.status, describeFailure(res.status, body), body);
   }
   return body as T;
+}
+
+/** A sentence a person can act on, never a raw status line, validation dump or upstream error page. */
+export function describeFailure(status: number, body: unknown): string {
+  const detail = body && typeof body === "object" ? (body as { detail?: unknown; error?: unknown }).detail ?? (body as { error?: unknown }).error : null;
+  if (typeof detail === "string" && detail.length <= 400) return detail;
+  if (Array.isArray(detail) && detail.length) {
+    const first = detail[0] as { loc?: unknown[]; msg?: string; type?: string; ctx?: { max_length?: number; min_length?: number } };
+    const field = Array.isArray(first.loc) ? String(first.loc[first.loc.length - 1] ?? "input") : "input";
+    if (first.type === "string_too_long" && first.ctx?.max_length) return `The ${field} is too long. Keep it under ${first.ctx.max_length} characters.`;
+    if (first.type === "string_too_short") return `The ${field} is too short.`;
+    if (first.type === "missing") return `The ${field} is required.`;
+    return `The ${field} is not valid${first.msg ? `: ${first.msg.toLowerCase()}` : ""}.`;
+  }
+  if (status === 401) return "Sign in to continue.";
+  if (status === 403) return "You do not have permission to do that.";
+  if (status === 404) return "That item was not found.";
+  if (status === 413) return "That upload is too large.";
+  if (status === 429) return "Too many requests. Please wait a moment and try again.";
+  if (status === 504 || status === 408) return "This is taking longer than expected. Please retry shortly.";
+  if (status >= 500) return "Untangle could not finish this request. Please retry shortly.";
+  return "The request could not be completed.";
+}
+
+let redirecting = false;
+/** The session expired or was revoked: return to sign-in, then back to this page. */
+function redirectToSignIn() {
+  if (typeof window === "undefined" || redirecting || SAMPLE_MODE) return;
+  const here = window.location.pathname + window.location.search;
+  if (here.startsWith("/login") || here.startsWith("/signup")) return;
+  redirecting = true;
+  // Called outside React (from the fetch client), so the router is not available here.
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+  window.location.assign(`/login?next=${encodeURIComponent(here)}`);
 }
 
 const q = (params: Record<string, string | null | undefined>) => {
@@ -126,6 +159,18 @@ async function loadRepositoryMap(repo: string, offset: number, signal?: AbortSig
 }
 
 export const api = {
+  me: (): Promise<{ user: Account }> => request("/auth/me"),
+  login: (body: { email: string; password: string }): Promise<{ user: Account }> =>
+    request("/auth/login", { method: "POST", body: JSON.stringify(body) }),
+  register: (body: { email: string; password: string; name?: string }): Promise<{ user: Account }> =>
+    request("/auth/register", { method: "POST", body: JSON.stringify(body) }),
+  logout: (): Promise<void> => request("/auth/logout", { method: "POST" }),
+  deleteAccount: (): Promise<void> => request("/auth/account", { method: "DELETE" }),
+  deleteMeeting: (id: string): Promise<void> => {
+    if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Deleting is available in the live app."));
+    return request(`/meetings/${encodeURIComponent(id)}`, { method: "DELETE" });
+  },
+
   health: (signal?: AbortSignal): Promise<Health> => (SAMPLE_MODE ? sample.sampleHealth() : request("/health", { signal })),
 
   repos: (signal?: AbortSignal): Promise<RepoSummary[]> => (SAMPLE_MODE ? sample.sampleRepos() : request("/repos", { signal })),
@@ -191,9 +236,24 @@ export function hrefFor(id: string, kind: string, url?: string | null): { href: 
     const m = /^utt:(mtg:.+)#(\d+)$/.exec(id);
     if (m) return { href: `/meetings/${encodeURIComponent(m[1])}#utt-${Number(m[2])}`, external: false };
   }
-  if (url) {
-    if (/^https?:\/\//i.test(url)) return { href: url, external: true };
-    return { href: url, external: false };
+  return safeLink(url);
+}
+
+/** Only web links and same-site paths are followed; `javascript:`, `data:` and `//host` links are dropped. */
+export function safeLink(url?: string | null): { href: string; external: boolean } | null {
+  if (!url) return null;
+  if (url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\")) return { href: url, external: false };
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return { href: parsed.href, external: true };
+  } catch {
+    return null;
   }
   return null;
+}
+
+/** The href for an external evidence link, or undefined when it is not a plain web address. */
+export function externalHref(url?: string | null): string | undefined {
+  const link = safeLink(url);
+  return link?.external ? link.href : undefined;
 }

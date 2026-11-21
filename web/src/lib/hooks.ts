@@ -45,6 +45,14 @@ export function invalidateRepositoryResources(repo: string): void {
   resourceListeners.forEach(listener => listener());
 }
 
+/** Forget every cached response, for example when a different account signs in. */
+export function clearResources(): void {
+  memory.clear();
+  inflight.clear();
+  resourceRevision++;
+  resourceListeners.forEach(listener => listener());
+}
+
 function fetchShared<T>(key: string, load: (signal: AbortSignal) => Promise<T>): Promise<T> {
   const running = inflight.get(key) as Promise<T> | undefined;
   if (running) return running;

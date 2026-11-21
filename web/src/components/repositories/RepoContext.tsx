@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { useResource, useStoredValue } from "@/lib/hooks";
 import type { RepoSummary } from "@/lib/types";
@@ -22,7 +23,9 @@ interface RepoState {
 const Ctx = createContext<RepoState | null>(null);
 
 export function RepoProvider({ children }: { children: ReactNode }) {
-  const res = useResource("repos", (signal) => api.repos(signal));
+  const { user } = useAuth();
+  // Nothing is requested until the session is known, so a signed-out visitor never sees a failed request.
+  const res = useResource(user ? "repos" : null, (signal) => api.repos(signal));
   const [stored, setStored] = useStoredValue(STORAGE_KEY);
   const value = useMemo<RepoState>(() => {
     const repos = res.data;
@@ -32,14 +35,14 @@ export function RepoProvider({ children }: { children: ReactNode }) {
     const repo = selected?.full_name ?? null;
     return {
       repos,
-      loading: res.loading,
+      loading: user === undefined || res.loading,
       error: res.error,
       reload: res.reload,
       repo,
       current: repos?.find((r) => r.full_name === repo),
       setRepo: setStored,
     };
-  }, [res.data, res.loading, res.error, res.reload, stored, setStored]);
+  }, [user, res.data, res.loading, res.error, res.reload, stored, setStored]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

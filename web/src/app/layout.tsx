@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
-import { Nav } from "@/components/layout/Nav";
-import { RepoProvider } from "@/components/repositories/RepoContext";
-import { SampleBanner } from "@/components/layout/SampleBanner";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -32,21 +30,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${fraunces.variable} h-full`}>
       <body className="flex min-h-full flex-col">
-        <RepoProvider>
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm"
-          >
-            Skip to content
-          </a>
-          <Nav />
-          <div className="flex flex-1 flex-col lg:pl-64">
-            <SampleBanner />
-            <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 sm:px-6 lg:pb-16 lg:px-10 lg:pt-10">
-              {children}
-            </main>
-          </div>
-        </RepoProvider>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm"
+        >
+          Skip to content
+        </a>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
