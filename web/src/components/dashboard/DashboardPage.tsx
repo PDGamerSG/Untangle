@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight, GitBranch, ShieldAlert } from "lucide-react";
+import { ArrowUpRight, Bot, ClipboardCheck, Compass, GitBranch, ShieldAlert } from "lucide-react";
 import { GraphStatsPanel, SearchPanel } from "./GraphPanels";
 import { EntityChip } from "@/components/ui/Chip";
 import { RepoSelect } from "@/components/repositories/RepoSelect";
@@ -196,6 +196,14 @@ function RecentCalls({ repo }: { repo: string }) {
   );
 }
 
+const TOOLS = [
+  { href: "/briefing", icon: Compass, title: "Start with the briefing", text: "New here? See the busiest code areas, who wrote them and the decisions to read before changing anything.", action: "Open day-one briefing" },
+  { href: "/preflight", icon: ClipboardCheck, title: "Check a change first", text: "Paste a diff or describe a change. See replaced values it brings back, what it reaches, tests to run and who to ask.", action: "Run a pre-flight check" },
+  { href: "/timeline", icon: GitBranch, title: "Explore decision history", text: "Trace a value to its source. Filter the timeline, inspect the reason, and export the evidence.", action: "Open decision workbench" },
+  { href: "/pulse", icon: ShieldAlert, title: "Review knowledge risks", text: "Focus on conflicts, drifting code or missing ownership. Take a source-linked brief into your next review.", action: "Open risk triage" },
+  { href: "/agents", icon: Bot, title: "Give coding agents the same memory", text: "Connect an agent over MCP so it checks a change, asks why and records its own decisions before it edits.", action: "Connect an agent" },
+] as const;
+
 export function DashboardPage() {
   const { repo, loading, error, reload } = useRepo();
   return (
@@ -235,15 +243,13 @@ export function DashboardPage() {
             <RepositoryOverviewPanel repo={repo} compact />
           </section>
 
-          <section className="grid gap-0 overflow-hidden rounded-xl border border-accent/20 bg-surface xl:grid-cols-2" aria-label="Investigation tools">
-            <Link href="/timeline" className="group flex min-w-0 items-start gap-4 border-b border-rule p-5 transition-colors hover:bg-accent-soft/60 xl:border-b-0 xl:border-r">
-              <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><GitBranch size={22} aria-hidden /></span>
-              <div className="min-w-0"><h2 className="text-[1rem] font-semibold text-ink">Explore decision history</h2><p className="mt-1 text-[0.85rem] leading-relaxed text-ink-2">Trace a value to its source. Filter the timeline, inspect the reason, and export the evidence.</p><span className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-accent">Open decision workbench <ArrowUpRight size={14} aria-hidden /></span></div>
-            </Link>
-            <Link href="/pulse" className="group flex min-w-0 items-start gap-4 p-5 transition-colors hover:bg-accent-soft/60">
-              <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><ShieldAlert size={22} aria-hidden /></span>
-              <div className="min-w-0"><h2 className="text-[1rem] font-semibold text-ink">Review knowledge risks</h2><p className="mt-1 text-[0.85rem] leading-relaxed text-ink-2">Focus on conflicts, drifting code or missing ownership. Take a source-linked brief into your next review.</p><span className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-accent">Open risk triage <ArrowUpRight size={14} aria-hidden /></span></div>
-            </Link>
+          <section className="grid gap-px overflow-hidden rounded-xl border border-accent/20 bg-rule md:grid-cols-2" aria-label="Investigation tools">
+            {TOOLS.map(({ href, icon: Icon, title, text, action }) => (
+              <Link key={href} href={href} className="group flex min-w-0 items-start gap-4 bg-surface p-5 transition-colors last:md:col-span-2 hover:bg-accent-soft/60">
+                <span className="rounded-lg bg-accent-soft p-2.5 text-accent"><Icon size={22} aria-hidden /></span>
+                <div className="min-w-0"><h2 className="text-[1rem] font-semibold text-ink">{title}</h2><p className="mt-1 text-[0.85rem] leading-relaxed text-ink-2">{text}</p><span className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-accent">{action} <ArrowUpRight size={14} aria-hidden /></span></div>
+              </Link>
+            ))}
           </section>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">

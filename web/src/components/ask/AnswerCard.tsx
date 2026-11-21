@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CircleSlash } from "lucide-react";
 import { CitationChip, EntityChip } from "@/components/ui/Chip";
 import { CopyButton } from "@/components/ui/CopyButton";
@@ -6,10 +7,38 @@ import { AnswerText } from "./AnswerText";
 import { BaselineCompare } from "./BaselineCompare";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 import { EvidenceChain } from "./EvidenceChain";
+import { ListenButton } from "./ListenButton";
 import { SupersessionBanner } from "./SupersessionBanner";
 import { WhyPanel } from "./WhyPanel";
 import { fmtDay, KIND_LABEL, normaliseKind } from "@/lib/format";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, Premise } from "@/lib/types";
+
+const PREMISE_TITLE: Record<Premise["status"], string> = {
+  contradicted: "The question's premise looks reversed",
+  outdated: "The question's premise is out of date",
+  unsupported: "The question's premise is not supported",
+  consistent: "The question's premise holds",
+  both: "Both are in use",
+};
+
+/** What the declared dependencies say about an "X instead of Y" question, before the answer itself. */
+function PremiseNote({ premise }: { premise: Premise }) {
+  const warn = premise.status === "contradicted" || premise.status === "outdated" || premise.status === "unsupported";
+  const instead = premise.status === "contradicted" || premise.status === "outdated" ? premise.found.find((f) => f.version && !f.removed_iso) : undefined;
+  return (
+    <section aria-label="Premise check" className={`${warn ? "card border-warn/50" : "card-muted"} p-4`}>
+      <p className={`text-[0.85rem] font-semibold ${warn ? "text-warn" : "text-ink-3"}`}>{PREMISE_TITLE[premise.status]}</p>
+      <p className="mt-1 text-[0.94rem] leading-relaxed text-ink">{premise.text.replace(/`/g, "")}</p>
+      {instead ? (
+        <p className="mt-2 text-[0.82rem]">
+          <Link href={`/ask?question=${encodeURIComponent(`Why do we pin ${instead.name} at ${instead.version}?`)}`} className="font-semibold text-accent underline-offset-4 hover:underline">
+            Ask why the repository uses {instead.name}
+          </Link>
+        </p>
+      ) : null}
+    </section>
+  );
+}
 
 function Refusal({ res }: { res: AskResponse }) {
   return (
@@ -66,6 +95,8 @@ export function AnswerCard({ res, atIso }: { res: AskResponse; atIso: string | n
         <h2 className="t-display mt-1 text-[1.7rem] text-ink sm:text-[2rem]">{res.question}</h2>
       </header>
 
+      {res.premise ? <PremiseNote premise={res.premise} /> : null}
+
       {res.refused ? (
         <Refusal res={res} />
       ) : (
@@ -78,6 +109,7 @@ export function AnswerCard({ res, atIso }: { res: AskResponse; atIso: string | n
             </div>
           </div>
           <AnswerText text={res.answer} citations={res.citations} className="mt-2 break-words text-[1.08rem] leading-[1.7] text-ink" />
+          <div className="mt-3"><ListenButton text={res.answer} /></div>
           {res.entities.length ? (
             <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-rule pt-3">
               <span className="mr-1 text-[0.82rem] text-ink-3">About</span>

@@ -4,6 +4,7 @@ import type {
   AgentToken,
   AskRequest,
   AskResponse,
+  BriefingResponse,
   EntityResponse,
   GitHubIdentity,
   GitHubRepositories,
@@ -12,6 +13,7 @@ import type {
   ImportJob,
   MeetingDetail,
   MeetingSummary,
+  PreflightResponse,
   PulseResponse,
   RepoSummary,
   RepositoryChanges,
@@ -19,7 +21,10 @@ import type {
   RepositoryOverview,
   SavedRepository,
   SearchResponse,
+  SpeakLanguages,
+  SpeakResponse,
   Timeline,
+  TimelineDiff,
   WhyPath,
 } from "./types";
 import * as sample from "./sample";
@@ -215,6 +220,11 @@ export const api = {
   timeline: (repo: string, atIso: string, signal?: AbortSignal): Promise<Timeline> =>
     SAMPLE_MODE ? sample.sampleTimeline(atIso) : request(`/timeline${q({ repo, at: atIso })}`, { signal }),
 
+  timelineCompare: (repo: string, from: string, to: string, signal?: AbortSignal): Promise<TimelineDiff> =>
+    SAMPLE_MODE
+      ? Promise.reject(new ApiError(400, "Comparing dates needs a live indexed repository."))
+      : request(`/timeline/compare${q({ repo, from, to })}`, { signal }),
+
   pulse: (repo: string, signal?: AbortSignal): Promise<PulseResponse> =>
     SAMPLE_MODE ? sample.samplePulse(repo) : request(`/pulse${q({ repo })}`, { signal }),
 
@@ -255,6 +265,23 @@ export const api = {
 
   repositoryOverview: (repo: string, signal?: AbortSignal): Promise<RepositoryOverview> =>
     SAMPLE_MODE ? Promise.reject(new ApiError(404, "The repository inventory is available in the live app.")) : request(`/repository-overview${q({ repo })}`, { signal }),
+
+  preflight: (body: { repo: string; change: string; paths: string[] }, signal?: AbortSignal): Promise<PreflightResponse> =>
+    SAMPLE_MODE
+      ? Promise.reject(new ApiError(400, "Pre-flight checks need a live indexed repository."))
+      : request("/preflight", { method: "POST", body: JSON.stringify(body), signal }, 60_000),
+
+  briefing: (repo: string, signal?: AbortSignal): Promise<BriefingResponse> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(400, "Briefings need a live indexed repository.")) : request(`/briefing${q({ repo })}`, { signal }, 60_000),
+
+  /** Same-origin link to the briefing as a Markdown file (the session cookie authorises the download). */
+  briefingMarkdownHref: (repo: string): string => `${API_BASE}/briefing/markdown${q({ repo })}`,
+
+  speakLanguages: (signal?: AbortSignal): Promise<SpeakLanguages> =>
+    SAMPLE_MODE ? Promise.resolve({ available: false, languages: [] }) : request("/speak/languages", { signal }),
+
+  speak: (text: string, language: string, signal?: AbortSignal): Promise<SpeakResponse> =>
+    request("/speak", { method: "POST", body: JSON.stringify({ text, language }), signal }, 60_000),
 
   ingestMeeting: (body: FormData): Promise<{ meeting_id: string; utterances: number; decisions: number }> => {
     if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Uploads are available in the live app."));

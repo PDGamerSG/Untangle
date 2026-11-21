@@ -82,9 +82,17 @@ export function EntityPage() {
             </dl>
           ) : null}
         </div>
-        <Link href={`/ask?question=${encodeURIComponent(`why is ${name} like this?`)}`} className="btn btn-primary btn-sm">
-          Ask why <ArrowUpRight size={13} aria-hidden />
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={e.label === "File" && e.path ? `/preflight?paths=${encodeURIComponent(String(e.path))}` : `/preflight?change=${encodeURIComponent(`Change ${name}`)}`}
+            className="btn btn-line btn-sm"
+          >
+            Check a change
+          </Link>
+          <Link href={`/ask?question=${encodeURIComponent(`why is ${name} like this?`)}`} className="btn btn-primary btn-sm">
+            Ask why <ArrowUpRight size={13} aria-hidden />
+          </Link>
+        </div>
       </header>
 
       <section aria-labelledby="entity-decisions">

@@ -305,6 +305,8 @@ export interface AskResponse {
   /** Present on refusals: the closest entities and the person to ask. */
   closest?: EntityRef[];
   ask?: PersonCard | null;
+  /** For "X instead of Y" questions: what the declared dependencies say about the question's claim. */
+  premise?: Premise | null;
 }
 
 export interface Timeline {
@@ -476,4 +478,133 @@ export interface RepositoryOverview {
     unresolved_imports: number;
   };
   warnings: string[];
+}
+
+// -- pre-flight checks ------------------------------------------------------------------------------------------------
+
+export type PreflightChange = "edit" | "add" | "remove" | "delete" | "file" | "mention";
+
+export interface PreflightTarget {
+  id: string;
+  label: string;
+  name?: string | null;
+  path?: string | null;
+  key?: string | null;
+  current?: string | null;
+  proposed?: string | null;
+  change: PreflightChange;
+  source: "diff" | "paths" | "text";
+  note?: string | null;
+}
+
+export interface PreflightRevival {
+  target: string;
+  /** The value the change sets, or "added again" for an entry a decision removed. */
+  proposed: string;
+  replaced: DecisionCard;
+  replaced_by: DecisionCard;
+  reason?: string | null;
+  evidence?: Ref | null;
+}
+
+export interface PreflightDecision {
+  decision: DecisionCard;
+  guards: string[];
+  earlier_values: number;
+  strength: number;
+}
+
+export interface PreflightAdvisory {
+  package: string;
+  ecosystem: string;
+  version: string;
+  exact: boolean;
+  current?: string | null;
+  advisory: { id: string; summary?: string | null; aliases: string[]; published_iso?: string | null; url?: string | null; severity?: string | null };
+}
+
+export interface PreflightResponse {
+  repo: string;
+  review: { level: "low" | "medium" | "high"; score: number; reasons: { points: number; text: string }[] };
+  targets: PreflightTarget[];
+  unresolved_paths: string[];
+  revivals: PreflightRevival[];
+  decisions: PreflightDecision[];
+  other_decisions: number;
+  reach: {
+    imports_indexed: boolean;
+    reached: { path: string; hop: number; via: string[] }[];
+    areas: { name: string; source?: string | null; via: string[] }[];
+    tests: string[];
+    cochanged: { path: string; together: number; total: number; share: number }[];
+    truncated: boolean;
+  };
+  advisories: { checked: boolean; note?: string | null; introduced: PreflightAdvisory[]; fixed: PreflightAdvisory[] };
+  people: PersonCard[];
+  next_steps: { text: string; href?: string | null }[];
+  limits: string[];
+  cypher: CypherCall[];
+  ms?: number | null;
+}
+
+// -- day-one briefing ---------------------------------------------------------------------------------------------------
+
+export interface BriefingArea {
+  name: string;
+  files: number;
+  commits: number;
+  last_changed_iso?: string | null;
+  decisions: number;
+  people: { id: string; name?: string | null; login?: string | null; commits: number; share: number }[];
+}
+
+export interface BriefingResponse {
+  repo: string;
+  description?: string | null;
+  url?: string | null;
+  languages: string[];
+  head_sha?: string | null;
+  indexed_at_iso?: string | null;
+  counts: Record<string, number>;
+  summary: string[];
+  areas: BriefingArea[];
+  guarded: { decision: DecisionCard; guards: string[]; weight: number }[];
+  changes: { newer: DecisionCard; older: DecisionCard; at_iso?: string | null; signal?: string | null; source?: Ref | null }[];
+  people: { id: string; name?: string | null; login?: string | null; commits: number; areas: string[] }[];
+  questions: string[];
+  limits: string[];
+  cypher: CypherCall[];
+  ms?: number | null;
+}
+
+// -- premise checks and listening -------------------------------------------------------------------------------------------
+
+export interface Premise {
+  status: "consistent" | "contradicted" | "outdated" | "unsupported" | "both";
+  text: string;
+  assumed: string;
+  alternative: string;
+  found: { name: string; version?: string | null; path?: string | null; removed_iso?: string | null }[];
+}
+
+export interface TimelineDiff {
+  from_iso: string;
+  to_iso: string;
+  counts: { changed: number; started: number; ended: number };
+  changed: { before: DecisionCard; after: DecisionCard }[];
+  started: DecisionCard[];
+  ended: DecisionCard[];
+  truncated: boolean;
+}
+
+export interface SpeakResponse {
+  language: string;
+  text: string;
+  audio_base64: string;
+  mime: string;
+}
+
+export interface SpeakLanguages {
+  available: boolean;
+  languages: { code: string; name: string }[];
 }

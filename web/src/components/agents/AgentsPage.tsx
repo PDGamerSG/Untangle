@@ -156,6 +156,8 @@ function BuiltInAgent() {
 }
 
 const TOOLS: [string, string][] = [
+  ["check_change", "Before editing: replaced values the planned diff brings back, decisions guarding the files, what imports them, tests to run and who to ask."],
+  ["repository_briefing", "A day-one orientation: busy areas and their authors, decisions to read first and recent replacements."],
   ["ask_why", "Cited answer to “why is this like this?”, or a refusal with the person to ask."],
   ["list_decisions", "Every recorded decision about a file, config key, dependency or module, with its history."],
   ["decision_timeline", "What was in force on a date, and what has been replaced since."],

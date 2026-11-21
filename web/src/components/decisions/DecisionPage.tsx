@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { CitationChip } from "@/components/ui/Chip";
 import { DecisionCard, StatusMark } from "./DecisionCard";
+import { DecisionReplay } from "./DecisionReplay";
+import { InlineCode } from "@/components/ask/AnswerText";
 import { CypherList } from "@/components/ask/WhyPanel";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, hrefFor } from "@/lib/api";
@@ -73,7 +75,7 @@ function ChainItem({ d, isThis }: { d: DecisionCardT; isThis: boolean }) {
           {d.decided_in ? ` · ${d.decided_in.title}` : ""}
           {` · ${signalLabel(d.signal)}`}
         </p>
-        <p className="mt-1 text-[0.86rem] text-ink-2">{d.text}</p>
+        <p className="mt-1 text-[0.86rem] text-ink-2"><InlineCode text={d.text} /></p>
       </div>
     </li>
   );
@@ -153,6 +155,8 @@ export function DecisionPage() {
           <EmptyState title="No evidence linked" />
         )}
       </section>
+
+      <DecisionReplay chain={chain} currentId={d.id} />
 
       <section aria-label="History of this decision">
         <SectionTitle hint="oldest first">History, older → newer</SectionTitle>

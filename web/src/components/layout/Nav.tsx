@@ -3,19 +3,36 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
-import { Activity, AudioLines, BookOpen, Bot, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
+import { Activity, AudioLines, BookOpen, Bot, ClipboardCheck, Compass, FlaskConical, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
 import { HealthDot, HealthPanel, useHealth } from "./HealthDot";
 import { Logo } from "./Logo";
 import { AccountCard, SignOutButton } from "@/components/auth/AccountMenu";
 import { useRepo } from "@/components/repositories/RepoContext";
 import { fmtDay } from "@/lib/format";
 
-const GROUPS = [
-  { title: "Overview", links: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
+interface NavItem {
+  href: string;
+  label: string;
+  /** A shorter label for the phone tab row, where seven tabs share the width. */
+  short?: string;
+  icon: typeof LayoutDashboard;
+  /** Reachable from the dashboard on phones; the tab row keeps the daily pages. */
+  wide?: boolean;
+}
+
+const GROUPS: readonly { title: string; links: readonly NavItem[] }[] = [
+  {
+    title: "Overview",
+    links: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/briefing", label: "Briefing", icon: Compass, wide: true },
+    ],
+  },
   {
     title: "Investigate",
     links: [
       { href: "/ask", label: "Ask", icon: MessageCircleQuestion },
+      { href: "/preflight", label: "Pre-flight", short: "Check", icon: ClipboardCheck },
       { href: "/map", label: "Map", icon: Network },
       { href: "/timeline", label: "Timeline", icon: History },
     ],
@@ -25,10 +42,11 @@ const GROUPS = [
     links: [
       { href: "/pulse", label: "Pulse", icon: Activity },
       { href: "/meetings", label: "Meetings", icon: AudioLines },
-      { href: "/agents", label: "Agents", icon: Bot },
+      // Connecting a coding agent is a desktop task; phones keep the seven daily pages.
+      { href: "/agents", label: "Agents", icon: Bot, wide: true },
     ],
   },
-] as const;
+];
 
 function isActive(pathname: string | null, href: string) {
   if (pathname === null) return false;
@@ -50,14 +68,14 @@ function NavLinks({ pathname }: { pathname: string | null }) {
           <p className="hidden px-3 pb-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-nav-ink-2/80 lg:block" aria-hidden>
             {group.title}
           </p>
-          {group.links.map(({ href, label, icon: Icon }) => {
+          {group.links.map(({ href, label, short, icon: Icon, wide }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`nav-link relative flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1.5 text-[0.68rem] font-medium transition-colors sm:text-[0.74rem] lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2 lg:text-[0.9rem] ${
+                className={`nav-link relative min-w-0 flex-col ${wide ? "hidden lg:flex" : "flex"} items-center justify-center gap-0.5 rounded-lg px-0.5 py-1.5 text-[0.68rem] font-medium transition-colors sm:text-[0.74rem] lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2 lg:text-[0.9rem] ${
                   active ? "text-nav-ink lg:bg-white/[0.14]" : "text-nav-ink-2 hover:bg-white/[0.08] hover:text-nav-ink"
                 }`}
               >
@@ -68,7 +86,14 @@ function NavLinks({ pathname }: { pathname: string | null }) {
                 >
                   <Icon size={18} strokeWidth={active ? 2.25 : 2} aria-hidden />
                 </span>
-                <span className="max-w-full truncate">{label}</span>
+                {short ? (
+                  <>
+                    <span className="max-w-full truncate lg:hidden">{short}</span>
+                    <span className="hidden max-w-full truncate lg:inline">{label}</span>
+                  </>
+                ) : (
+                  <span className="max-w-full truncate">{label}</span>
+                )}
               </Link>
             );
           })}
@@ -165,6 +190,13 @@ export function Nav() {
           <BookOpen size={16} aria-hidden />
           How Untangle works
         </a>
+        <Link
+          href="/benchmarks"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[0.85rem] font-medium text-nav-ink-2 transition-colors hover:bg-white/10 hover:text-nav-ink"
+        >
+          <FlaskConical size={16} aria-hidden />
+          How accurate it is
+        </Link>
         <HealthPanel status={status} />
         <AccountCard />
       </div>

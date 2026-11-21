@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { DecisionWorkbench } from "./DecisionWorkbench";
+import { TimelineCompare } from "./TimelineCompare";
 import { RepoSelect } from "@/components/repositories/RepoSelect";
 import { useRepo } from "@/components/repositories/RepoContext";
 import { ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
@@ -123,6 +124,8 @@ export function TimelinePage() {
           </>
         ) : null}
       </section>
+
+      {repo && minDay && todayDay && shownDay ? <TimelineCompare repo={repo} day={shownDay} minDay={minDay} todayDay={todayDay} /> : null}
 
       {timeline.error ? (
         <ErrorState title="Could not load the timeline" error={timeline.error} onRetry={timeline.reload} />

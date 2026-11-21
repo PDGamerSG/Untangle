@@ -7,7 +7,9 @@ import answer from "../sample/ask/concurrency.json";
 import refusal from "../sample/ask/refusal.json";
 import pulse from "../sample/pulse.json";
 import repositoryMap from "../sample/repository-map.json";
+import decisionsSample from "../sample/decisions.json";
 import { sampleDecision, sampleTimeline } from "../src/lib/sample";
+import type { DecisionCard } from "../src/lib/types";
 
 // Browser integration tests use recorded API contracts. Live service checks run separately.
 // The inventory and import shapes the backend returns; values are illustrative, not a recorded snapshot.
@@ -64,6 +66,38 @@ const changes = {
   indexed_recent: [{ sha: "abc1234def", short: "abc1234", message: "Release v5", date: "2026-10-30T00:00:00Z" }],
 };
 
+
+// Shapes the pre-flight, briefing and compare endpoints return; values are illustrative.
+const sampleCards = decisionsSample.cards as unknown as Record<string, DecisionCard>;
+const newer = sampleCards["dec:knadh/listmonk:config_value:599023a9f988"];
+const older = sampleCards["dec:knadh/listmonk:config_value:d3c44eb38b14"];
+const preflightResult = {
+  repo: "knadh/listmonk",
+  review: { level: "high", score: 65, reasons: [{ points: 30, text: "Brings back app.concurrency = 5, a value a later decision replaced" }, { points: 15, text: "1 decision in scope came from an incident" }] },
+  targets: [{ id: "cfg:knadh/listmonk:schema.sql::app.concurrency", label: "ConfigKey", name: "app.concurrency", path: "schema.sql", key: "app.concurrency", current: "10", proposed: "5", change: "edit", source: "diff" }],
+  unresolved_paths: ["new/file.go"],
+  revivals: [{ target: "app.concurrency", proposed: "5", replaced: older, replaced_by: newer, reason: "It changed after incident #790 'SMTP errors under load'.", evidence: null }],
+  decisions: [{ decision: newer, guards: ["Introduced after incident #790 'SMTP errors under load'"], earlier_values: 1, strength: 4 }],
+  other_decisions: 2,
+  reach: { imports_indexed: true, reached: [{ path: "cmd/main.go", hop: 1, via: ["cmd/main.go", "internal/manager/manager.go"] }], areas: [{ name: "cmd", source: "directory", via: ["cmd/main.go"] }],
+    tests: ["internal/manager/manager_test.go"], cochanged: [{ path: "config.toml.sample", together: 6, total: 9, share: 0.67 }], truncated: false },
+  advisories: { checked: true, note: null, introduced: [{ package: "github.com/lib/pq", ecosystem: "go", version: "1.0.0", exact: true, current: "1.10.9",
+    advisory: { id: "GO-2021-0001", summary: "Example advisory", aliases: ["CVE-2021-0001"], published_iso: "2021-01-01T00:00:00Z", url: "https://osv.dev/vulnerability/GO-2021-0001", severity: null } }], fixed: [] },
+  people: [{ id: "person:gh:knadh", name: "Kailash Nadh", login: "knadh", why: "authored 174 of 189 commits on schema.sql" }],
+  next_steps: [{ text: "Read PR #812 before setting app.concurrency back to 5.", href: `/decisions/${newer.id}` }, { text: "Run the tests that reach this change: internal/manager/manager_test.go." }],
+  limits: ["History shows recorded reasons only."], cypher: [{ name: "97_preflight_targets", params: {}, rows: 1, ms: 3 }], ms: 40,
+};
+const briefing = {
+  repo: "knadh/listmonk", description: "Newsletter manager", url: "https://github.com/knadh/listmonk", languages: ["Go"], head_sha: "abc1234def", indexed_at_iso: "2026-11-01T00:00:00Z",
+  counts: { decisions: 2546, commits: 2270 }, summary: ["knadh/listmonk has 410 current files in 6 main areas.", "Most change happens in `cmd` (900 commits)."],
+  areas: [{ name: "cmd", files: 40, commits: 900, last_changed_iso: "2026-10-30T00:00:00Z", decisions: 12, people: [{ id: "person:gh:knadh", name: "Kailash Nadh", login: "knadh", commits: 800, share: 0.89 }] }],
+  guarded: [{ decision: newer, guards: ["Introduced after incident #790 'SMTP errors under load'"], weight: 7 }],
+  changes: [{ newer, older, at_iso: "2023-03-14T00:00:00Z", signal: "config_diff", source: null }],
+  people: [{ id: "person:gh:knadh", name: "Kailash Nadh", login: "knadh", commits: 800, areas: ["cmd"] }],
+  questions: ["Why is app.concurrency 10?"], limits: ["Authorship counts show who wrote the history."], cypher: [], ms: 30,
+};
+const timelineDiff = { from_iso: "2022-01-01T23:59:59Z", to_iso: "2024-01-01T23:59:59Z", counts: { changed: 1, started: 0, ended: 0 }, changed: [{ before: older, after: newer }], started: [], ended: [], truncated: false };
+
 test.beforeEach(async ({ page, baseURL }) => {
   // Browser tests run as a signed-in member; the API's session checks are covered by the backend suite.
   await page.context().addCookies([{ name: "untangle_session", value: "browser-test-session", url: baseURL ?? "http://127.0.0.1:3100" }]);
@@ -82,6 +116,10 @@ test.beforeEach(async ({ page, baseURL }) => {
     else if (path === "/auth/tokens" && route.request().method() === "GET") body = { tokens: [], max: 10 };
     else if (path === "/agent-notes") body = { repo: url.searchParams.get("repo"), notes: [] };
     else if (path === "/auth/logout") return route.fulfill({ status: 204, body: "" });
+    else if (path === "/speak/languages") body = { available: false, languages: [] };
+    else if (path === "/briefing") body = briefing;
+    else if (path === "/preflight") body = preflightResult;
+    else if (path === "/timeline/compare") body = timelineDiff;
     else if (path === "/health") body = health;
     else if (path === "/repos") body = repos;
     else if (path === "/pulse") body = pulse;
@@ -843,4 +881,82 @@ test("every chapter of the landing story keeps WCAG AA contrast and marks the cu
   await page.locator('[data-rail="time"]').click();
   await expect(page.locator('[data-rail="time"]')).toHaveAttribute("aria-current", "location", { timeout: 300 });
   await expect(page.locator('[aria-current="location"]')).toHaveCount(1);
+});
+
+
+test("pre-flight check explains a replaced value, its reach and the next steps", async ({ page }) => {
+  let sent: { repo: string; change: string; paths: string[] } | null = null;
+  await page.route("**/api/preflight", async (route) => {
+    sent = route.request().postDataJSON();
+    await route.fulfill({ json: preflightResult });
+  });
+  await page.goto("/preflight");
+  await page.getByLabel("The change", { exact: true }).fill("Set app.concurrency back to 5");
+  await page.getByLabel(/^Files/).fill("internal/manager/manager.go, new/file.go");
+  await page.getByRole("button", { name: "Check change", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Brings back a replaced value" })).toBeVisible();
+  expect(sent).toEqual({ repo: "knadh/listmonk", change: "Set app.concurrency back to 5", paths: ["internal/manager/manager.go", "new/file.go"] });
+  await expect(page.getByText("65 of 100")).toBeVisible();
+  await expect(page.getByRole("link", { name: "GO-2021-0001" })).toHaveAttribute("href", "https://osv.dev/vulnerability/GO-2021-0001");
+  await expect(page.getByText("internal/manager/manager_test.go", { exact: true })).toBeVisible();
+  await expect(page.getByText("6 of 9 commits")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download for the pull request" })).toBeEnabled();
+  await expect(page.getByText("new/file.go", { exact: true })).toBeVisible();
+});
+
+test("pre-flight links from an entity prefill the files", async ({ page }) => {
+  await page.goto("/preflight?paths=schema.sql");
+  await expect(page.getByLabel(/^Files/)).toHaveValue("schema.sql");
+  await expect(page).toHaveURL(/\/preflight$/);
+});
+
+test("briefing shows areas, decisions to read and who to ask", async ({ page }) => {
+  await page.goto("/briefing");
+  await expect(page.getByRole("heading", { level: 1, name: "Your first day in knadh/listmonk" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Read before changing" })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "cmd" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Download Markdown" })).toHaveAttribute("href", "/api/briefing/markdown?repo=knadh%2Flistmonk");
+  await page.getByRole("link", { name: "Why is app.concurrency 10?" }).click();
+  await expect(page).toHaveURL(/\/ask/);
+});
+
+test("answers flag a reversed premise and can be read aloud", async ({ page }) => {
+  await page.addInitScript(() => { HTMLMediaElement.prototype.play = function () { return Promise.resolve(); }; });
+  await page.route("**/api/speak/languages", (route) => route.fulfill({ json: { available: true, languages: [{ code: "en-IN", name: "English" }, { code: "hi-IN", name: "हिन्दी (Hindi)" }] } }));
+  await page.route("**/api/speak", (route) => route.fulfill({ json: { language: "hi-IN", text: "app.concurrency 10 है।", audio_base64: "SUQz", mime: "audio/mpeg" } }));
+  await page.route("**/api/ask", (route) => route.fulfill({ json: { ...answer, baseline: null,
+    premise: { status: "contradicted", text: "The repository declares `mocha` at `^3.5.3` in `package.json`, not `jest`.", assumed: "jest", alternative: "mocha",
+      found: [{ name: "mocha", version: "^3.5.3", path: "package.json", removed_iso: null }] } } }));
+  await page.goto("/ask");
+  await page.getByLabel("Your question").fill("Why do we use jest instead of mocha?");
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  const premise = page.getByRole("region", { name: "Premise check" });
+  await expect(premise.getByText("The question's premise looks reversed")).toBeVisible();
+  await expect(premise.getByRole("link", { name: "Ask why the repository uses mocha" })).toBeVisible();
+  await page.getByLabel("Language to listen in").selectOption("hi-IN");
+  await page.getByRole("button", { name: "Listen" }).click();
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  await page.getByText("Read it in हिन्दी").click();
+  await expect(page.getByText("app.concurrency 10 है।")).toBeVisible();
+});
+
+test("timeline compares two dates and a decision can be replayed", async ({ page }) => {
+  await page.goto("/timeline");
+  await page.getByLabel(/^Compare .* with$/).fill("2022-01-01");
+  await expect(page.getByText(/1 changed, 0 started, 0 ended/)).toBeVisible();
+  await page.goto(`/decisions/${encodeURIComponent(newer.id)}`);
+  const replay = page.getByRole("region", { name: "Replay this decision" });
+  await expect(replay.getByText(/Step \d of 3/)).toBeVisible();
+  await replay.getByRole("button", { name: "Previous step" }).click();
+  await expect(replay.getByText("Step 2 of 3")).toBeVisible();
+  await replay.press("ArrowLeft");
+  await expect(replay.getByText("Step 1 of 3")).toBeVisible();
+  await expect(replay.getByText("The first recorded value.")).toBeVisible();
+});
+
+test("benchmarks show the recorded comparison", async ({ page }) => {
+  await page.goto("/benchmarks");
+  await expect(page.getByRole("heading", { level: 1, name: "How often Untangle is right" })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "Refusal recall" })).toBeVisible();
+  await expect(page.getByRole("rowheader", { name: "refuse-kafka" })).toBeVisible();
 });
