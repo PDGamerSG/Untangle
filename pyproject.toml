@@ -17,6 +17,7 @@ dependencies = [
   "orjson>=3.9",
   "anthropic>=0.40",
   "fastembed>=0.4",
+  "argon2-cffi>=23.1",
 ]
 
 [tool.vercel]
@@ -53,7 +54,7 @@ dev = [
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-markers = ["neo4j: needs a reachable Neo4j (skipped when NEO4J_URI does not answer)"]
+markers = ["neo4j: needs a reachable Neo4j (skipped when NEO4J_URI does not answer)", "real_auth: run the real session check instead of the signed-in test user"]
 
 [tool.ruff]
 line-length = 120
