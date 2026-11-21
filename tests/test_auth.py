@@ -82,6 +82,25 @@ def test_session_tokens_are_stored_hashed():
     assert accounts.token_hash(token) != token and len(accounts.token_hash(token)) == 64
 
 
+def test_production_trusts_only_its_public_origins(monkeypatch):
+    from untangle import config
+
+    monkeypatch.setenv("VERCEL", "1")
+    assert config._default_origins() == ("https://untangle.pallabdas.me", "https://untangle-code.vercel.app")
+    monkeypatch.delenv("VERCEL")
+    assert "http://localhost:3000" in config._default_origins()
+
+
+@pytest.mark.real_auth
+async def test_untrusted_and_opaque_origins_cannot_write(anon):
+    for origin in ("https://evil.example", "null", "https://untangle.pallabdas.me.evil.example", "http://untangle.pallabdas.me"):
+        r = await anon.post("/auth/logout", headers={"Origin": origin})
+        assert r.status_code == 403, origin
+    # The service's own origin and the configured public origins may write.
+    assert (await anon.post("/auth/logout", headers={"Origin": "http://untangle.test"})).status_code == 204
+    assert (await anon.post("/auth/logout", headers={"Origin": "https://untangle.pallabdas.me"})).status_code == 204
+
+
 def test_secure_cookie_uses_the_host_prefix(monkeypatch):
     monkeypatch.setattr(auth_api, "settings", lambda: replace(settings(), cookie_secure=True))
     assert auth_api.cookie_name() == "__Host-untangle_session"

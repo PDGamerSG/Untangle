@@ -25,11 +25,14 @@ def _load_env() -> None:
             break
 
 
-# Browser origins allowed to send state-changing requests with the session cookie.
-_DEFAULT_ORIGINS = (
-    "https://untangle.pallabdas.me", "https://untangle-code.vercel.app",
-    "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3100",
-)
+# Browser origins allowed to send state-changing requests with the session cookie. Local development origins are
+# trusted only when not running on Vercel, so a page served from a visitor's own machine is never trusted by production.
+_PUBLIC_ORIGINS = ("https://untangle.pallabdas.me", "https://untangle-code.vercel.app")
+_LOCAL_ORIGINS = ("http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3100")
+
+
+def _default_origins() -> tuple[str, ...]:
+    return _PUBLIC_ORIGINS if os.environ.get("VERCEL") else _PUBLIC_ORIGINS + _LOCAL_ORIGINS
 
 
 def _env(name: str, default: str = "") -> str:
@@ -112,6 +115,6 @@ def settings() -> Settings:
         session_days=max(1, min(30, int(_env("UNTANGLE_SESSION_DAYS", "7")))),
         # Production is served over HTTPS; local development uses plain HTTP and cannot set Secure cookies.
         cookie_secure=_env("UNTANGLE_COOKIE_SECURE", "1" if os.environ.get("VERCEL") else "0").lower() in ("1", "true", "yes"),
-        trusted_origins=tuple(o.strip().rstrip("/") for o in _env("UNTANGLE_TRUSTED_ORIGINS", ",".join(_DEFAULT_ORIGINS)).split(",") if o.strip()),
+        trusted_origins=tuple(o.strip().rstrip("/") for o in _env("UNTANGLE_TRUSTED_ORIGINS", ",".join(_default_origins())).split(",") if o.strip()),
         api_docs=_env("UNTANGLE_API_DOCS", "0").lower() in ("1", "true", "yes"),
     )
