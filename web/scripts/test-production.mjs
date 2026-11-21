@@ -39,7 +39,16 @@ for (const [name, origin] of origins) {
 }
 
 if (cookie) {
-  const removed = await fetch(`${origins[0][1]}/api/auth/account`, { method: "DELETE", headers: { cookie } });
-  console.log(`\nLive-check account ${removed.status === 204 ? "deleted" : `not deleted (${removed.status})`}.`);
+  // The run can take minutes; a pooled connection may have closed meanwhile, so retry on a fresh one.
+  let status = "not attempted";
+  for (let attempt = 1; attempt <= 3 && status !== 204; attempt++) {
+    try {
+      status = (await fetch(`${origins[0][1]}/api/auth/account`, { method: "DELETE", headers: { cookie, connection: "close" } })).status;
+    } catch (error) {
+      status = error.cause?.message ?? error.message;
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+  console.log(status === 204 ? "\nLive-check account deleted." : `\nLive-check account ${email} was not deleted (${status}); delete it by signing in.`);
 }
 process.exitCode = failed ? 1 : 0;
