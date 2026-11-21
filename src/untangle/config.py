@@ -25,6 +25,13 @@ def _load_env() -> None:
             break
 
 
+# Browser origins allowed to send state-changing requests with the session cookie.
+_DEFAULT_ORIGINS = (
+    "https://untangle.pallabdas.me", "https://untangle-code.vercel.app",
+    "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3100",
+)
+
+
 def _env(name: str, default: str = "") -> str:
     value = os.environ.get(name)
     return default if value is None or value == "" else value
@@ -60,6 +67,13 @@ class Settings:
     cors_origins: tuple[str, ...] = ("http://localhost:3000",)
     display_language: str = "en"
 
+    # Accounts. Every data endpoint requires a signed-in user; see untangle.auth.
+    admin_emails: tuple[str, ...] = ()
+    session_days: int = 7
+    cookie_secure: bool = False
+    trusted_origins: tuple[str, ...] = ()
+    api_docs: bool = False
+
     @property
     def aura(self) -> bool:
         return "databases.neo4j.io" in self.neo4j_uri
@@ -94,4 +108,10 @@ def settings() -> Settings:
         api_port=int(_env("API_PORT", "8090")),
         cors_origins=tuple(o.strip() for o in _env("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()),
         display_language=_env("UNTANGLE_DISPLAY_LANGUAGE", "en").strip().lower(),
+        admin_emails=tuple(e.strip().lower() for e in _env("UNTANGLE_ADMIN_EMAILS").split(",") if e.strip()),
+        session_days=max(1, min(30, int(_env("UNTANGLE_SESSION_DAYS", "7")))),
+        # Production is served over HTTPS; local development uses plain HTTP and cannot set Secure cookies.
+        cookie_secure=_env("UNTANGLE_COOKIE_SECURE", "1" if os.environ.get("VERCEL") else "0").lower() in ("1", "true", "yes"),
+        trusted_origins=tuple(o.strip().rstrip("/") for o in _env("UNTANGLE_TRUSTED_ORIGINS", ",".join(_DEFAULT_ORIGINS)).split(",") if o.strip()),
+        api_docs=_env("UNTANGLE_API_DOCS", "0").lower() in ("1", "true", "yes"),
     )

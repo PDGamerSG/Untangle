@@ -1,4 +1,4 @@
-"""Small, dependency-free shaping helpers for the public health contract."""
+"""The public health contract: readiness only, with no hosts, model names, versions or error text."""
 
 from __future__ import annotations
 
@@ -7,27 +7,30 @@ from typing import Any
 
 
 def shape_health(snapshot: Mapping[str, Any]) -> dict[str, Any]:
-    """Add stable readiness fields while keeping the legacy health fields intact.
+    """Reduce the answer service's internal snapshot to what an anonymous visitor may see.
 
-    The answer service owns the actual graph probe and backend discovery. This module only
-    adds safe readiness fields; it never adds credentials or secret configuration values.
-    """
+    `/health` is public so the sign-in page can show whether the service is up. It reports whether each part is
+    ready and nothing that would help locate or fingerprint the database or the hosted model."""
     neo4j = dict(snapshot.get("neo4j") or {})
     llm = dict(snapshot.get("llm") or {})
     embed = dict(snapshot.get("embed") or {})
     sarvam = dict(snapshot.get("sarvam") or {})
+    graph_ok = bool(neo4j.get("ok"))
+    llm_backend = "fake" if llm.get("backend") == "fake" else "hosted"
+    embed_backend = "fake" if embed.get("backend") == "fake" else "local"
+    embed_ok = bool(embed.get("available", embed.get("backend")))
     return {
-        **dict(snapshot),
+        "ok": bool(snapshot.get("ok")),
         "status": "ok" if bool(snapshot.get("ok")) else "degraded",
-        "graph": {
-            "ok": bool(neo4j.get("ok")),
-            "version": neo4j.get("version"),
-            "aura": bool(neo4j.get("aura")),
-            "edition": neo4j.get("edition"),
-        },
+        "version": snapshot.get("version"),
+        "neo4j": {"ok": graph_ok, "aura": bool(neo4j.get("aura"))},
+        "graph": {"ok": graph_ok, "aura": bool(neo4j.get("aura"))},
+        "llm": {"backend": llm_backend, "available": bool(llm.get("available"))},
+        "embed": {"backend": embed_backend, "dim": embed.get("dim"), "available": embed_ok},
+        "sarvam": {"configured": bool(sarvam.get("configured"))},
         "optional_backends": {
-            "llm": {"backend": llm.get("backend"), "available": bool(llm.get("available"))},
-            "embeddings": {"backend": embed.get("backend"), "available": bool(embed.get("available", embed.get("backend")))},
+            "llm": {"backend": llm_backend, "available": bool(llm.get("available"))},
+            "embeddings": {"backend": embed_backend, "available": embed_ok},
             "sarvam": {"configured": bool(sarvam.get("configured"))},
         },
     }

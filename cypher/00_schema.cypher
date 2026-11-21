@@ -27,6 +27,11 @@ CREATE INDEX utterance_meeting_seq IF NOT EXISTS FOR (n:Utterance) ON (n.meeting
 CREATE INDEX translation_key IF NOT EXISTS FOR (n:Translation) ON (n.key)
 CREATE INDEX import_status_time IF NOT EXISTS FOR (n:RepositoryImport) ON (n.status, n.created_at)
 CREATE INDEX import_repo_key IF NOT EXISTS FOR (n:RepositoryImport) ON (n.repo_key)
+CREATE INDEX session_expires IF NOT EXISTS FOR (n:Session) ON (n.expires_at)
+CREATE INDEX ratelimit_expires IF NOT EXISTS FOR (n:RateLimit) ON (n.expires_at)
+
+// Accounts: one user per normalised email address.
+CREATE CONSTRAINT user_email IF NOT EXISTS FOR (n:User) REQUIRE n.email IS UNIQUE
 
 // Full-text (Lucene standard analyzer). `tokens` holds names split on punctuation so `retry_limit` and `retry limit` both match.
 CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (n:File|Module|Symbol|ConfigKey|Dependency) ON EACH [n.name, n.path, n.key, n.tokens]

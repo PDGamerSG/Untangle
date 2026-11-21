@@ -12,7 +12,7 @@ come from `untangle.config.settings()` (`SARVAM_API_KEY`, `LLM_BACKEND`, `EMBED_
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -137,15 +137,18 @@ def ingest_transcript(
     llm: LLM | None = None,
     embedder: Embedder | None = None,
     sarvam: SarvamClient | None = None,
+    keep_audio_uri: bool = True,
+    before_write: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
-    """Load a transcript file (Untangle JSON, Sarvam JSON or `Speaker: text` lines) into the graph."""
+    """Load a transcript file (Untangle JSON, Sarvam JSON or `Speaker: text` lines) into the graph.
+    Web uploads pass `keep_audio_uri=False`: a file's own recording link must not make visitors load another host."""
     t = load_transcript(path, title=title, language=language)
     client = sarvam if sarvam is not None else (sarvam_client() if translate else None)
     with _graph(graph) as g:
         return ingest_kt(
             g, repo, title=t.title or Path(path).stem, utterances=t.utterances, speakers=t.speakers, started_at=t.started_at,
-            language=t.language, audio_uri=t.audio_uri, llm=llm if llm is not None else make_llm(), embedder=embedder,
-            source=t.source, sarvam=client, translate=translate, summary=t.note,
+            language=t.language, audio_uri=t.audio_uri if keep_audio_uri else None, llm=llm if llm is not None else make_llm(),
+            embedder=embedder, source=t.source, sarvam=client, translate=translate, summary=t.note, before_write=before_write,
         )
 
 
@@ -164,6 +167,7 @@ def ingest_audio(
     keyterms: Sequence[str] | None = None,
     prefer_windows: bool = False,
     started_at: int | str | None = None,
+    before_write: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     """Transcribe a recording with Sarvam (keyterms biased toward the repository's identifiers) and ingest it."""
     client = sarvam if sarvam is not None else sarvam_client()
@@ -175,7 +179,7 @@ def ingest_audio(
         return ingest_kt(
             g, repo, title=title, utterances=t.utterances, speakers=t.speakers, started_at=started_at, language=t.language or language,
             audio_uri=None, llm=llm if llm is not None else make_llm(), embedder=embedder, source=t.source,
-            sarvam=client, translate=translate,
+            sarvam=client, translate=translate, before_write=before_write,
         )
 
 

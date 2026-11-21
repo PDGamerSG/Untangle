@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import re
 import time
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -329,6 +329,7 @@ def ingest_kt(
     summary: str | None = None,
     catalogue_limit: int = CATALOGUE_LIMIT,
     now: int | None = None,
+    before_write: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     """Load one call. `utterances` are normalised rows (`untangle.kt.transcript`); `speakers` maps labels to
     `{name, login, email}` (or a bare name); `started_at` is epoch ms or ISO-8601; `sarvam` is a `SarvamClient`
@@ -346,6 +347,9 @@ def ingest_kt(
     duration_ms = max(u.end_ms for u in rows)
     meeting_start = started if started else now - duration_ms
     mid = ids.meeting_id(repo, meeting_slug(title, started, rows[0].text))
+    if before_write is not None:
+        # Lets the caller refuse to replace a call someone else uploaded, before anything is written.
+        before_write(mid)
     display = {label: (info.get("name") or label) for label, info in speakers_map.items()}
 
     # entities of the repository (may be empty when the code history has not been ingested yet)

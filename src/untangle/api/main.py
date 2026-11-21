@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import importlib
 import logging
+import re
 import tempfile
 import time
 import uuid
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -34,26 +35,39 @@ from untangle.answer.models import (
     WhyPath,
 )
 from untangle.api import meetings as meeting_shape
+from untangle.api.auth import CurrentUser, charge, enforce_access
+from untangle.api.auth import router as auth_router
 from untangle.api.english import to_english
 from untangle.api.health import shape_health
 from untangle.api.repositories import router as repositories_router
+from untangle.api.security import add_security_headers
+from untangle.auth import limits
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
 from untangle.kt.sarvam import SarvamError
 from untangle.repositories.models import ImportProblem
+from untangle.repositories.service import normalize_repository
 from untangle.repository_map.export import vault_zip
 from untangle.repository_map.service import complete_repository_map, repository_map
 
 log = logging.getLogger("untangle.api")
+_REQUEST_ID = re.compile(r"[A-Za-z0-9._-]{1,128}")
 
+_docs = settings().api_docs
 app = FastAPI(
     title="Untangle API", version=__version__,
     description="Answers 'why is the code like this?' from a graph of a repository's history, with evidence on every answer.",
+    # Interactive documentation is for local development; production does not publish its schema.
+    docs_url="/docs" if _docs else None, redoc_url=None, openapi_url="/openapi.json" if _docs else None,
+    dependencies=[Depends(enforce_access)],
 )
+# The web app calls the API on its own origin; CORS only admits the configured development origins.
 app.add_middleware(
     CORSMiddleware, allow_origins=list(settings().cors_origins) or ["http://localhost:3000"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE"], allow_headers=["Accept", "Content-Type", "X-Request-Id"], max_age=600,
 )
+add_security_headers(app)
+app.include_router(auth_router)
 app.include_router(repositories_router)
 
 
@@ -63,7 +77,9 @@ app.include_router(repositories_router)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):  # type: ignore[no-untyped-def]
-    request_id = request.headers.get("x-request-id", "").strip()[:128] or uuid.uuid4().hex
+    supplied = request.headers.get("x-request-id", "").strip()
+    # Echo a caller's id only when it is a plain token, so it cannot inject text into logs or headers.
+    request_id = supplied if _REQUEST_ID.fullmatch(supplied) else uuid.uuid4().hex
     request.state.request_id = request_id
     started = time.perf_counter()
     response = await call_next(request)
@@ -111,16 +127,24 @@ async def _sarvam_error(request: Request, exc: SarvamError) -> JSONResponse:
     return _error(status, "Transcription is unavailable. Please try a transcript file or retry later.", request_id=_request_id(request))
 
 
+@app.exception_handler(limits.LimitExceeded)
+async def _limit_exceeded(request: Request, exc: limits.LimitExceeded) -> JSONResponse:
+    response = _error(429, str(exc), request_id=_request_id(request))
+    response.headers["Retry-After"] = str(exc.retry_after)
+    return response
+
+
+# Database and unexpected errors are logged with the request id; the response never includes internal details.
 @app.exception_handler(Neo4jError)
 async def _neo4j_error(request: Request, exc: Neo4jError) -> JSONResponse:
-    log.error("neo4j error: %s", exc)
-    return _error(502, f"graph query failed: {exc.message if hasattr(exc, 'message') else exc}", request_id=_request_id(request), code=getattr(exc, "code", None))
+    log.error("neo4j error [%s]: %s", _request_id(request), exc)
+    return _error(502, "The graph database could not complete this request. Please retry shortly.", request_id=_request_id(request))
 
 
 @app.exception_handler(Exception)
 async def _unexpected(request: Request, exc: Exception) -> JSONResponse:
-    log.exception("unhandled error")
-    return _error(500, f"{type(exc).__name__}: {exc}", request_id=_request_id(request))
+    log.exception("unhandled error [%s]", _request_id(request))
+    return _error(500, "Something went wrong on our side. Please retry; if it continues, share the request id.", request_id=_request_id(request))
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -143,37 +167,38 @@ def _english(result: Any) -> Any:
 
 
 @app.post("/ask", response_model=AskResponse)
-def ask(body: AskRequest) -> Any:
+def ask(body: AskRequest, request: Request) -> Any:
+    charge(request, limits.ASK, "You have asked 40 questions in the last hour. Please wait before asking more.")
     return _english(service.ask(body.question, body.repo, at=body.at, mode=body.mode))
 
 
 @app.get("/decisions/{decision_id:path}", response_model=WhyPath)
 def decision(decision_id: str) -> Any:
-    return _english(service.why_path(decision_id))
+    return _english(service.why_path(decision_id[:300]))
 
 
 @app.get("/entities/{entity_id:path}", response_model=EntityResponse)
 def entity(entity_id: str) -> Any:
-    return _english(service.entity(entity_id))
+    return _english(service.entity(entity_id[:300]))
 
 
 @app.get("/search", response_model=SearchResponse)
-def search(repo: str = Query(min_length=3), q: str = Query(min_length=1, max_length=500)) -> Any:
+def search(repo: str = Query(min_length=3, max_length=200), q: str = Query(min_length=1, max_length=500)) -> Any:
     return _english(service.search(repo, q))
 
 
 @app.get("/timeline", response_model=TimelineResponse)
-def timeline(repo: str = Query(min_length=3), at: str | None = None) -> Any:
+def timeline(repo: str = Query(min_length=3, max_length=200), at: str | None = Query(default=None, max_length=40)) -> Any:
     return _english(service.timeline(repo, at))
 
 
 @app.get("/pulse", response_model=PulseResponse)
-def pulse(repo: str = Query(min_length=3), limit: int = Query(default=24, ge=1, le=50)) -> Any:
+def pulse(repo: str = Query(min_length=3, max_length=200), limit: int = Query(default=24, ge=1, le=50)) -> Any:
     return _english(service.pulse(repo, limit=limit))
 
 
 @app.get("/stats")
-def stats(repo: str | None = None) -> dict[str, Any]:
+def stats(repo: str | None = Query(default=None, min_length=3, max_length=200)) -> dict[str, Any]:
     return service.get_graph().stats(repo)
 
 
@@ -198,31 +223,55 @@ def _kt(function: str) -> Any:
     try:
         module = importlib.import_module("untangle.kt.service")
     except ImportError as exc:
-        raise HTTPException(status_code=501, detail=f"{_KT_MISSING % function} ({exc})") from exc
+        raise HTTPException(status_code=501, detail=_KT_MISSING % function) from exc
     fn = getattr(module, function, None)
     if fn is None:
         raise HTTPException(status_code=501, detail=_KT_MISSING % function)
     return fn
 
 
+def _owner_fields(row: dict[str, Any], user: Any) -> dict[str, Any]:
+    owner = row.get("uploaded_by")
+    return {"uploaded_by_me": owner == user.id, "can_delete": owner == user.id or user.is_admin}
+
+
 @app.get("/meetings")
-def meetings(repo: str = Query(min_length=3)) -> Any:
-    return _english([meeting_shape.summary_out(r) for r in _kt("meetings")(repo, graph=service.get_graph())])
+def meetings(user: CurrentUser, repo: str = Query(min_length=3, max_length=200)) -> Any:
+    rows = _kt("meetings")(repo, graph=service.get_graph())
+    return _english([{**meeting_shape.summary_out(r), **_owner_fields(r, user)} for r in rows])
 
 
 @app.get("/meetings/{meeting_id:path}")
-def meeting(meeting_id: str) -> Any:
+def meeting(meeting_id: str, user: CurrentUser) -> Any:
     graph = service.get_graph()
-    result = _kt("meeting")(meeting_id, graph=graph)
+    result = _kt("meeting")(meeting_id[:300], graph=graph)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"no meeting {meeting_id!r}")
-    return _english(meeting_shape.detail_out(result, graph=graph))
+        raise HTTPException(status_code=404, detail="This handover call was not found.")
+    return _english({**meeting_shape.detail_out(result, graph=graph), **_owner_fields(result.get("meeting") or result, user)})
+
+
+@app.delete("/meetings/{meeting_id:path}", status_code=204)
+def delete_meeting(meeting_id: str, user: CurrentUser) -> Response:
+    """The uploader (or an administrator) can remove a handover call, for example when consent is withdrawn."""
+    graph = service.get_graph()
+    owner = graph.read("MATCH (m:Meeting {id: $id}) RETURN m.uploaded_by AS owner", {"id": meeting_id[:300]}).records
+    if not owner:
+        raise HTTPException(status_code=404, detail="This handover call was not found.")
+    if owner[0]["owner"] != user.id and not user.is_admin:
+        raise HTTPException(status_code=403, detail="Only the person who uploaded this handover call can delete it.")
+    graph.run_named("kt_delete_meeting", {"meeting_id": meeting_id[:300]}, write=True)
+    return Response(status_code=204)
+
+
+_AUDIO_SUFFIXES = {".wav", ".mp3", ".m4a", ".aac", ".ogg", ".oga", ".opus", ".flac", ".webm", ".mp4", ".amr"}
 
 
 @app.post("/kt/ingest")
 async def kt_ingest(
-    repo: Annotated[str, Form()], title: Annotated[str | None, Form()] = None, language: Annotated[str | None, Form()] = None,
-    speakers: Annotated[int | None, Form()] = None, audio: Annotated[UploadFile | None, File()] = None,
+    request: Request, user: CurrentUser,
+    repo: Annotated[str, Form(min_length=3, max_length=200)], title: Annotated[str | None, Form(max_length=200)] = None,
+    language: Annotated[str | None, Form(max_length=16)] = None,
+    speakers: Annotated[int | None, Form(ge=1, le=12)] = None, audio: Annotated[UploadFile | None, File()] = None,
     transcript: Annotated[UploadFile | None, File()] = None,
 ) -> Any:
     """Multipart `{repo, title, audio | transcript}` -> `{meeting_id, utterances, decisions, ...}` from `untangle.kt.service`.
@@ -239,19 +288,47 @@ async def kt_ingest(
         raise HTTPException(status_code=400, detail="The uploaded file is empty")
     function = "ingest_audio" if audio is not None else "ingest_transcript"
     ingest = _kt(function)
-    suffix = Path(upload.filename or ("audio.wav" if audio is not None else "transcript.json")).suffix or ".bin"
+    # Only the extension is taken from the client's filename; the stored file name is fixed.
+    suffix = Path(upload.filename or "").suffix.lower()
+    if audio is not None and suffix not in _AUDIO_SUFFIXES:
+        raise HTTPException(status_code=415, detail="Upload a WAV, MP3, M4A, OGG, OPUS, FLAC or WEBM recording.")
+    if transcript is not None:
+        if suffix not in (".json", ".txt", ""):
+            raise HTTPException(status_code=415, detail="Upload the transcript as a JSON file or as text with one `Speaker: words` line per turn.")
+        try:
+            content.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise HTTPException(status_code=415, detail="The transcript must be UTF-8 text.") from exc
+    graph = service.get_graph()
+    repo = normalize_repository(repo)
+    imported = await run_in_threadpool(graph.read, "MATCH (r:Repo {id: $id}) RETURN r.ingested_at AS at", {"id": f"repo:{repo}"})
+    if not imported.records or imported.records[0]["at"] is None:
+        raise HTTPException(status_code=404, detail="Import this repository from Repositories before adding handover calls to it.")
+    await run_in_threadpool(charge, request, limits.HANDOVER_UPLOAD, "You can upload 10 handover calls a day. Please try again tomorrow.")
+
+    def authorize(meeting_id: str) -> None:
+        rows = graph.read("MATCH (m:Meeting {id: $id}) RETURN m.uploaded_by AS owner", {"id": meeting_id}).records
+        if rows and rows[0]["owner"] != user.id and not user.is_admin:
+            raise HTTPException(status_code=409, detail="A handover call with this title and date already exists and was added by someone else. Give yours a different title.")
+
     with tempfile.TemporaryDirectory(prefix="untangle-kt-") as tmp:
-        path = Path(tmp) / f"upload{suffix}"
+        path = Path(tmp) / f"upload{suffix or '.json'}"
         path.write_bytes(content)
-        name = title or Path(upload.filename or "handover").stem
+        name = (title or Path(upload.filename or "handover").stem)[:200]
         if audio is not None:
-            return await run_in_threadpool(ingest, repo, name, path, language=language, num_speakers=speakers, graph=service.get_graph())
-        return await run_in_threadpool(ingest, repo, path, title=name, language=language, graph=service.get_graph())
+            result = await run_in_threadpool(ingest, repo, name, path, language=language, num_speakers=speakers, graph=graph, before_write=authorize)
+        else:
+            result = await run_in_threadpool(ingest, repo, path, title=name, language=language, graph=graph, keep_audio_uri=False, before_write=authorize)
+    meeting_id = result.get("meeting_id") if isinstance(result, dict) else None
+    if meeting_id:
+        await run_in_threadpool(graph.run_named, "kt_meeting_owner", {"meeting_id": meeting_id, "user_id": user.id}, write=True)
+    return result
 
 
 @app.exception_handler(ValidationError)
-async def _validation(_: Request, exc: ValidationError) -> JSONResponse:
-    return _error(422, "invalid request", details=exc.errors())
+async def _validation(request: Request, exc: ValidationError) -> JSONResponse:
+    details = [{"loc": e.get("loc"), "msg": e.get("msg"), "type": e.get("type")} for e in exc.errors()]
+    return _error(422, "invalid request", request_id=_request_id(request), details=details)
 
 
 __all__ = ["app"]

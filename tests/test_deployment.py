@@ -52,10 +52,11 @@ async def test_vercel_mount_preserves_api_routes_validation_and_errors(prefix):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=module.app), base_url="https://test") as client:
-        schema = await client.get(f"{prefix}/openapi.json")
-        assert schema.status_code == 200
-        assert "/repository-imports" in schema.json()["paths"]
-        assert "/ask" in schema.json()["paths"]
+        assert (await client.get(f"{prefix}/openapi.json")).status_code == 404
+        assert (await client.get(f"{prefix}/docs")).status_code == 404
+        from untangle.api.main import app as api_app
+
+        assert {"/repository-imports", "/ask", "/auth/login"} <= set(api_app.openapi()["paths"])
         invalid = await client.post(f"{prefix}/repository-imports", json={"repository": "https://example.com/o/r"})
         assert invalid.status_code == 400
         assert "GitHub" in invalid.json()["error"]

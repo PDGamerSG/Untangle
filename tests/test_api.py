@@ -59,13 +59,29 @@ async def test_kt_upload_uses_transcript_service(client, monkeypatch):
         calls.append((repo, path.read_text(), kwargs["title"]))
         return {"meeting_id": "mtg:o/r:call", "utterances": 1, "decisions": 0}
 
+    class FakeGraph:
+        """The repository is imported and the call is new; owner writes are recorded."""
+
+        def __init__(self):
+            self.writes = []
+
+        def read(self, cypher, params=None):
+            class Result:
+                records = [{"at": 1}] if "Repo" in cypher else []
+            return Result()
+
+        def run_named(self, name, params=None, write=False):
+            self.writes.append((name, params))
+
+    graph = FakeGraph()
     monkeypatch.setattr(api, "_kt", lambda name: ingest)
-    monkeypatch.setattr(service, "get_graph", lambda: None)
+    monkeypatch.setattr(service, "get_graph", lambda: graph)
     r = await client.post("/kt/ingest", data={"repo": "o/r", "title": "Handover"},
                           files={"transcript": ("call.txt", b"Sam: We use Neo4j.", "text/plain")})
     assert r.status_code == 200
     assert r.json()["meeting_id"] == "mtg:o/r:call"
     assert calls == [("o/r", "Sam: We use Neo4j.", "Handover")]
+    assert graph.writes == [("kt_meeting_owner", {"meeting_id": "mtg:o/r:call", "user_id": "user:test-admin"})]
 
 
 async def test_request_id_is_echoed_and_added_to_errors(client):
@@ -102,7 +118,10 @@ def test_kt_delegation_answers_501_when_the_function_is_missing():
 
 
 async def test_openapi_lists_every_contract_endpoint(client):
-    paths = (await client.get("/openapi.json")).json()["paths"]
+    # The schema is not published in production (UNTANGLE_API_DOCS is off), but every contract route exists.
+    assert (await client.get("/openapi.json")).status_code == 404
+    assert (await client.get("/docs")).status_code == 404
+    paths = api.app.openapi()["paths"]
     for path in ("/health", "/repos", "/ask", "/decisions/{decision_id}", "/entities/{entity_id}", "/search", "/timeline", "/pulse", "/meetings", "/meetings/{meeting_id}", "/kt/ingest", "/stats"):
         assert path in paths, path
 
@@ -123,7 +142,9 @@ def seeded_api(graph):
 @pytest.mark.neo4j
 async def test_health_and_repos(client, graph, seeded_api: Fixture):
     h = (await client.get("/health")).json()
-    assert h["ok"] is True and h["neo4j"]["version"] and h["llm"]["backend"] == "fake" and h["embed"]["dim"] == 384
+    assert h["ok"] is True and h["graph"]["ok"] and h["llm"]["backend"] == "fake" and h["embed"]["dim"] == 384
+    # Public health never names the database host, versions or the hosted model.
+    assert "uri" not in h["neo4j"] and "version" not in h["neo4j"] and "model" not in h["llm"]
     repos = (await client.get("/repos")).json()
     mine = next(r for r in repos if r["full_name"] == seeded_api.repo)
     assert mine["counts"]["decisions"] == 2 and mine["head_sha"]
