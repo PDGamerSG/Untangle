@@ -4,8 +4,31 @@
     {
       "name": "web-live-api",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["UNTANGLE_API_URL=https://untangle-code-api.vercel.app", "pnpm", "--dir", "web", "dev", "--port", "3010"],
+      "runtimeArgs": [
+        "UNTANGLE_API_URL=https://untangle-code-api.vercel.app",
+        "pnpm",
+        "--dir",
+        "web",
+        "dev",
+        "--port",
+        "3010"
+      ],
       "port": 3010
+    },
+    {
+      "name": "landing-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--dir",
+        "landing",
+        "exec",
+        "vite",
+        "preview",
+        "--port",
+        "5181",
+        "--strictPort"
+      ],
+      "port": 5181
     }
   ]
 }
