@@ -27,18 +27,34 @@ def normalize_repository(value: str) -> str:
     return value
 
 
+_NOT_FOUND = "GitHub could not find a public repository at that URL. Check the name and its visibility."
+
+
 def fetch_public_repository(repo: str) -> dict:
-    """Unauthenticated check intentionally cannot expose a private repo readable by the deployment's token."""
+    """Check public visibility without the deployment's token first, so it cannot expose a private repository.
+
+    Anonymous calls share GitHub's 60-per-hour limit across a host's outbound address. When that limit answers
+    403/429 and a token is configured, the check repeats with the token, and any private result is reported exactly
+    like a missing repository.
+    """
     repo = normalize_repository(repo)
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "Untangle-repository-import"}
+    authenticated = False
     try:
-        with httpx.Client(timeout=15, follow_redirects=False, headers={"Accept": "application/vnd.github+json", "User-Agent": "Untangle-repository-import"}) as client:
+        with httpx.Client(timeout=15, follow_redirects=False, headers=headers) as client:
             response = client.get(f"https://api.github.com/repos/{repo}")
+            token = settings().github_token
+            if response.status_code in (403, 429) and token:
+                response = client.get(f"https://api.github.com/repos/{repo}", headers={"Authorization": f"Bearer {token}"})
+                authenticated = True
     except httpx.HTTPError as exc:
         raise ImportProblem(503, "GitHub could not be reached. Please try again shortly.") from exc
+    if authenticated and response.status_code == 200 and _private(response):
+        raise ImportProblem(404, _NOT_FOUND)
     if response.status_code in (301, 302, 307, 308):
         raise ImportProblem(400, "This repository has moved. Enter its current GitHub URL.")
     if response.status_code == 404:
-        raise ImportProblem(404, "GitHub could not find a public repository at that URL. Check the name and its visibility.")
+        raise ImportProblem(404, _NOT_FOUND)
     if response.status_code != 200:
         raise ImportProblem(503, "GitHub is temporarily unavailable or rate limited. Please try again later.")
     try:
@@ -54,6 +70,13 @@ def fetch_public_repository(repo: str) -> dict:
                 "size": int(data.get("size", 0)), "private": False}
     except (ValueError, TypeError, AttributeError) as exc:
         raise ImportProblem(503, "GitHub returned incomplete repository metadata. Please try again later.") from exc
+
+
+def _private(response: httpx.Response) -> bool:
+    try:
+        return response.json().get("private") is not False
+    except (ValueError, AttributeError):
+        return True
 
 
 def submit(value: str, graph: Graph) -> dict:

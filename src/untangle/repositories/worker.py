@@ -92,14 +92,57 @@ def process_one(graph: Graph, *, ingester=ingest_repo, validator=fetch_public_re
     return True
 
 
+def serve(connect, stop: threading.Event, *, poll_seconds: float, process=process_one) -> int:
+    """Keep claiming jobs until `stop` is set, for a persistent host such as a Render background worker.
+
+    A failed poll (Aura restart, network drop) closes the connection and opens a new one on the next poll.
+    The database lease still decides ownership, so this can run beside the scheduled GitHub Actions worker.
+    """
+    graph = None
+    done = 0
+    while not stop.is_set():
+        try:
+            if graph is None:
+                graph = connect(require=True)
+                graph.ensure_schema()
+                log.info("Import worker connected; polling every %ss", poll_seconds)
+            if process(graph):
+                done += 1
+                log.info("Import worker finished job %d", done)
+                continue
+        except Exception as exc:
+            log.error("Import worker poll failed (%s); reconnecting", type(exc).__name__)
+            if graph is not None:
+                try:
+                    graph.close()
+                except Exception:
+                    pass
+                graph = None
+        stop.wait(poll_seconds)
+    if graph is not None:
+        graph.close()
+    return done
+
+
 def register(subparsers) -> None:
     parser = subparsers.add_parser("import-worker", help="process durable repository import jobs")
     parser.add_argument("--max-jobs", type=int, default=6)
+    parser.add_argument("--poll", type=float, default=0, metavar="SECONDS",
+                        help="run until stopped, checking the queue every SECONDS (persistent hosts only)")
     parser.set_defaults(func=run)
 
 
 def run(args) -> int:
     from untangle.graph.db import connect
+    if args.poll > 0:
+        import signal
+        log.setLevel(logging.INFO)  # the CLI root logger stays at WARNING; poll progress belongs in host logs
+        stop = threading.Event()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(sig, lambda *_: stop.set())
+        done = serve(connect, stop, poll_seconds=max(5.0, args.poll))
+        print(json.dumps({"processed": done}))
+        return 0
     graph = connect(require=True)
     try:
         graph.ensure_schema()

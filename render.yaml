@@ -1,0 +1,25 @@
+# Render Blueprint for the repository import worker. The website and API stay on Vercel.
+# Database credentials are entered in the Render dashboard (sync: false) and never committed.
+services:
+  - type: worker
+    name: untangle-import-worker
+    runtime: docker
+    repo: https://github.com/PDGamerSG/Untangle
+    branch: main
+    dockerfilePath: ./deploy/render/worker.Dockerfile
+    dockerContext: .
+    plan: standard
+    region: singapore
+    maxShutdownDelaySeconds: 300
+    envVars:
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USER
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        sync: false
+      # Public read access only; raises GitHub's API limit from 60 to 5,000 requests per hour.
+      - key: GITHUB_TOKEN
+        sync: false

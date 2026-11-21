@@ -90,6 +90,35 @@ def test_private_disabled_and_large_repositories_are_rejected(body, status):
     assert error.value.status == status
 
 
+@pytest.fixture
+def github_token(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "test-token")
+    settings.cache_clear()
+    yield
+    settings.cache_clear()
+
+
+@respx.mock
+def test_rate_limited_check_retries_with_the_deployment_token(github_token):
+    from untangle.repositories.service import fetch_public_repository
+    route = respx.get("https://api.github.com/repos/owner/repo")
+    route.side_effect = [httpx.Response(403), httpx.Response(200, json={"full_name": "owner/repo", "private": False, "size": 10})]
+    assert fetch_public_repository("owner/repo")["full_name"] == "owner/repo"
+    assert "Authorization" not in route.calls[0].request.headers
+    assert route.calls[1].request.headers["Authorization"] == "Bearer test-token"
+
+
+@respx.mock
+def test_token_retry_reports_a_private_repository_as_missing(github_token):
+    from untangle.repositories.service import ImportProblem, fetch_public_repository
+    respx.get("https://api.github.com/repos/owner/secret").side_effect = [
+        httpx.Response(429), httpx.Response(200, json={"full_name": "owner/secret", "private": True, "size": 10})]
+    with pytest.raises(ImportProblem) as error:
+        fetch_public_repository("owner/secret")
+    assert error.value.status == 404
+    assert "private" not in str(error.value)
+
+
 @respx.mock
 @pytest.mark.parametrize("status,want", [(404, 404), (403, 503), (429, 503), (500, 503)])
 def test_github_failures_have_actionable_status(status, want):

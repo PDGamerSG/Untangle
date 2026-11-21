@@ -56,6 +56,21 @@ jobs and scheduling delays. Re-adding a failed repository creates a new job;
 active or recently completed imports return the existing job. Completed imports can be refreshed after an hour.
 Failed refreshes preserve previously stored evidence and report partial-update risk.
 
+### Persistent worker on Render
+
+GitHub runs the five-minute schedule only every few hours on this repository, so queued imports could wait that long.
+A Render background worker (`render.yaml`, `deploy/render/worker.Dockerfile`) runs
+`untangle import-worker --poll 15`: it checks the queue every 15 seconds and starts a job at once. It uses the
+same Aura queue and leases, so it can run beside the scheduled workflow, which stays as a fallback. A failed poll
+reconnects on the next one. On shutdown it finishes the current job when Render's 300-second grace period allows;
+otherwise the lease expires and the job becomes retryable.
+
+A local import of a small repository peaked near 1.1 GB of memory, so the worker uses Render's 2 GB Standard plan.
+Set `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE` and `GITHUB_TOKEN` in Render. Use a fine-grained
+token with public read-only access. Anonymous GitHub calls share a 60-per-hour limit per outbound address. The
+public-visibility check still tries without the token first. If GitHub answers 403/429, it repeats with the token
+and reports any private repository exactly like a missing one.
+
 ## Deployment
 
 Set `REPO_IMPORTS_ENABLED=true` on the API after deploying the workflow and schema. Configure these GitHub Actions
