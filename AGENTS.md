@@ -1,5 +1,10 @@
 # Untangle project instructions
 
+## Commit messages
+
+Do not add AI or tool attribution to commit messages, including generated-by footers or AI co-author trailers.
+Preserve genuine human authors and co-authors.
+
 ## Production verification
 
 Whenever testing a release or reporting production verification, test **both** public URLs:
