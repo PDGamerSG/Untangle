@@ -94,7 +94,7 @@ def status(graph: Graph) -> dict:
     expire_stalled(graph)
     seen = graph.read("MATCH (c:ImportControl {id:'repositories'}) RETURN c.last_seen_at AS seen").scalar()
     return {"enabled": settings().repo_imports_enabled, "limits": LIMITS, "jobs": list_jobs(graph),
-            "worker": {"last_seen_at_iso": iso(seen), "scheduling": "Imports are picked up by a scheduled worker, usually within a few minutes. GitHub scheduling can delay startup."}}
+            "worker": {"last_seen_at_iso": iso(seen), "scheduling": "An always-on worker usually starts an import within a minute. A scheduled backup worker covers any gap."}}
 
 
 def overview(repo: str, graph: Graph) -> dict:

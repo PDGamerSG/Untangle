@@ -48,6 +48,8 @@ class Settings:
     neo4j_database: str | None = None
 
     github_token: str | None = None
+    # JSON object from public origin to {"client_id", "client_secret"}; see untangle.auth.github.
+    github_oauth_apps: str | None = None
     repo_imports_enabled: bool = False
     repo_cache: Path = field(default_factory=lambda: cache_root() / "repos")
 
@@ -94,6 +96,7 @@ def settings() -> Settings:
         neo4j_password=_env("NEO4J_PASSWORD", ""),
         neo4j_database=_env("NEO4J_DATABASE") or None,
         github_token=_env("GITHUB_TOKEN") or None,
+        github_oauth_apps=_env("GITHUB_OAUTH_APPS") or None,
         repo_imports_enabled=_env("REPO_IMPORTS_ENABLED", "false").lower() in ("1", "true", "yes"),
         repo_cache=cache_dir,
         llm_backend=_env("LLM_BACKEND", "fake").lower(),

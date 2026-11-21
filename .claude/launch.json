@@ -29,6 +29,29 @@
         "--strictPort"
       ],
       "port": 5181
+    },
+    {
+      "name": "api-local-neo4j",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "NEO4J_URI=bolt://localhost:7687 NEO4J_USER=neo4j NEO4J_PASSWORD=untangle-dev-password NEO4J_DATABASE= LLM_BACKEND=fake EMBED_BACKEND=fake REPO_IMPORTS_ENABLED=true UNTANGLE_TRUSTED_ORIGINS=http://localhost:3020 GITHUB_TOKEN=$(gh auth token) uv run untangle serve --port 8091"
+      ],
+      "port": 8091
+    },
+    {
+      "name": "web-local-api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "UNTANGLE_API_URL=http://127.0.0.1:8091",
+        "pnpm",
+        "--dir",
+        "web",
+        "dev",
+        "--port",
+        "3020"
+      ],
+      "port": 3020
     }
   ]
 }

@@ -61,6 +61,8 @@ _ACCOUNT_SCHEMA = (
     "CREATE CONSTRAINT session_id IF NOT EXISTS FOR (n:Session) REQUIRE n.id IS UNIQUE",
     "CREATE CONSTRAINT ratelimit_id IF NOT EXISTS FOR (n:RateLimit) REQUIRE n.id IS UNIQUE",
     "CREATE CONSTRAINT apitoken_id IF NOT EXISTS FOR (n:ApiToken) REQUIRE n.id IS UNIQUE",
+    "CREATE CONSTRAINT user_github_id IF NOT EXISTS FOR (n:User) REQUIRE n.github_id IS UNIQUE",
+    "CREATE CONSTRAINT saved_repository_id IF NOT EXISTS FOR (n:SavedRepository) REQUIRE n.id IS UNIQUE",
     "CREATE INDEX session_expires IF NOT EXISTS FOR (n:Session) ON (n.expires_at)",
     "CREATE INDEX ratelimit_expires IF NOT EXISTS FOR (n:RateLimit) ON (n.expires_at)",
 )

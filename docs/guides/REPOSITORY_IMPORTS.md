@@ -14,6 +14,26 @@ When the range is exceeded the tracker says so instead of counting down to a fal
 The public deployment accepts publicly readable GitHub repositories. Imported evidence is shared with other
 visitors. It does not request users' GitHub passwords or tokens and cannot import private repositories.
 
+## Your repositories and GitHub sign-in
+
+**Continue with GitHub** on the sign-in and sign-up pages creates or opens an account from a GitHub identity.
+It requests only `read:user user:email` and never stores the GitHub access token. A GitHub identity links to the
+signed-in account, or to an existing account whose email matches the verified primary GitHub email; otherwise
+GitHub creates a new account without a password. An account without a password cannot disconnect GitHub.
+
+On **Repositories**:
+
+- **Your repositories** lists repositories the signed-in person added or saved. Only that person sees the list;
+  imported evidence stays shared. For each indexed repository, **What changed** compares the indexed commit with
+  the current default branch on GitHub. It shows new commits, changed files and a compare link, and
+  **Update import** queues a fresh import. Opening the changes marks them as seen.
+- **From GitHub** lists the public repositories of the connected GitHub account, or of any user or organization
+  name typed there. **Import** queues a repository and saves it to the list.
+
+Configure one GitHub OAuth App per public origin in `GITHUB_OAUTH_APPS` (see `.env.example`); the callback URL is
+`<origin>/api/auth/github/callback`. Without it, the button is hidden and the rest still works. Set `GITHUB_TOKEN`
+(public read-only) on the API too, so repository lists and comparisons are not limited to 60 GitHub calls per hour.
+
 ## Analysis and coverage
 
 The worker reuses the full ingestion pipeline: commits and parents, changed files, contributors, source symbols,

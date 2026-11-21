@@ -5,6 +5,8 @@ import type {
   AskRequest,
   AskResponse,
   EntityResponse,
+  GitHubIdentity,
+  GitHubRepositories,
   GraphStats,
   Health,
   ImportJob,
@@ -12,8 +14,10 @@ import type {
   MeetingSummary,
   PulseResponse,
   RepoSummary,
+  RepositoryChanges,
   RepositoryImports,
   RepositoryOverview,
+  SavedRepository,
   SearchResponse,
   Timeline,
   WhyPath,
@@ -225,6 +229,23 @@ export const api = {
     SAMPLE_MODE
       ? Promise.reject(new ApiError(400, "Adding repositories is available in the live app."))
       : request("/repository-imports", { method: "POST", body: JSON.stringify({ repository }) }),
+
+  authProviders: (signal?: AbortSignal): Promise<{ github: boolean }> =>
+    SAMPLE_MODE ? Promise.resolve({ github: false }) : request("/auth/providers", { signal }),
+  githubIdentity: (signal?: AbortSignal): Promise<{ github: GitHubIdentity | null }> =>
+    SAMPLE_MODE ? Promise.resolve({ github: null }) : request("/auth/github", { signal }),
+  disconnectGitHub: (): Promise<void> => request("/auth/github", { method: "DELETE" }),
+  githubRepositories: (owner: string | null, signal?: AbortSignal): Promise<GitHubRepositories> =>
+    SAMPLE_MODE
+      ? Promise.resolve({ owner: null, connected: false, repositories: [] })
+      : request(`/github/repositories${owner ? q({ owner }) : ""}`, { signal }),
+  savedRepositories: (signal?: AbortSignal): Promise<{ repositories: SavedRepository[]; max: number }> =>
+    SAMPLE_MODE ? Promise.resolve({ repositories: [], max: 0 }) : request("/my/repositories", { signal }),
+  saveRepository: (repository: string): Promise<{ repo: string; saved: boolean }> =>
+    request("/my/repositories", { method: "POST", body: JSON.stringify({ repository }) }),
+  removeSavedRepository: (repo: string): Promise<void> => request(`/my/repositories${q({ repo })}`, { method: "DELETE" }),
+  repositoryChanges: (repo: string, signal?: AbortSignal): Promise<RepositoryChanges> =>
+    request(`/my/repositories/changes${q({ repo })}`, { signal }),
 
   repositoryOverview: (repo: string, signal?: AbortSignal): Promise<RepositoryOverview> =>
     SAMPLE_MODE ? Promise.reject(new ApiError(404, "The repository inventory is available in the live app.")) : request(`/repository-overview${q({ repo })}`, { signal }),

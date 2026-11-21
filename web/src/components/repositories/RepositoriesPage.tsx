@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { ArrowUpRight, CheckCircle2, Circle, CircleAlert, ExternalLink, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
 import { useRepo } from "./RepoContext";
+import { GitHubRepositoriesSection, SavedRepositories } from "./MyRepositories";
 import { RepositoryOverviewPanel } from "./RepositoryOverview";
 import { EmptyState, ErrorState, SkeletonLines } from "@/components/ui/states";
 import { api, ApiError, errorMessage } from "@/lib/api";
@@ -562,12 +563,15 @@ export function RepositoriesPage() {
   const imports = useResource("repository-imports", (signal) => api.repositoryImports(signal));
   const [tracked, setTracked] = useStoredValue(JOB_KEY);
   const [initial, setInitial] = useState<ImportJob | null>(null);
+  const [savedRevision, setSavedRevision] = useState(0);
   const reloadImports = imports.reload;
+  const refreshSaved = () => setSavedRevision((n) => n + 1);
 
   const follow = (job: ImportJob) => {
     setInitial(job);
     setTracked(job.id);
     reloadImports();
+    refreshSaved();
   };
 
   return (
@@ -595,6 +599,10 @@ export function RepositoriesPage() {
           onRetried={follow}
         />
       ) : null}
+
+      <SavedRepositories selected={repo} onUse={setRepo} onQueued={follow} revision={savedRevision} />
+
+      <GitHubRepositoriesSection onQueued={follow} onChanged={refreshSaved} />
 
       {imports.data ? <RecentImports jobs={imports.data.jobs} tracked={tracked} onTrack={follow} /> : null}
 

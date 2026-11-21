@@ -373,6 +373,63 @@ export interface ImportJob {
   warnings: string[];
 }
 
+export interface GitHubIdentity {
+  login: string;
+  avatar_url: string;
+}
+
+export interface GitHubRepository {
+  full_name: string;
+  description: string;
+  language: string | null;
+  stars: number;
+  fork: boolean;
+  archived: boolean;
+  size_kb: number;
+  default_branch: string;
+  pushed_at: string | null;
+  url: string;
+  imported: boolean;
+  saved: boolean;
+  ingested_at_iso: string | null;
+  job: { id: string; status: ImportStatus; progress: number; message: string } | null;
+}
+
+export interface GitHubRepositories {
+  owner: string | null;
+  connected: boolean;
+  self?: boolean;
+  repositories: GitHubRepository[];
+}
+
+export interface SavedRepository {
+  repo: string;
+  saved_at_iso: string | null;
+  imported: boolean;
+  ingested_at_iso: string | null;
+  indexed_sha: string | null;
+  commit_count: number;
+  job: { id: string; status: ImportStatus; progress: number; message: string } | null;
+  changes: { available: boolean; ahead_by?: number; reason?: string } | null;
+  unseen?: boolean;
+}
+
+export interface RepositoryChanges {
+  repo: string;
+  indexed_sha: string;
+  ingested_at_iso: string | null;
+  default_branch: string | null;
+  available: boolean;
+  reason?: string;
+  ahead_by?: number;
+  behind_by?: number;
+  compare_url?: string;
+  files_changed?: number;
+  commits?: { sha: string; short: string; message: string; author: string; date: string | null; url: string }[];
+  files?: { path: string; status: string; additions: number; deletions: number }[];
+  indexed_recent: { sha: string; short: string; message: string; date: string | null }[];
+}
+
 export interface ImportLimits {
   max_repository_size_kb: number;
   max_commits: number;

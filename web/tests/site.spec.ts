@@ -37,6 +37,33 @@ const concurrencyKey = { id: "cfg:knadh/listmonk:schema.sql::app.concurrency", l
 
 const account = { id: "user:asha", email: "asha@example.com", name: "Asha Verma", role: "member", created_at_iso: "2026-11-01T00:00:00Z" };
 
+const githubRepos = {
+  owner: "asha", connected: true, self: true,
+  repositories: [
+    { full_name: "asha/notes-api", description: "Notes service", language: "Go", stars: 12, fork: false, archived: false, size_kb: 900, default_branch: "main",
+      pushed_at: "2026-11-20T10:00:00Z", url: "https://github.com/asha/notes-api", imported: false, saved: false, ingested_at_iso: null, job: null },
+    { full_name: "knadh/listmonk", description: "Newsletter manager", language: "Go", stars: 15000, fork: true, archived: false, size_kb: 9000, default_branch: "master",
+      pushed_at: "2026-11-19T10:00:00Z", url: "https://github.com/knadh/listmonk", imported: true, saved: true, ingested_at_iso: "2026-11-01T00:00:00Z", job: null },
+  ],
+};
+
+const savedRepos = {
+  max: 30,
+  repositories: [{ repo: "knadh/listmonk", saved_at_iso: "2026-11-02T00:00:00Z", imported: true, ingested_at_iso: "2026-11-01T00:00:00Z", indexed_sha: "abc1234def",
+    commit_count: 1000, job: null, changes: { available: true, ahead_by: 2 }, unseen: true }],
+};
+
+const changes = {
+  repo: "knadh/listmonk", indexed_sha: "abc1234def", ingested_at_iso: "2026-11-01T00:00:00Z", default_branch: "master", available: true, ahead_by: 2, behind_by: 0,
+  compare_url: "https://github.com/knadh/listmonk/compare/abc1234...master", files_changed: 1,
+  commits: [
+    { sha: "fff0001", short: "fff0001", message: "Raise default concurrency", author: "knadh", date: "2026-11-20T09:00:00Z", url: "https://github.com/knadh/listmonk/commit/fff0001" },
+    { sha: "eee0002", short: "eee0002", message: "Fix campaign retry", author: "asha", date: "2026-11-19T09:00:00Z", url: "https://github.com/knadh/listmonk/commit/eee0002" },
+  ],
+  files: [{ path: "internal/manager/manager.go", status: "modified", additions: 4, deletions: 2 }],
+  indexed_recent: [{ sha: "abc1234def", short: "abc1234", message: "Release v5", date: "2026-10-30T00:00:00Z" }],
+};
+
 test.beforeEach(async ({ page, baseURL }) => {
   // Browser tests run as a signed-in member; the API's session checks are covered by the backend suite.
   await page.context().addCookies([{ name: "untangle_session", value: "browser-test-session", url: baseURL ?? "http://127.0.0.1:3100" }]);
@@ -45,6 +72,13 @@ test.beforeEach(async ({ page, baseURL }) => {
     const path = decodeURIComponent(url.pathname.slice(4));
     let body: unknown;
     if (path === "/auth/me") body = { user: account };
+    else if (path === "/auth/providers") body = { github: true };
+    else if (path === "/auth/github") body = { github: { login: "asha", avatar_url: "" } };
+    else if (path === "/github/repositories") body = githubRepos;
+    else if (path === "/my/repositories" && route.request().method() === "GET") body = savedRepos;
+    else if (path === "/my/repositories" && route.request().method() === "POST") body = { repo: route.request().postDataJSON().repository, saved: true };
+    else if (path === "/my/repositories") return route.fulfill({ status: 204, body: "" });
+    else if (path === "/my/repositories/changes") body = changes;
     else if (path === "/auth/tokens" && route.request().method() === "GET") body = { tokens: [], max: 10 };
     else if (path === "/agent-notes") body = { repo: url.searchParams.get("repo"), notes: [] };
     else if (path === "/auth/logout") return route.fulfill({ status: 204, body: "" });
@@ -591,6 +625,31 @@ test("the repositories page shows the indexed inventory of the selected reposito
   await page.getByRole("link", { name: "why is app.concurrency set the way it is?" }).click();
   await expect(page).toHaveURL(/\/ask/);
   await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency set the way it is?");
+});
+
+test("a connected GitHub account lists its repositories and saved ones show commits since import", async ({ page }) => {
+  await page.goto("/repositories");
+  const saved = page.getByRole("region", { name: "Your repositories" });
+  await expect(saved.getByText("2 new commits on GitHub")).toBeVisible();
+  await saved.getByRole("button", { name: "What changed" }).click();
+  await expect(saved.getByText("Raise default concurrency")).toBeVisible();
+  await expect(saved.getByRole("link", { name: "Compare on GitHub" })).toHaveAttribute("href", /compare\/abc1234\.\.\.master/);
+  await expect(saved.getByRole("button", { name: "Update import" })).toBeVisible();
+
+  const fromGitHub = page.getByRole("region", { name: "From GitHub" });
+  await expect(fromGitHub.getByText("Connected as @asha")).toBeVisible();
+  await expect(fromGitHub.getByText("asha/notes-api")).toBeVisible();
+  await expect(fromGitHub.getByText("In your list")).toBeVisible();
+  await expect(fromGitHub.getByRole("button", { name: "Import" })).toBeEnabled();
+});
+
+test("sign-in offers GitHub and keeps the requested page", async ({ page, context }) => {
+  await context.clearCookies();
+  await page.route("**/api/auth/me", (route) => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  await page.goto("/login?next=/pulse");
+  await expect(page.getByRole("link", { name: "Continue with GitHub" })).toHaveAttribute("href", "/api/auth/github/start?next=%2Fpulse");
+  await page.goto("/login?error=github-conflict");
+  await expect(page.getByRole("alert").filter({ hasText: "already connected to a different Untangle account" })).toBeVisible();
 });
 
 test("signed-out visitors are sent to sign-in and return to the page they asked for", async ({ page }) => {

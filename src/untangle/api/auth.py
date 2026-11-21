@@ -9,17 +9,19 @@ from __future__ import annotations
 from typing import Annotated
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from untangle.answer import service as answers
-from untangle.auth import limits, tokens
+from untangle.auth import github, limits, tokens
 from untangle.auth import service as accounts
 from untangle.auth.service import AuthProblem, User
 from untangle.config import settings
 
-PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me"})
+PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me", "/auth/github/start",
+                           "/auth/github/callback", "/auth/providers"})
 # Routes a coding agent may call with a personal access token instead of a browser session.
 TOKEN_ROUTES = frozenset({"/mcp"})
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
@@ -199,4 +201,78 @@ def create_token(body: TokenRequest, user: CurrentUser) -> dict:
 def revoke_token(token_id: str, user: CurrentUser) -> Response:
     if not tokens.revoke(answers.get_graph(), user, token_id[:32]):
         raise HTTPException(status_code=404, detail="That token was not found.")
+    return Response(status_code=204)
+
+
+# ---- Sign in with GitHub ------------------------------------------------------------------------------------------
+
+
+def _state_cookie() -> str:
+    return "__Host-untangle_github" if settings().cookie_secure else "untangle_github"
+
+
+def public_origin(request: Request) -> str | None:
+    """This request's own origin, only when it is a trusted public origin (never a client-chosen Host)."""
+    trusted = {o.lower() for o in settings().trusted_origins}
+    return next((o for o in sorted(_own_origins(request)) if o.lower() in trusted), None)
+
+
+@router.get("/providers")
+def providers(request: Request) -> dict:
+    return {"github": github.app_for(public_origin(request)) is not None}
+
+
+@router.get("/github/start")
+def github_start(request: Request, next: str | None = Query(default=None, max_length=300)) -> Response:
+    origin = public_origin(request)
+    app = github.app_for(origin)
+    if app is None or origin is None:
+        return RedirectResponse("/login?error=github-unavailable", status_code=303)
+    state = github.new_state()
+    response = RedirectResponse(github.authorize_url(app, origin, state), status_code=303)
+    response.set_cookie(_state_cookie(), f"{state}|{github.safe_next(next)}", max_age=600, path="/", httponly=True,
+                        secure=settings().cookie_secure, samesite="lax")
+    return response
+
+
+@router.get("/github/callback")
+async def github_callback(request: Request, code: str | None = Query(default=None, max_length=200),
+                          state: str | None = Query(default=None, max_length=200),
+                          error: str | None = Query(default=None, max_length=200)) -> Response:
+    import hmac
+    stored, _, next_path = (request.cookies.get(_state_cookie()) or "").partition("|")
+    origin = public_origin(request)
+    app = github.app_for(origin)
+
+    def fail(reason: str) -> Response:
+        result = RedirectResponse(f"/login?error={reason}", status_code=303)
+        result.delete_cookie(_state_cookie(), path="/", httponly=True, secure=settings().cookie_secure, samesite="lax")
+        return result
+
+    if error:
+        return fail("github-cancelled")
+    if not code or not state or not stored or not hmac.compare_digest(stored, state) or app is None or origin is None:
+        return fail("github-expired")
+    current = accounts.resolve(answers.get_graph(), session_token(request))
+    try:
+        access = await run_in_threadpool(github.exchange_code, app, origin, code)
+        profile = await run_in_threadpool(github.fetch_profile, access)
+        _user_row, token = await run_in_threadpool(github.sign_in, answers.get_graph(), profile, current=current, ip=client_ip(request))
+    except AuthProblem as exc:
+        return fail("github-conflict" if exc.status == 409 else "github-limited" if exc.status == 429 else "github-failed")
+    result = RedirectResponse(github.safe_next(next_path), status_code=303)
+    result.delete_cookie(_state_cookie(), path="/", httponly=True, secure=settings().cookie_secure, samesite="lax")
+    _set_cookie(result, token)
+    return result
+
+
+@router.get("/github")
+def github_identity(user: CurrentUser) -> dict:
+    return {"github": github.identity(answers.get_graph(), user)}
+
+
+@router.delete("/github", status_code=204)
+def github_disconnect(user: CurrentUser) -> Response:
+    if not github.disconnect(answers.get_graph(), user):
+        raise HTTPException(status_code=409, detail="Set a password before disconnecting GitHub, or you could not sign in again.")
     return Response(status_code=204)
