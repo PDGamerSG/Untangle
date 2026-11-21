@@ -54,6 +54,14 @@ def test_tool_loop_runs_tools_and_returns_the_final_answer(fake_tools):
     assert client.calls[0]["output_config"] == {"effort": "low"}
 
 
+def test_ask_why_is_charged_as_a_question(fake_tools, monkeypatch):
+    monkeypatch.setitem(mcp_server.TOOLS["ask_why"], "fn", lambda args, user: ("Because of PR #1.", {}))
+    client = Script(tool_use("ask_why", {"repo": "x/y", "question": "why?"}), text("Because of PR #1."))
+    charged = []
+    agent_chat.chat([{"role": "user", "content": "why?"}], None, USER, charge=charged.append, client=client)
+    assert charged == ["ask"]
+
+
 def test_tool_errors_go_back_to_the_model(fake_tools):
     client = Script(tool_use("search_repository", {"repo": "x/y", "query": "retry"}), text("That repository is not indexed."))
     result = agent_chat.chat([{"role": "user", "content": "find retry"}], None, USER, charge=lambda kind: None, client=client)

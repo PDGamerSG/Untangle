@@ -153,6 +153,13 @@ def adopt_guest(graph: Graph, guest: User | None, into: User) -> None:
 
 
 def _upgrade_guest(graph: Graph, guest: User, email: str, password: str, name: str | None) -> User | None:
+    try:
+        return _upgrade_guest_once(graph, guest, email, password, name)
+    except ConstraintError:  # the same email was registered at the same moment
+        return None
+
+
+def _upgrade_guest_once(graph: Graph, guest: User, email: str, password: str, name: str | None) -> User | None:
     rows = graph.query("""MATCH (u:User {id:$id, role:'guest'})
       WHERE NOT EXISTS { MATCH (o:User {email:$email}) WHERE o.id <> u.id }
       SET u.email = $email, u.password_hash = $hash, u.name = $name, u.role = 'member', u.upgraded_at = $now

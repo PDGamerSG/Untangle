@@ -231,10 +231,15 @@ async def mcp_endpoint(request: Request, user: CurrentUser) -> Response:
     def charge_call(kind: str) -> None:
         if user.is_admin:
             return
+        if user.is_guest and kind == "write":
+            raise mcp_server.ToolError("Create an account to record decisions.")
         graph = service.get_graph()
+        scale = limits.for_guest if user.is_guest else (lambda limit: limit)
         limit = {"ask": limits.ASK, "write": limits.AGENT_NOTE}.get(kind)
+        limit = scale(limit) if limit is not None else None
+        calls = scale(limits.AGENT_CALL)
         try:
-            limits.hit(graph, limits.AGENT_CALL, user.id, "This token has made 300 tool calls in the last hour. Please wait.")
+            limits.hit(graph, calls, user.id, f"This account has made {calls.count} tool calls in the last hour. Please wait.")
             if limit is not None:
                 limits.hit(graph, limit, user.id, "This account reached its limit for this tool. Please try again later.")
         except limits.LimitExceeded as exc:
@@ -266,9 +271,14 @@ async def agent_chat(body: AgentChatRequest, request: Request, user: CurrentUser
     def charge_call(kind: str) -> None:
         if user.is_admin:
             return
-        limit = limits.for_guest(limits.AGENT_CALL) if user.is_guest else limits.AGENT_CALL
+        scale = limits.for_guest if user.is_guest else (lambda limit: limit)
+        calls = scale(limits.AGENT_CALL)
         try:
-            limits.hit(service.get_graph(), limit, user.id, f"The agent has made {limit.count} lookups for you in the last hour. Please wait.")
+            limits.hit(service.get_graph(), calls, user.id, f"The agent has made {calls.count} lookups for you in the last hour. Please wait.")
+            # ask_why runs the paid answer pipeline: it counts as a question, like the Ask page.
+            if kind == "ask":
+                asks = scale(limits.ASK)
+                limits.hit(service.get_graph(), asks, user.id, f"You have asked {asks.count} questions in the last hour. Please wait before asking more.")
         except limits.LimitExceeded as exc:
             raise chat.AgentLimit(str(exc), exc.retry_after) from exc
 

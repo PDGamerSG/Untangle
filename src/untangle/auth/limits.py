@@ -72,4 +72,5 @@ def peek(graph: Graph, limit: Limit, subject: str, *, now: float | None = None) 
 
 def prune(graph: Graph, *, now: float | None = None) -> None:
     now_ms = int((time.time() if now is None else now) * 1000)
-    graph.run_named("auth_prune", {"now": now_ms}, write=True)
+    from untangle.config import settings
+    graph.run_named("auth_prune", {"now": now_ms, "guest_age": settings().session_days * 86_400_000}, write=True)

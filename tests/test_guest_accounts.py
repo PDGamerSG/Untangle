@@ -100,3 +100,28 @@ def test_github_sign_in_from_a_guest_upgrades_it(graph, clean, test_repo):
     assert user.id != guest.id and not user.is_guest
     assert [r["repo"] for r in mine.saved_repositories(graph, user)["repositories"]] == [test_repo]
     assert graph.read("MATCH (u:User {id:$id}) RETURN count(u)", {"id": guest.id}).scalar() == 0
+
+
+@pytest.mark.neo4j
+def test_prune_removes_abandoned_guests_but_keeps_active_ones(graph, clean, test_repo):
+    import time
+    old, _ = accounts.start_guest(graph, ip="10.78.0.4")
+    active, _ = accounts.start_guest(graph, ip="10.78.0.4")
+    mine.save(graph, old, test_repo)
+    graph.query("MATCH (u:User {id:$id})-[:HAS_SESSION]->(s:Session) DETACH DELETE s SET u.created_at = 0", {"id": old.id})
+    graph.query("MATCH (u:User {id:$id}) SET u.created_at = 0", {"id": active.id})
+    limits.prune(graph, now=time.time())
+    assert graph.read("MATCH (u:User {id:$id}) RETURN count(u)", {"id": old.id}).scalar() == 0
+    assert graph.read("MATCH (s:SavedRepository {user_id:$id}) RETURN count(s)", {"id": old.id}).scalar() == 0
+    assert graph.read("MATCH (u:User {id:$id}) RETURN count(u)", {"id": active.id}).scalar() == 1
+
+
+@pytest.mark.neo4j
+@pytest.mark.real_auth
+@pytest.mark.asyncio
+async def test_guests_cannot_record_decisions_over_mcp(graph, clean, anon):
+    await anon.post("/auth/guest", headers=_ip())
+    reply = await anon.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+        "name": "remember_decision", "arguments": {"repo": "x/y", "subject": "a.py", "decision": "b"}}})
+    result = reply.json()["result"]
+    assert result["isError"] is True and "Create an account" in result["content"][0]["text"]
