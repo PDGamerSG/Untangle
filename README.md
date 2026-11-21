@@ -31,6 +31,11 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 | 🔎 **Compare retrieval** | Put graph reasoning beside vector-only search over the same evidence. |
 | 🧰 **Investigate a snapshot** | Search Timeline by file, value, reason or person; inspect each decision's sources and ask about the selected date. |
 | 📋 **Take evidence into a review** | Filter Pulse by risk category or criticality and download the visible decisions or risks as a source-linked Markdown brief. |
+| 🛫 **Check a change before you make it** | Paste a diff or describe a change. Pre-flight flags values a later decision replaced, decisions that guard the files, what imports them, the tests to run, files that usually change with them, public advisories for a proposed dependency version, and who to ask. |
+| 🧭 **Start with a day-one briefing** | See the busiest code areas and who wrote them, the decisions to read before changing anything, what was replaced recently and who to ask, as a page or a Markdown file. |
+| ⏪ **Replay a decision** | Step through one value's history, or compare two dates to see what changed, started and ended in between. |
+| 🧐 **Catch a wrong premise** | "Why do we use Jest instead of Mocha?" is checked against the declared dependencies before it is answered. |
+| 🔊 **Listen in your language** | Hear an answer or briefing in Hindi, Tamil, Telugu, Bengali and seven more Indian languages. |
 | 🕸️ **Map features to commits** | Explore feature entry points, shared code and Git parents. Select a commit to trace potential impact and export linked notes for Obsidian. |
 
 ## 🚀 Three steps
@@ -109,7 +114,8 @@ Build it with `pnpm build`; the generated `dist/` directory is deployable to any
 | Ingest | Read commits, renames, config and dependency history, pull requests, reviews, issues, documents, and symbols. |
 | Enrich | Add optional GitHub discussions, embeddings, and Sarvam-transcribed handover utterances. |
 | Record | Store entities, evidence, people, meetings, and bi-temporal decisions in Neo4j. |
-| Answer | Resolve the question, select active evidence, validate citations, and report supersession or refusal. |
+| Answer | Resolve the question, check its premise, select active evidence, validate citations, and report supersession or refusal. |
+| Pre-flight | Match a diff or description to files, keys and dependencies; find replaced values, guarding decisions, import reach, co-changed files, tests, advisories and reviewers. |
 | Explain | Show the same answer through the CLI, FastAPI, Next.js UI, and graph-vs-vector comparison. |
 
 ## ⚙️ Architecture

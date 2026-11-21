@@ -163,7 +163,7 @@ Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and th
   route accepts tokens. Tokens: `GET /auth/tokens`, `POST /auth/tokens {name}` (the only response containing the
   token), `DELETE /auth/tokens/{id}`; stored as `(:User)-[:HAS_TOKEN]->(:ApiToken {id = sha256(token), name, prefix,
   created_at, last_used_at})`. Tools: `list_repositories`, `ask_why`, `list_decisions`, `decision_timeline`,
-  `who_to_ask`, `search_repository`, `remember_decision`, `recall_agent_notes`. `remember_decision` records
+  `who_to_ask`, `search_repository`, `check_change`, `repository_briefing`, `remember_decision`, `recall_agent_notes`. `remember_decision` records
   `Decision {kind: 'agent', key: 'agent|<entity id>|<topic>', signal: 'agent_memory', recorded_by, recorded_by_name,
   source_url}` with an `ABOUT` edge through `21_record_decision`/`22_link_decision`; agent keys never match code keys.
   `GET /agent-notes?repo=` lists them for the web app. Limits: 300 tool calls per hour, 50 notes per day, and `ask_why`
@@ -177,6 +177,26 @@ Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and th
 - `GET /entities/{id}` → `{ entity, decisions: [DecisionCard], people: [PersonCard], recent_commits: [...] }`
 - `GET /search?repo=&q=` → `{ entities: [EntityHit], people: [PersonHit] }`
 - `GET /timeline?repo=&at=iso` → `{ at_iso, active: [DecisionCard], superseded_since: [DecisionCard] }`
+- `GET /timeline/compare?repo=&from=&to=` → `{ from_iso, to_iso, counts: {changed, started, ended}, changed: [{before,
+  after}], started: [DecisionCard], ended: [DecisionCard], truncated }`. Every decision in force on both dates is compared
+  by key (`99_decision_state`), so counts are exact; cards are returned for the newest 40 of each kind.
+- `POST /preflight {repo, change, paths?}` → `PreflightResponse` (60 per hour). `change` is a description, a unified
+  diff or both (≤ 60,000 characters); `paths` names up to 50 files. Deterministic, no model call. Returns `targets`
+  (files from the diff or paths, configuration keys and dependencies whose changed lines name them, entities the
+  description names), `revivals` (a proposed value equal to one a later decision replaced, or a removed entry added
+  back, with the replacing decision and its reason), `decisions` (active decisions about the targets with `guards`:
+  incident, linked issue, revert, recorded reason, handover statement, earlier values), `reach` (reverse static imports
+  up to 3 hops with the import chain, code areas whose entry points reach them, tests, files that changed in the same
+  commits), `advisories` (OSV.dev advisories affecting a proposed dependency version but not the current one; ranges
+  are checked at their lower bound; `UNTANGLE_ADVISORIES=0` turns lookups off), `people`, `review {level, score,
+  reasons: [{points, text}]}`, `next_steps`, `limits` and the Cypher trace.
+- `GET /briefing?repo=` → `BriefingResponse {summary, areas: [{name, files, commits, last_changed_iso, decisions,
+  people: [{name, login, commits, share}]}], guarded: [{decision, guards, weight}], changes: [{newer, older, at_iso}],
+  people: [{name, login, commits, areas}], questions, limits}`; `GET /briefing/markdown?repo=` downloads it as Markdown.
+- `POST /speak {text, language}` → `{language, text, audio_base64, mime}` (30 per hour): Sarvam translation (code-mixed)
+  and text-to-speech for `en-IN`, `hi-IN`, `bn-IN`, `ta-IN`, `te-IN`, `kn-IN`, `ml-IN`, `mr-IN`, `gu-IN`, `pa-IN` and
+  `od-IN`. Citation markers are removed before speaking and the audio is not stored. `GET /speak/languages` →
+  `{available, languages}`; without `SARVAM_API_KEY` `/speak` answers 503.
 - `GET /pulse?repo=&limit=24` → `{ repo, generated_at_iso, summary, risks: [PulseRisk] }`; risks are deterministic graph signals, ordered by score. `PulseRisk.category` is `contradiction`, `drift`, `ownership_gap`, `rationale_gap`, or `stale`; `reasons` lists the exact signals that contributed to the score.
 - `GET /meetings?repo=` → `[MeetingSummary]` and `GET /meetings/{id}` → `MeetingDetail` (shaped by `untangle.api.meetings`):
   `MeetingSummary {id, repo, title, started_at_iso, duration_ms, language, source, audio_uri, summary, utterance_count,
@@ -213,7 +233,8 @@ its standard `detail` shape; consumers should use the response header for correl
     "subgraph": { "nodes": [ { "id": "...", "label": "Decision", "props": {...} } ], "edges": [ { "from": "...", "to": "...", "type": "SUPERSEDES" } ] },
     "llm": { "backend": "fake", "model": "fake", "used": false }
   },
-  "baseline": null                                                  // when mode = both: { "answer": "...", "chunks": [ {id, text, source_kind, score} ], "note": "vector-only, no graph" }
+  "baseline": null,                                                 // when mode = both: { "answer": "...", "chunks": [ {id, text, source_kind, score} ], "note": "vector-only, no graph" }
+  "premise": null                                                   // "why X instead of Y": { status: consistent|contradicted|outdated|unsupported|both, text, assumed, alternative, found }
 }
 ```
 
