@@ -36,6 +36,7 @@ from untangle.answer.models import (
     Why,
     WhyPath,
 )
+from untangle.answer.premise import check as premise_check
 from untangle.answer.retrieve import (
     Evidence,
     Recorder,
@@ -137,6 +138,7 @@ def ask(
         ),
         baseline=base, at_iso=iso(at_ms), intent=decision.intent,
     )
+    response.premise = premise_check(recorder, repo, question)
     if refused:
         response.closest = [EntityRef(id=e.id, label=e.label, name=e.name, path=e.path, key=e.key) for e in evidence.related[:6]]
         if evidence.people:

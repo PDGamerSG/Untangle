@@ -31,7 +31,9 @@ INSTRUCTIONS = (
     "list_decisions for it. Answers cite their evidence; a refusal means the history does not explain it, so ask the "
     "person suggested by who_to_ask instead of guessing. After you settle a non-obvious decision, record it with "
     "remember_decision so the next agent or engineer can find the reason. Repository names use owner/name; call "
-    "list_repositories to see what is indexed."
+    "list_repositories to see what is indexed. Before editing, call check_change with your planned diff or a short "
+    "description: it lists replaced values the change would bring back, decisions that guard the files, what imports "
+    "them, the tests to run and who to ask. Call repository_briefing once when you start in an unfamiliar repository."
 )
 
 
@@ -189,6 +191,54 @@ def tool_recall_agent_notes(args: dict[str, Any], user: User) -> tuple[str, dict
     return "Notes recorded by coding agents, newest first:\n" + "\n".join(lines), {"notes": notes}
 
 
+def tool_check_change(args: dict[str, Any], user: User) -> tuple[str, dict[str, Any]]:
+    from untangle.preflight import MAX_CHANGE_CHARS, preflight
+
+    repo = _repo(args)
+    change = _text(args, "change", limit=MAX_CHANGE_CHARS, required=False) or ""
+    paths = args.get("paths") or []
+    if not isinstance(paths, list) or not all(isinstance(p, str) for p in paths) or len(paths) > 50:
+        raise ToolError("paths must be a list of at most 50 file paths.")
+    if not change and not paths:
+        raise ToolError("Send the planned change as a unified diff or a description, or name the files in paths.")
+    try:
+        res = preflight(repo, change, paths=[p[:400] for p in paths])
+    except ValueError as exc:
+        raise ToolError(str(exc)) from exc
+    lines = [f"Review level: {res.review.level} ({res.review.score}/100)."]
+    lines += [f"- +{r.points} {r.text}" for r in res.review.reasons]
+    if res.targets:
+        lines.append("Targets: " + ", ".join(
+            (t.key or t.name or t.path or t.id) + (f" ({t.current} -> {t.proposed})" if t.proposed else "") for t in res.targets))
+    for r in res.revivals:
+        lines.append(f"Brings back a replaced value: {r.target} = {r.proposed}. Replaced by [{r.replaced_by.id}] {r.replaced_by.text or ''}. {r.reason or ''}".rstrip())
+    for g in res.decisions[:8]:
+        lines.append(f"Decision in scope [{g.decision.id}] {g.decision.text or g.decision.object or ''}" + (f" ({'; '.join(g.guards[:2])})" if g.guards else ""))
+    for a in res.advisories.introduced:
+        lines.append(f"Advisory: {a.package}@{a.version} is affected by {a.advisory.get('id')} {a.advisory.get('summary') or ''} {a.advisory.get('url') or ''}".rstrip())
+    if res.reach.reached:
+        lines.append("Imported by: " + ", ".join(f"{x.path} (hop {x.hop})" for x in res.reach.reached[:15]))
+    if res.reach.tests:
+        lines.append("Tests to run: " + ", ".join(res.reach.tests[:10]))
+    if res.reach.cochanged:
+        lines.append("Usually changed together: " + ", ".join(f"{c.path} ({c.together}/{c.total})" for c in res.reach.cochanged[:6]))
+    if res.people:
+        lines.append("Ask: " + "; ".join(f"{p.name or p.login} ({p.why})" for p in res.people))
+    lines.append("Next steps:\n" + "\n".join(f"- {s.text}" for s in res.next_steps))
+    lines.append("Limits: " + " ".join(res.limits))
+    data = res.model_dump()
+    data.pop("cypher", None)
+    return "\n".join(lines), data
+
+
+def tool_repository_briefing(args: dict[str, Any], user: User) -> tuple[str, dict[str, Any]]:
+    from untangle.briefing import briefing, briefing_markdown
+
+    repo = _repo(args)
+    data = briefing(repo)
+    return briefing_markdown(data), data.model_dump()
+
+
 _REPO = {"type": "string", "description": "Repository as owner/name, for example knadh/listmonk.", "maxLength": 200}
 _AS_OF = {"type": "string", "description": "Optional date (YYYY-MM-DD) to answer as of that day.", "maxLength": 40}
 _SUBJECT = {"type": "string", "description": "A file path, config key, dependency or module name.", "maxLength": 300}
@@ -231,6 +281,26 @@ TOOLS: dict[str, dict[str, Any]] = {
         "description": "Find files, config keys, dependencies, modules, symbols and people by name in an indexed repository.",
         "inputSchema": {"type": "object", "properties": {"repo": _REPO, "query": {"type": "string", "maxLength": 300}},
                         "required": ["repo", "query"], "additionalProperties": False},
+    },
+    "check_change": {
+        "title": "Pre-flight check a planned change", "fn": tool_check_change,
+        "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+        "description": "Before editing, check a planned change against the repository's history. Send a unified diff, a short "
+                       "description (\"set app.concurrency back to 5\"), file paths, or a mix. Returns a review level with its "
+                       "reasons, replaced values the change would bring back, active decisions guarding the targets, files that "
+                       "import them, tests to run, files usually changed together, public advisories for changed dependency "
+                       "versions, and who to ask.",
+        "inputSchema": {"type": "object", "properties": {
+            "repo": _REPO,
+            "change": {"type": "string", "maxLength": 60000, "description": "A unified diff and/or a plain description of the change."},
+            "paths": {"type": "array", "items": {"type": "string", "maxLength": 400}, "maxItems": 50, "description": "Files the change touches, if not in the diff."},
+        }, "required": ["repo"], "additionalProperties": False},
+    },
+    "repository_briefing": {
+        "title": "Day-one briefing for a repository", "fn": tool_repository_briefing, "annotations": _READ,
+        "description": "An orientation for an unfamiliar repository: its code areas with their main contributors, the decisions "
+                       "to read before changing anything, recently replaced decisions, and who to ask about what.",
+        "inputSchema": {"type": "object", "properties": {"repo": _REPO}, "required": ["repo"], "additionalProperties": False},
     },
     "remember_decision": {
         "title": "Record a decision in the graph", "fn": tool_remember_decision, "write": True,

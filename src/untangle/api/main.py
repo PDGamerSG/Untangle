@@ -22,7 +22,7 @@ from neo4j.exceptions import Neo4jError
 from pydantic import BaseModel, Field, ValidationError
 from starlette.concurrency import run_in_threadpool
 
-from untangle import __version__
+from untangle import __version__, speech
 from untangle.answer import service
 from untangle.answer.models import (
     AskRequest,
@@ -42,13 +42,16 @@ from untangle.api.health import shape_health
 from untangle.api.repositories import router as repositories_router
 from untangle.api.security import add_security_headers
 from untangle.auth import limits
+from untangle.briefing import BriefingResponse, briefing, briefing_markdown
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
 from untangle.kt.sarvam import SarvamError
+from untangle.preflight import PreflightRequest, PreflightResponse, preflight
 from untangle.repositories.models import ImportProblem
 from untangle.repositories.service import normalize_repository
 from untangle.repository_map.export import vault_zip
 from untangle.repository_map.service import complete_repository_map, repository_map
+from untangle.speech import SpeakRequest, SpeakResponse
 
 log = logging.getLogger("untangle.api")
 _REQUEST_ID = re.compile(r"[A-Za-z0-9._-]{1,128}")
@@ -170,6 +173,44 @@ def _english(result: Any) -> Any:
 def ask(body: AskRequest, request: Request) -> Any:
     charge(request, limits.ASK, "You have asked 40 questions in the last hour. Please wait before asking more.")
     return _english(service.ask(body.question, body.repo, at=body.at, mode=body.mode))
+
+
+@app.post("/preflight", response_model=PreflightResponse)
+def preflight_check(body: PreflightRequest, request: Request) -> Any:
+    """What the history says about a proposed change (a description, a unified diff and/or file paths)."""
+    charge(request, limits.PREFLIGHT, "You have run 60 pre-flight checks in the last hour. Please wait before running more.")
+    return _english(preflight(normalize_repository(body.repo), body.change, paths=[p[:400] for p in body.paths]))
+
+
+@app.get("/briefing", response_model=BriefingResponse)
+def repository_briefing(repo: str = Query(min_length=3, max_length=200)) -> Any:
+    """A day-one orientation: code areas and their authors, decisions to read first, recent changes, who to ask."""
+    return _english(briefing(normalize_repository(repo)))
+
+
+@app.get("/briefing/markdown")
+def repository_briefing_markdown(repo: str = Query(min_length=3, max_length=200)) -> Response:
+    data = BriefingResponse.model_validate(_english(briefing(normalize_repository(repo))))
+    name = normalize_repository(repo).replace("/", "-")
+    return Response(briefing_markdown(data), media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="untangle-briefing-{name}.md"'})
+
+
+@app.post("/speak", response_model=SpeakResponse)
+def speak_text(body: SpeakRequest, request: Request) -> Any:
+    """Translate an answer into an Indian language and read it aloud. The audio is returned, never stored."""
+    charge(request, limits.SPEAK, "You have listened to 30 answers in the last hour. Please wait before listening to more.")
+    try:
+        return speech.speak(body.text, body.language)
+    except SarvamError as exc:
+        status = 503 if exc.status in (None, 401, 403) or "not set" in str(exc) else 502
+        log.warning("speak failed [%s]: %s", _request_id(request), exc)
+        return _error(status, "Listening is unavailable right now. Please read the answer or retry later.", request_id=_request_id(request))
+
+
+@app.get("/speak/languages")
+def speak_languages() -> dict[str, Any]:
+    return {"available": bool(settings().sarvam_api_key), "languages": speech.languages()}
 
 
 @app.get("/decisions/{decision_id:path}", response_model=WhyPath)

@@ -11,6 +11,7 @@ from fastapi import Request  # module level: FastAPI resolves the override's str
 os.environ.setdefault("LLM_BACKEND", "fake")
 os.environ.setdefault("EMBED_BACKEND", "fake")
 os.environ.setdefault("EMBED_DIM", "384")
+os.environ.setdefault("UNTANGLE_ADVISORIES", "0")  # never call OSV.dev from tests
 
 from untangle.graph.db import Graph, GraphUnavailable, connect  # noqa: E402
 

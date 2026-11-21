@@ -482,6 +482,29 @@ class SarvamClient:
             parts.append(translated.strip())
         return " ".join(p for p in parts if p)
 
+    def text_to_speech(self, text: str, *, language: str, model: str = "bulbul:v3", speaker: str = "shubh", codec: str = "mp3") -> bytes:
+        """`POST /text-to-speech` -> audio bytes. Bulbul v3 takes up to 2500 characters; the response carries the audio
+        as base64 strings in `audios`. Older deployments name the language field `target_language_code`, so a 4xx that
+        mentions it is retried once with that name."""
+        import base64
+
+        payload: dict[str, Any] = {"text": text[:TTS_MAX_CHARS.get(model, 1500)], "language_code": language, "model": model,
+                                   "speaker": speaker, "output_audio_codec": codec}
+        try:
+            body = self._request("POST", "text-to-speech", json=payload)
+        except SarvamError as exc:
+            if exc.status not in (400, 422) or "target_language_code" not in str(exc):
+                raise
+            payload["target_language_code"] = payload.pop("language_code")
+            body = self._request("POST", "text-to-speech", json=payload)
+        audios = body.get("audios") if isinstance(body, dict) else None
+        if not isinstance(audios, list) or not audios or not all(isinstance(a, str) for a in audios):
+            raise SarvamError("text-to-speech response has no audios")
+        return b"".join(base64.b64decode(a) for a in audios)
+
+
+TTS_MAX_CHARS = {"bulbul:v3": 2500, "bulbul:v2": 1500}
+
 
 __all__ = [
     "DEFAULT_STT_MODEL",

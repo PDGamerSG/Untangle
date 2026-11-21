@@ -66,6 +66,11 @@ class Settings:
 
     sarvam_stt_model: str = "saaras:v4"
     sarvam_stt_mode: str = "codemix"
+    sarvam_tts_model: str = "bulbul:v3"
+    sarvam_tts_speaker: str = "shubh"
+    # Pre-flight checks look up public advisories for changed dependency versions on OSV.dev (no key, package
+    # names and versions only). Set UNTANGLE_ADVISORIES=0 to stay offline.
+    advisories: bool = True
 
     api_host: str = "127.0.0.1"
     api_port: int = 8090
@@ -110,6 +115,9 @@ def settings() -> Settings:
         embed_dim=int(_env("EMBED_DIM", "384")),
         sarvam_stt_model=_env("SARVAM_STT_MODEL", "saaras:v4"),
         sarvam_stt_mode=_env("SARVAM_STT_MODE", "codemix"),
+        sarvam_tts_model=_env("SARVAM_TTS_MODEL", "bulbul:v3"),
+        sarvam_tts_speaker=_env("SARVAM_TTS_SPEAKER", "shubh"),
+        advisories=_env("UNTANGLE_ADVISORIES", "1").lower() in ("1", "true", "yes"),
         api_host=_env("API_HOST", "127.0.0.1"),
         api_port=int(_env("API_PORT", "8090")),
         cors_origins=tuple(o.strip() for o in _env("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()),

@@ -7,6 +7,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
+from untangle.answer.premise import Premise
+
 Mode = Literal["graph", "baseline", "both"]
 Intent = Literal["why", "who_to_ask", "what_changed", "belief_at", "is_current", "list_decisions"]
 
@@ -128,6 +130,8 @@ class AskResponse(BaseModel):
     # On a refusal: the closest related entities and the person most likely to know, so the reader has a next step.
     closest: list[EntityRef] = Field(default_factory=list)
     ask: PersonCard | None = None
+    # For "X instead of Y" questions: what the declared dependencies say about the question's own claim.
+    premise: Premise | None = None
 
 
 class AskRequest(BaseModel):

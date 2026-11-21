@@ -40,7 +40,9 @@ def test_initialize_negotiates_the_protocol_version():
 def test_tools_are_listed_with_schemas_and_annotations():
     tools = {t["name"]: t for t in mcp_server.handle(_rpc("tools/list"), USER, charge=_no_charge)["result"]["tools"]}
     assert set(tools) == {"list_repositories", "ask_why", "list_decisions", "decision_timeline", "who_to_ask",
-                          "search_repository", "remember_decision", "recall_agent_notes"}
+                          "search_repository", "check_change", "repository_briefing", "remember_decision", "recall_agent_notes"}
+    assert tools["check_change"]["inputSchema"]["required"] == ["repo"]
+    assert tools["check_change"]["annotations"]["openWorldHint"] is True  # it may look up public advisories
     assert tools["ask_why"]["inputSchema"]["required"] == ["repo", "question"]
     assert tools["remember_decision"]["annotations"]["readOnlyHint"] is False
     assert all(t["annotations"]["readOnlyHint"] for name, t in tools.items() if name != "remember_decision")
