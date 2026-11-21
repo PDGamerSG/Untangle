@@ -283,11 +283,41 @@ export const api = {
   speak: (text: string, language: string, signal?: AbortSignal): Promise<SpeakResponse> =>
     request("/speak", { method: "POST", body: JSON.stringify({ text, language }), signal }, 60_000),
 
-  ingestMeeting: (body: FormData): Promise<{ meeting_id: string; utterances: number; decisions: number }> => {
-    if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Uploads are available in the live app."));
-    return request("/kt/ingest", { method: "POST", body }, 300_000);
+  /** Uploads a recording or transcript. A long recording answers 202 while it transcribes; this keeps collecting it
+   * (`onPending` gets the upload id so a reloaded page can call `resumeMeeting`) until the call is saved. */
+  ingestMeeting: async (body: FormData, onPending?: (uploadId: string) => void, signal?: AbortSignal): Promise<IngestResult> => {
+    if (SAMPLE_MODE) throw new ApiError(400, "Uploads are available in the live app.");
+    // No short client deadline: a phone can spend minutes sending 4 MB before the server starts its own bounded work.
+    const first = await request<IngestResult | PendingUpload>("/kt/ingest", { method: "POST", body, signal }, 900_000);
+    if (!isPending(first)) return first;
+    onPending?.(first.upload_id);
+    return api.resumeMeeting(first.upload_id, signal);
+  },
+
+  resumeMeeting: async (uploadId: string, signal?: AbortSignal): Promise<IngestResult> => {
+    const giveUp = Date.now() + 40 * 60_000;
+    let failures = 0;
+    while (Date.now() < giveUp) {
+      await new Promise((resolve) => setTimeout(resolve, 3_000));
+      signal?.throwIfAborted();
+      try {
+        const result = await request<IngestResult | PendingUpload>(`/kt/ingest/${encodeURIComponent(uploadId)}/resume`, { method: "POST", signal }, 120_000);
+        if (!isPending(result)) return result;
+        failures = 0;
+      } catch (e) {
+        // Only a dropped connection or a timeout is worth another try; the server already explained anything else.
+        const transient = e instanceof ApiError && (e.status === 0 || e.status === 408 || e.status === 504);
+        if (!transient || ++failures >= 3) throw e;
+      }
+    }
+    throw new ApiError(408, "Transcription is taking unusually long. Please try again later.");
   },
 };
+
+export type IngestResult = { meeting_id: string; utterances: number; decisions: number };
+type PendingUpload = { status: "transcribing"; upload_id: string };
+const isPending = (value: IngestResult | PendingUpload): value is PendingUpload =>
+  (value as PendingUpload)?.status === "transcribing" && typeof (value as PendingUpload).upload_id === "string";
 
 /** Resolves a citation or evidence link: absolute URLs open in a new tab, decision ids go to the why-path page. */
 export function hrefFor(id: string, kind: string, url?: string | null): { href: string; external: boolean } | null {

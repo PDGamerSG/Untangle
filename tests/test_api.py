@@ -6,11 +6,15 @@ import uuid
 
 import httpx
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 
 from _answer_fixture import Fixture, seed_graph, unseed_people
 from untangle.answer import service
 from untangle.api import main as api
+from untangle.api.auth import enforce_access
+from untangle.auth.service import User
+from untangle.graph.queries import load_cypher
+from untangle.kt.sarvam import BatchPending, SarvamError
 
 
 @pytest.fixture
@@ -82,6 +86,103 @@ async def test_kt_upload_uses_transcript_service(client, monkeypatch):
     assert r.json()["meeting_id"] == "mtg:o/r:call"
     assert calls == [("o/r", "Sam: We use Neo4j.", "Handover")]
     assert graph.writes == [("kt_meeting_owner", {"meeting_id": "mtg:o/r:call", "user_id": "user:test-admin"})]
+
+
+
+class PendingGraph:
+    """An imported repository with no meetings; pending uploads (`KtUpload`) are kept in memory."""
+
+    def __init__(self):
+        self.uploads: dict[str, dict] = {}
+        self.writes: list[tuple] = []
+
+    def read(self, cypher, params=None):
+        class Result:
+            records: list = []
+        result = Result()
+        if "Repo" in cypher:
+            result.records = [{"at": 1}]
+        elif "KtUpload" in cypher and params["id"] in self.uploads:
+            result.records = [{"p": dict(self.uploads[params["id"]])}]
+        return result
+
+    def query(self, cypher, params=None):
+        if "CREATE (:KtUpload" in cypher:
+            self.uploads[params["id"]] = {k: params[k] for k in ("id", "job_id", "input_name", "repo", "title", "language", "user_id")}
+        elif "DETACH DELETE p" in cypher:
+            self.uploads.pop(params["id"], None)
+
+    def run_named(self, name, params=None, write=False):
+        self.writes.append((name, params))
+
+
+async def test_long_recordings_keep_transcribing_after_the_first_request(client, monkeypatch):
+    graph, waits, polls = PendingGraph(), [], {"n": 0}
+
+    def ingest_audio(repo, title, path, **kwargs):
+        waits.append(kwargs["batch_timeout"])
+        raise BatchPending("job-9", "upload.mp3", "running")
+
+    def resume_audio(repo, title, job_id, input_name, **kwargs):
+        assert (repo, title, job_id, input_name) == ("o/r", "Long call", "job-9", "upload.mp3")
+        assert kwargs["batch_timeout"] == api._RESUME_WAIT_SECONDS
+        polls["n"] += 1
+        if polls["n"] == 1:
+            raise BatchPending(job_id, input_name, "running")
+        return {"meeting_id": "mtg:o/r:long", "utterances": 3, "decisions": 1}
+
+    functions = {"ingest_audio": ingest_audio, "resume_audio": resume_audio}
+    monkeypatch.setattr(api, "_kt", lambda name: functions[name])
+    monkeypatch.setattr(service, "get_graph", lambda: graph)
+    r = await client.post("/kt/ingest", data={"repo": "o/r", "title": "Long call"}, files={"audio": ("call.mp3", b"ID3audio", "audio/mpeg")})
+    assert r.status_code == 202
+    assert r.json()["status"] == "transcribing"
+    upload_id = r.json()["upload_id"]
+    assert 0 < waits[0] <= api._TRANSCRIBE_WAIT_SECONDS
+    assert graph.uploads[upload_id]["user_id"] == "user:test-admin"
+
+    r = await client.post(f"/kt/ingest/{upload_id}/resume")
+    assert r.status_code == 202 and r.json()["upload_id"] == upload_id
+    r = await client.post(f"/kt/ingest/{upload_id}/resume")
+    assert r.status_code == 200 and r.json()["meeting_id"] == "mtg:o/r:long"
+    assert graph.writes == [("kt_meeting_owner", {"meeting_id": "mtg:o/r:long", "user_id": "user:test-admin"})]
+    assert graph.uploads == {}
+    assert (await client.post(f"/kt/ingest/{upload_id}/resume")).status_code == 404
+
+
+async def test_a_failed_transcription_is_reported_and_forgotten(client, monkeypatch):
+    graph = PendingGraph()
+    graph.uploads["u1"] = {"id": "u1", "job_id": "job-5", "input_name": "upload.mp3", "repo": "o/r", "title": "Call", "language": None, "user_id": "user:test-admin"}
+
+    def resume_audio(*args, **kwargs):
+        raise SarvamError("batch job job-5 Failed: unsupported codec")
+
+    monkeypatch.setattr(api, "_kt", lambda name: resume_audio)
+    monkeypatch.setattr(service, "get_graph", lambda: graph)
+    r = await client.post("/kt/ingest/u1/resume")
+    assert r.status_code == 502
+    assert graph.uploads == {}
+
+
+async def test_only_the_uploader_can_collect_a_pending_recording(client, monkeypatch):
+    graph = PendingGraph()
+    graph.uploads["u2"] = {"id": "u2", "job_id": "job-6", "input_name": "upload.mp3", "repo": "o/r", "title": "Call", "language": None, "user_id": "user:someone-else"}
+    member = User(id="user:member", email="member@untangle.test", name="Member", role="member", created_at=0)
+
+    def as_member(req: Request) -> None:
+        req.state.user = member
+
+    monkeypatch.setattr(api, "_kt", lambda name: pytest.fail("another person's upload must not be resumed"))
+    monkeypatch.setattr(service, "get_graph", lambda: graph)
+    api.app.dependency_overrides[enforce_access] = as_member
+    r = await client.post("/kt/ingest/u2/resume")
+    assert r.status_code == 404
+    assert "u2" in graph.uploads
+
+
+def test_meeting_reads_return_the_uploader_for_delete_permissions():
+    for name in ("kt_meetings", "kt_meeting_detail"):
+        assert "m.uploaded_by AS uploaded_by" in load_cypher(name)
 
 
 async def test_request_id_is_echoed_and_added_to_errors(client):

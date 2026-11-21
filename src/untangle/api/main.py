@@ -46,7 +46,7 @@ from untangle.auth import limits
 from untangle.briefing import BriefingResponse, briefing, briefing_markdown
 from untangle.config import settings
 from untangle.graph.db import GraphUnavailable
-from untangle.kt.sarvam import SarvamError
+from untangle.kt.sarvam import BatchPending, SarvamError
 from untangle.preflight import PreflightRequest, PreflightResponse, preflight
 from untangle.repositories.models import ImportProblem
 from untangle.repositories.service import normalize_repository
@@ -412,6 +412,38 @@ def delete_meeting(meeting_id: str, user: CurrentUser) -> Response:
 
 
 _AUDIO_SUFFIXES = {".wav", ".mp3", ".m4a", ".aac", ".ogg", ".oga", ".opus", ".flac", ".webm", ".mp4", ".amr"}
+# A hosted request stops after 300 s (vercel.json `maxDuration`). The first request waits this long for Sarvam, which
+# leaves time for extraction and graph writes; a longer recording keeps transcribing and the browser resumes it.
+_TRANSCRIBE_WAIT_SECONDS = 150.0
+_RESUME_WAIT_SECONDS = 25.0
+_PENDING_TTL_MS = 6 * 3_600_000
+_STILL_TRANSCRIBING = "The recording is still being transcribed."
+
+
+def _authorizer(graph: Any, user: Any):
+    def authorize(meeting_id: str) -> None:
+        rows = graph.read("MATCH (m:Meeting {id: $id}) RETURN m.uploaded_by AS owner", {"id": meeting_id}).records
+        if rows and rows[0]["owner"] != user.id and not user.is_admin:
+            raise HTTPException(status_code=409, detail="A handover call with this title and date already exists and was added by someone else. Give yours a different title.")
+    return authorize
+
+
+def _save_pending(graph: Any, pending: BatchPending, *, repo: str, title: str, language: str | None, user_id: str) -> str:
+    """Remember a running Sarvam job so its uploader can collect it with `POST /kt/ingest/{id}/resume`."""
+    upload_id = uuid.uuid4().hex
+    graph.query(
+        "MATCH (old:KtUpload) WHERE old.created_at < timestamp() - $ttl DETACH DELETE old "
+        "WITH count(*) AS pruned CREATE (:KtUpload {id: $id, job_id: $job_id, input_name: $input_name, repo: $repo, "
+        "title: $title, language: $language, user_id: $user_id, created_at: timestamp()})",
+        {"ttl": _PENDING_TTL_MS, "id": upload_id, "job_id": pending.job_id, "input_name": pending.input_name, "repo": repo,
+         "title": title, "language": language, "user_id": user_id},
+    )
+    return upload_id
+
+
+def _pending_response(upload_id: str) -> JSONResponse:
+    return JSONResponse(status_code=202, content={"status": "transcribing", "upload_id": upload_id, "detail": _STILL_TRANSCRIBING},
+                        headers={"Retry-After": "5"})
 
 
 @app.post("/kt/ingest")
@@ -423,7 +455,10 @@ async def kt_ingest(
     transcript: Annotated[UploadFile | None, File()] = None,
 ) -> Any:
     """Multipart `{repo, title, audio | transcript}` -> `{meeting_id, utterances, decisions, ...}` from `untangle.kt.service`.
-    The upload is spooled to a temporary file because the KT functions take paths (Sarvam batch jobs need one)."""
+    The upload is spooled to a temporary file because the KT functions take paths (Sarvam batch jobs need one).
+    A recording that is still transcribing when the wait ends answers 202 `{status: "transcribing", upload_id}`;
+    the client then calls `POST /kt/ingest/{upload_id}/resume` until it answers 200 with the same result."""
+    started = time.monotonic()
     if audio is None and transcript is None:
         raise HTTPException(status_code=400, detail="send an `audio` file or a `transcript` JSON file")
     if audio is not None and transcript is not None:
@@ -454,22 +489,56 @@ async def kt_ingest(
         raise HTTPException(status_code=404, detail="Import this repository from Repositories before adding handover calls to it.")
     await run_in_threadpool(charge, request, limits.HANDOVER_UPLOAD, "You can upload 10 handover calls a day. Please try again tomorrow.")
 
-    def authorize(meeting_id: str) -> None:
-        rows = graph.read("MATCH (m:Meeting {id: $id}) RETURN m.uploaded_by AS owner", {"id": meeting_id}).records
-        if rows and rows[0]["owner"] != user.id and not user.is_admin:
-            raise HTTPException(status_code=409, detail="A handover call with this title and date already exists and was added by someone else. Give yours a different title.")
+    authorize = _authorizer(graph, user)
 
     with tempfile.TemporaryDirectory(prefix="untangle-kt-") as tmp:
         path = Path(tmp) / f"upload{suffix or '.json'}"
         path.write_bytes(content)
         name = (title or Path(upload.filename or "handover").stem)[:200]
         if audio is not None:
-            result = await run_in_threadpool(ingest, repo, name, path, language=language, num_speakers=speakers, graph=graph, before_write=authorize)
+            wait = max(15.0, _TRANSCRIBE_WAIT_SECONDS - (time.monotonic() - started))
+            try:
+                result = await run_in_threadpool(ingest, repo, name, path, language=language, num_speakers=speakers, graph=graph,
+                                                 before_write=authorize, batch_timeout=wait)
+            except BatchPending as pending:
+                upload_id = await run_in_threadpool(_save_pending, graph, pending, repo=repo, title=name, language=language, user_id=user.id)
+                return _pending_response(upload_id)
         else:
             result = await run_in_threadpool(ingest, repo, path, title=name, language=language, graph=graph, keep_audio_uri=False, before_write=authorize)
     meeting_id = result.get("meeting_id") if isinstance(result, dict) else None
     if meeting_id:
         await run_in_threadpool(graph.run_named, "kt_meeting_owner", {"meeting_id": meeting_id, "user_id": user.id}, write=True)
+    return result
+
+
+@app.post("/kt/ingest/{upload_id}/resume")
+async def kt_resume(upload_id: str, user: CurrentUser) -> Any:
+    """Collect a recording that `/kt/ingest` left transcribing: 202 while Sarvam is still working, then the ingest result."""
+    graph = service.get_graph()
+    rows = (await run_in_threadpool(graph.read, "MATCH (p:KtUpload {id: $id}) RETURN p {.*} AS p", {"id": upload_id[:64]})).records
+    pending = rows[0]["p"] if rows else None
+    if pending is None or (pending.get("user_id") != user.id and not user.is_admin):
+        raise HTTPException(status_code=404, detail="This upload is no longer waiting. If it finished, it is in the list of handover calls.")
+    resume = _kt("resume_audio")
+    owner = pending.get("user_id") or user.id
+
+    def forget() -> None:
+        graph.query("MATCH (p:KtUpload {id: $id}) DETACH DELETE p", {"id": pending["id"]})
+
+    try:
+        result = await run_in_threadpool(
+            resume, pending["repo"], pending["title"], pending["job_id"], pending["input_name"], language=pending.get("language"),
+            graph=graph, before_write=_authorizer(graph, user), batch_timeout=_RESUME_WAIT_SECONDS,
+        )
+    except BatchPending:
+        return _pending_response(pending["id"])
+    except (SarvamError, HTTPException):
+        await run_in_threadpool(forget)
+        raise
+    meeting_id = result.get("meeting_id") if isinstance(result, dict) else None
+    if meeting_id:
+        await run_in_threadpool(graph.run_named, "kt_meeting_owner", {"meeting_id": meeting_id, "user_id": owner}, write=True)
+    await run_in_threadpool(forget)
     return result
 
 

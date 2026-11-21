@@ -5,6 +5,8 @@
 * `ingest_audio(repo, title, path)` transcribes with Sarvam's batch endpoint for speaker diarisation, including
   short recordings. If batch transcription fails, WAV files can fall back to 28 s real-time windows; compressed
   files under the short-endpoint size limit can fall back to a single request. Those fallbacks do not diarize.
+  With `batch_timeout`, a job still running after that many seconds raises `BatchPending` (the hosted API has a
+  fixed request time limit); `resume_audio(repo, title, job_id, input_name)` later collects it and ingests.
 
 The Sarvam client, LLM, embedder and graph are injectable so everything runs offline against fakes; the defaults
 come from `untangle.config.settings()` (`SARVAM_API_KEY`, `LLM_BACKEND`, `EMBED_BACKEND`, `NEO4J_*`)."""
@@ -24,7 +26,7 @@ from untangle.config import Settings, settings
 from untangle.embed import Embedder
 from untangle.graph.db import Graph, connect
 from untangle.kt.pipeline import ingest_kt, keyterms_for_repo
-from untangle.kt.sarvam import SarvamClient, SarvamError, wav_duration_seconds
+from untangle.kt.sarvam import BatchPending, SarvamClient, SarvamError, wav_duration_seconds
 from untangle.kt.transcript import Transcript, from_sarvam, load_transcript
 from untangle.llm import LLM, make_llm
 
@@ -98,8 +100,10 @@ def transcribe_audio(
     keyterms: Sequence[str] | None = None,
     prefer_windows: bool = False,
     title: str | None = None,
+    batch_timeout: float | None = None,
 ) -> Transcript:
-    """Pick the Sarvam path for this file and return a normalised transcript (`source` says which path ran)."""
+    """Pick the Sarvam path for this file and return a normalised transcript (`source` says which path ran).
+    `BatchPending` is re-raised, never answered with a fallback: the started job is still transcribing."""
     path = Path(audio_path)
     audio = path.read_bytes()
     if not audio:
@@ -108,9 +112,12 @@ def transcribe_audio(
     if prefer_windows and duration is not None:
         doc = client.transcribe_windows(audio, path.name, language_code=language, keyterms=keyterms, num_speakers=num_speakers)
         return from_sarvam(doc, language=language, source="sarvam-rest", title=title)
+    wait = {"timeout": batch_timeout} if batch_timeout is not None else {}
     try:
-        doc = client.run_batch_job(path, language_code=language, keyterms=keyterms, num_speakers=num_speakers)
+        doc = client.run_batch_job(path, language_code=language, keyterms=keyterms, num_speakers=num_speakers, **wait)
         return from_sarvam(doc, language=language, source="sarvam-batch", title=title)
+    except BatchPending:
+        raise
     except SarvamError as exc:
         if duration is not None:
             log.warning("batch job failed (%s); falling back to 28 s windows through the short endpoint", exc)
@@ -168,6 +175,7 @@ def ingest_audio(
     prefer_windows: bool = False,
     started_at: int | str | None = None,
     before_write: Callable[[str], None] | None = None,
+    batch_timeout: float | None = None,
 ) -> dict[str, Any]:
     """Transcribe a recording with Sarvam (keyterms biased toward the repository's identifiers) and ingest it."""
     client = sarvam if sarvam is not None else sarvam_client()
@@ -175,12 +183,50 @@ def ingest_audio(
         raise SarvamError("SARVAM_API_KEY is not set; transcribe elsewhere and use --transcript, or set the key")
     with _graph(graph) as g:
         terms = list(keyterms) if keyterms is not None else _safe_keyterms(g, repo)
-        t = transcribe_audio(client, audio_path, language=language, num_speakers=num_speakers, keyterms=terms, prefer_windows=prefer_windows, title=title)
-        return ingest_kt(
-            g, repo, title=title, utterances=t.utterances, speakers=t.speakers, started_at=started_at, language=t.language or language,
-            audio_uri=None, llm=llm if llm is not None else make_llm(), embedder=embedder, source=t.source,
-            sarvam=client, translate=translate, before_write=before_write,
+        t = transcribe_audio(
+            client, audio_path, language=language, num_speakers=num_speakers, keyterms=terms, prefer_windows=prefer_windows,
+            title=title, batch_timeout=batch_timeout,
         )
+        return _ingest_transcribed(g, repo, title, t, client, language=language, llm=llm, embedder=embedder, translate=translate,
+                                   started_at=started_at, before_write=before_write)
+
+
+def resume_audio(
+    repo: str,
+    title: str,
+    job_id: str,
+    input_name: str,
+    *,
+    language: str | None = None,
+    translate: bool = True,
+    graph: Graph | None = None,
+    llm: LLM | None = None,
+    embedder: Embedder | None = None,
+    sarvam: SarvamClient | None = None,
+    batch_timeout: float = 0.0,
+    started_at: int | str | None = None,
+    before_write: Callable[[str], None] | None = None,
+) -> dict[str, Any]:
+    """Collect a batch job that `ingest_audio` left running and ingest it. Raises `BatchPending` while it still runs."""
+    client = sarvam if sarvam is not None else sarvam_client()
+    if client is None:
+        raise SarvamError("SARVAM_API_KEY is not set; transcribe elsewhere and use --transcript, or set the key")
+    doc = client.finish_batch_job(job_id, input_name, timeout=batch_timeout)
+    t = from_sarvam(doc, language=language, source="sarvam-batch", title=title)
+    with _graph(graph) as g:
+        return _ingest_transcribed(g, repo, title, t, client, language=language, llm=llm, embedder=embedder, translate=translate,
+                                   started_at=started_at, before_write=before_write)
+
+
+def _ingest_transcribed(
+    g: Graph, repo: str, title: str, t: Transcript, client: SarvamClient, *, language: str | None, llm: LLM | None,
+    embedder: Embedder | None, translate: bool, started_at: int | str | None, before_write: Callable[[str], None] | None,
+) -> dict[str, Any]:
+    return ingest_kt(
+        g, repo, title=title, utterances=t.utterances, speakers=t.speakers, started_at=started_at, language=t.language or language,
+        audio_uri=None, llm=llm if llm is not None else make_llm(), embedder=embedder, source=t.source,
+        sarvam=client, translate=translate, before_write=before_write,
+    )
 
 
 def _safe_keyterms(graph: Graph, repo: str) -> list[str]:
@@ -191,4 +237,4 @@ def _safe_keyterms(graph: Graph, repo: str) -> list[str]:
         return []
 
 
-__all__ = ["ingest_audio", "ingest_transcript", "iso", "meeting", "meetings", "sarvam_client", "transcribe_audio"]
+__all__ = ["ingest_audio", "ingest_transcript", "iso", "meeting", "meetings", "resume_audio", "sarvam_client", "transcribe_audio"]

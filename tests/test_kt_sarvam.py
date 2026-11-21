@@ -12,7 +12,14 @@ from typing import Any
 import httpx
 import pytest
 
-from untangle.kt.sarvam import SarvamClient, SarvamError, entries_from_response, split_wav_windows, wav_duration_seconds
+from untangle.kt.sarvam import (
+    BatchPending,
+    SarvamClient,
+    SarvamError,
+    entries_from_response,
+    split_wav_windows,
+    wav_duration_seconds,
+)
 
 KEY = "test-subscription-key"
 
@@ -316,6 +323,61 @@ def test_batch_job_failure_raises_with_the_service_message(tmp_path):
 
     with client_for(handler) as c, pytest.raises(SarvamError, match="unsupported codec"):
         c.run_batch_job(audio_path, poll_interval=0)
+
+
+
+def test_batch_job_still_running_raises_pending_and_can_be_finished_later(tmp_path):
+    """A hosted request stops waiting; the job id lets a later request download the same output."""
+    audio_path = tmp_path / "kt.wav"
+    audio_path.write_bytes(make_wav(2))
+    state = {"done": False, "polls": 0}
+
+    def handler(request):
+        path = request.url.path
+        if path == "/speech-to-text/job/v1":
+            return httpx.Response(200, json={"job_id": "job-3", "job_state": "Accepted"})
+        if path.endswith("upload-files"):
+            return httpx.Response(200, json={"upload_urls": {"kt.wav": {"file_url": "https://blob.example.net/kt.wav"}}})
+        if request.url.host == "blob.example.net":
+            if request.method == "PUT":
+                return httpx.Response(201)
+            return httpx.Response(200, content=json.dumps(BATCH_OUTPUT, ensure_ascii=False).encode("utf-8"))
+        if path.endswith("/start"):
+            return httpx.Response(200, json={"job_state": "Pending"})
+        if path.endswith("/status"):
+            state["polls"] += 1
+            if not state["done"]:
+                return httpx.Response(200, json={"job_state": "Running"})
+            return httpx.Response(200, json={"job_state": "Completed", "job_details": [
+                {"inputs": [{"file_name": "kt.wav"}], "outputs": [{"file_name": "kt.json"}], "state": "Success"}]})
+        if path.endswith("download-files"):
+            return httpx.Response(200, json={"download_urls": {"kt.json": {"file_url": "https://blob.example.net/kt.json"}}})
+        return httpx.Response(404)
+
+    with client_for(handler) as c:
+        with pytest.raises(BatchPending) as pending:
+            c.run_batch_job(audio_path, poll_interval=1, timeout=3)
+        assert (pending.value.job_id, pending.value.input_name, pending.value.state) == ("job-3", "kt.wav", "running")
+        assert state["polls"] == 4  # at 0, 1, 2 and 3 s: the wait never sleeps past the 3 s limit
+        state["done"] = True
+        doc = c.finish_batch_job("job-3", "kt.wav", timeout=0)
+    assert doc["job_id"] == "job-3"
+    assert [e["speaker_id"] for e in entries_from_response(doc)] == ["SPEAKER_00", "SPEAKER_01", "SPEAKER_00"]
+
+
+def test_transcription_still_running_is_not_retried_another_way(tmp_path, monkeypatch):
+    from untangle.kt.service import transcribe_audio
+
+    path = tmp_path / "long.wav"
+    path.write_bytes(make_wav(5))
+    with client_for(lambda request: pytest.fail("a running job must not be transcribed a second time")) as c:
+        def still_running(path, **kw):
+            assert kw["timeout"] == 12.0
+            raise BatchPending("job-4", "long.wav", "running")
+
+        monkeypatch.setattr(c, "run_batch_job", still_running)
+        with pytest.raises(BatchPending):
+            transcribe_audio(c, path, batch_timeout=12.0)
 
 
 # ---------- text ----------

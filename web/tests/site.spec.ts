@@ -335,6 +335,29 @@ test("upload a handover and open its transcript", async ({ page }) => {
   await expect(page.getByText("sarvam-batch", { exact: false })).toHaveCount(0);
 });
 
+test("a long recording keeps transcribing after the first request and survives a reload", async ({ page }) => {
+  let resumes = 0;
+  await page.route("**/api/kt/ingest", route => route.fulfill({ status: 202, json: { status: "transcribing", upload_id: "u-long" } }));
+  await page.route("**/api/kt/ingest/u-long/resume", route => {
+    resumes += 1;
+    // Still running on the first collection; the page is then reloaded and finishes on its own.
+    return resumes < 3
+      ? route.fulfill({ status: 202, json: { status: "transcribing", upload_id: "u-long" } })
+      : route.fulfill({ json: { meeting_id: meeting.id, utterances: 40, decisions: 15 } });
+  });
+  await page.goto("/meetings");
+  await page.getByLabel("Meeting title", { exact: true }).fill("Long handover");
+  await page.getByLabel("Recording or transcript", { exact: true }).setInputFiles({ name: "call.mp3", mimeType: "audio/mpeg", buffer: Buffer.from("ID3 test audio") });
+  await page.getByLabel(/Everyone in this conversation agreed/).check();
+  await page.getByRole("button", { name: "Upload handover", exact: true }).click();
+  await expect(page.getByText(/Still transcribing… \d+:\d\d/)).toBeVisible();
+  await expect.poll(() => resumes, { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+  await page.reload();
+  await expect(page.getByText(/Still transcribing/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "View transcript and decisions" })).toBeVisible({ timeout: 20_000 });
+  expect(await page.evaluate(() => localStorage.getItem("untangle.pendingHandover"))).toBeNull();
+});
+
 test("API errors show the server message and recover on retry", async ({ page }) => {
   await page.route("**/api/repos", route => route.fulfill({ status: 503, json: { error: "The graph is waking up" } }));
   await page.goto("/ask");

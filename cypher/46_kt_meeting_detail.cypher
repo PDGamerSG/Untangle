@@ -32,6 +32,6 @@ WITH m, utterances, speakers, collect(CASE WHEN d IS NULL THEN null ELSE {
     supersedes: [x IN supersedes WHERE x IS NOT NULL]
 } END) AS decisions
 RETURN m.id AS id, m.repo AS repo, m.title AS title, m.started_at AS started_at, m.duration_ms AS duration_ms,
-       m.language AS language, m.source AS source, m.audio_uri AS audio_uri, m.summary AS summary,
+       m.language AS language, m.source AS source, m.audio_uri AS audio_uri, m.summary AS summary, m.uploaded_by AS uploaded_by,
        [x IN speakers WHERE x.id IS NOT NULL] AS speakers, utterances,
        [x IN decisions WHERE x IS NOT NULL] AS decisions

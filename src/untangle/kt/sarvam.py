@@ -62,6 +62,15 @@ class SarvamError(RuntimeError):
         self.status, self.code = status, code
 
 
+class BatchPending(SarvamError):
+    """A batch job was started but had not finished when the caller stopped waiting. Resume it with
+    `SarvamClient.finish_batch_job(job_id, input_name)`; the job keeps running at Sarvam meanwhile."""
+
+    def __init__(self, job_id: str, input_name: str, state: str | None = None):
+        super().__init__(f"batch job {job_id} is still running (state {state or 'unknown'})")
+        self.job_id, self.input_name, self.state = job_id, input_name, state
+
+
 def _error_message(response: httpx.Response) -> str:
     """Sarvam error bodies look like `{"error": {"message": "...", "code": "..."}}` or `{"detail": ...}`."""
     try:
@@ -377,7 +386,23 @@ class SarvamClient:
         3. `PUT <signed url>` with the audio bytes (`x-ms-blob-type: BlockBlob`, like the SDK)
         4. `POST speech-to-text/job/v1/<job_id>/start`
         5. `GET speech-to-text/job/v1/<job_id>/status` until `job_state` is Completed or Failed
-        6. `POST speech-to-text/job/v1/download-files` `{job_id, files: [output]}` -> signed download URL -> JSON."""
+        6. `POST speech-to-text/job/v1/download-files` `{job_id, files: [output]}` -> signed download URL -> JSON.
+
+        When the job is still running after `timeout` seconds, `BatchPending` is raised with the job id so a later
+        call to `finish_batch_job` can collect the result (a hosted request has a fixed time limit)."""
+        path = Path(path)
+        job_id = self.start_batch_job(path, language_code=language_code, keyterms=keyterms, num_speakers=num_speakers)
+        return self.finish_batch_job(job_id, path.name, poll_interval=poll_interval, timeout=timeout)
+
+    def start_batch_job(
+        self,
+        path: str | Path,
+        *,
+        language_code: str | None = None,
+        keyterms: Sequence[str] | None = None,
+        num_speakers: int | None = None,
+    ) -> str:
+        """Steps 1-4 of `run_batch_job`: create the job, upload the file and start it. Returns the job id."""
         path = Path(path)
         audio = path.read_bytes()
         name = path.name
@@ -401,10 +426,15 @@ class SarvamClient:
         self._request("PUT", upload_url, auth=False, expect_json=False, content=audio, headers={"x-ms-blob-type": "BlockBlob", "Content-Type": mime_for(name)})
 
         self._request("POST", f"speech-to-text/job/v1/{job_id}/start")
-        status = self._wait(job_id, poll_interval, timeout)
+        return job_id
+
+    def finish_batch_job(self, job_id: str, input_name: str, *, poll_interval: float = 5.0, timeout: float = 3600.0) -> dict[str, Any]:
+        """Steps 5-6 of `run_batch_job`: wait for a started job and download its output document.
+        Raises `BatchPending` when the job is still running after `timeout` seconds."""
+        status = self._wait(job_id, poll_interval, timeout, input_name=input_name)
         if str(status.get("job_state", "")).lower() != "completed":
             raise SarvamError(f"batch job {job_id} {status.get('job_state')}: {status.get('error_message') or 'no message'}")
-        output_name = self._output_name(status, name)
+        output_name = self._output_name(status, input_name)
         down = self._request("POST", "speech-to-text/job/v1/download-files", json={"job_id": job_id, "files": [output_name]})
         link = ((down or {}).get("download_urls") or {}).get(output_name) or {}
         download_url = link.get("file_url") if isinstance(link, dict) else None
@@ -419,15 +449,19 @@ class SarvamClient:
             doc.setdefault("job_id", job_id)
         return doc
 
-    def _wait(self, job_id: str, poll_interval: float, timeout: float) -> dict[str, Any]:
-        waited = 0.0
+    def _wait(self, job_id: str, poll_interval: float, timeout: float, *, input_name: str = "") -> dict[str, Any]:
+        # Both the slept time and the wall clock count, so slow status calls cannot stretch the wait past `timeout`.
+        waited, started, last_state = 0.0, time.monotonic(), None
         while True:
             status = self._request("GET", f"speech-to-text/job/v1/{job_id}/status")
             state = str((status or {}).get("job_state") or "").lower()
+            if state != last_state:
+                log.info("Sarvam batch job %s is %s", job_id, state or "in an unknown state")
+                last_state = state
             if state in _TERMINAL_STATES:
                 return status
-            if waited >= timeout:
-                raise SarvamError(f"batch job {job_id} did not finish within {timeout:.0f} s (state {state or 'unknown'})")
+            if max(waited, time.monotonic() - started) + poll_interval > timeout:
+                raise BatchPending(job_id, input_name, state or None)
             self._sleep(poll_interval)
             waited += poll_interval
 
@@ -507,6 +541,7 @@ TTS_MAX_CHARS = {"bulbul:v3": 2500, "bulbul:v2": 1500}
 
 
 __all__ = [
+    "BatchPending",
     "DEFAULT_STT_MODEL",
     "SHORT_LIMIT_SECONDS",
     "WINDOW_SECONDS",
