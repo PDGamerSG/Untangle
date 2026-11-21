@@ -622,8 +622,10 @@ test("adding a public repository follows the import across a reload and selects 
     expect(route.request().postDataJSON()).toEqual({ repository: "octo-org/hello-world" });
     await route.fulfill({ status: 202, json: importJob("queued") });
   });
-  await page.route("**/api/repository-imports/imp_1", route => {
+  await page.route("**/api/repository-imports/imp_1", async route => {
     polls += 1;
+    // A slow answer lets the session load first after the reload; polling must not restart and drop this response.
+    await new Promise(r => setTimeout(r, 400));
     const status = polls < 3 ? "running" : "complete";
     if (status === "complete") indexed = true;
     return route.fulfill({ json: importJob(status) });

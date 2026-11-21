@@ -125,6 +125,13 @@ function JobTracker({
   /** Bumped by a retry that reuses this job id, to start polling again. */
   const [generation, setGeneration] = useState(0);
   const lastStatus = useRef<ImportStatus | null>(initial?.status ?? null);
+  // The repository context hands out new functions when the session or repository list loads. Polling reads them
+  // through a ref, so it does not restart then: a restart aborts the request in flight, and a job that finished
+  // meanwhile would be seen only as complete, never as the change from pending that selects it.
+  const context = useRef({ setRepo, reload });
+  useEffect(() => {
+    context.current = { setRepo, reload };
+  }, [setRepo, reload]);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,8 +148,8 @@ function JobTracker({
           setNow(Date.now());
           if (before && pending(before) && next.status === "complete") {
             invalidateRepositoryResources(next.repo);
-            setRepo(next.repo);
-            reload();
+            context.current.setRepo(next.repo);
+            context.current.reload();
             setSelected(true);
           }
           if (pending(next.status)) timer = setTimeout(tick, POLL_MS);
@@ -164,7 +171,7 @@ function JobTracker({
       controller.abort();
       if (timer) clearTimeout(timer);
     };
-  }, [id, generation, setRepo, reload]);
+  }, [id, generation]);
 
   const retry = async () => {
     if (!job) return;
