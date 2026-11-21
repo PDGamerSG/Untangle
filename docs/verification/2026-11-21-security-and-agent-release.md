@@ -39,6 +39,8 @@ was too low for a shared network (now 30), and the signed-out checks reused the 
 
 ## ArgosX
 
-Baseline free deep scan at about 16:10 IST: VibeScore 94, six findings (https://getargosx.com/r/ipoczozg). Five are
-fixed in this release and one is accepted; see [the remediation log](../submission/ARGOSX_REMEDIATION_LOG.md). The
-final scan is still to run.
+Free deep scans of https://untangle.pallabdas.me: baseline 94 (16:10 IST), re-tests 96.4 (16:44, 17:03), final **99**
+(17:41) with accessibility 100. Four landing-page releases followed the findings (`2976760`, `3f6a32c`, `403bff4`,
+`53448b4`); browser tests now run axe-core at load and at every scroll position. Details and the reasons for the
+three open findings are in [the remediation log](../submission/ARGOSX_REMEDIATION_LOG.md); the four report PDFs are
+in `docs/submission/argosx/`.
