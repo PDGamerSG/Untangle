@@ -137,6 +137,11 @@ def ask(
         ),
         baseline=base, at_iso=iso(at_ms), intent=decision.intent,
     )
+    if refused:
+        response.closest = [EntityRef(id=e.id, label=e.label, name=e.name, path=e.path, key=e.key) for e in evidence.related[:6]]
+        if evidence.people:
+            person = evidence.people[0]
+            response.ask = PersonCard(id=person.id, name=person.display, login=person.login, why=person.why(evidence.entity_short))
     log.info("ask repo=%s intent=%s refused=%s confidence=%.2f llm=%s in %.0f ms", repo, decision.intent, refused, confidence.score, composed.used_llm, (time.perf_counter() - started) * 1000)
     return response
 

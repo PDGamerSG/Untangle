@@ -72,16 +72,26 @@ def date_forms(ms: Any) -> list[str]:
     ]
 
 
+# Epoch milliseconds between 1970 and 2200: anything else is a typo, and the database driver rejects huge integers.
+_MAX_MS = 7_258_118_400_000
+
+
+def _bounded(ms: int) -> int:
+    if not 0 <= ms <= _MAX_MS:
+        raise ValueError("cannot parse date: use a date such as 2024-03-14, or epoch milliseconds after 1970")
+    return ms
+
+
 def parse_at(value: str | int | float | None, *, end_of_period: bool = False) -> int | None:
     """`2024-01-01`, `2024-01-01T10:00:00Z`, `2024-01`, `2024`, `14 March 2023`, `March 2023` or epoch ms -> epoch ms.
     A bare year or month resolves to its start, or its end with `end_of_period=True` ("what was it in 2022?")."""
     if value is None or value == "":
         return None
     if isinstance(value, int | float):
-        return int(value)
+        return _bounded(int(value))
     text = str(value).strip()
     if text.isdigit() and len(text) > 4:
-        return int(text)
+        return _bounded(int(text))
     m = _ISO_DATE.match(text)
     if m:
         y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))

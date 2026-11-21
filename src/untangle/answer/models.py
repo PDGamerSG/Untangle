@@ -125,12 +125,15 @@ class AskResponse(BaseModel):
     baseline: Baseline | None = None
     at_iso: str | None = None
     intent: Intent = "why"
+    # On a refusal: the closest related entities and the person most likely to know, so the reader has a next step.
+    closest: list[EntityRef] = Field(default_factory=list)
+    ask: PersonCard | None = None
 
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
-    repo: str = Field(min_length=3)
-    at: str | None = None
+    repo: str = Field(min_length=3, max_length=200)
+    at: str | None = Field(default=None, max_length=40)
     mode: Mode = "graph"
 
 
