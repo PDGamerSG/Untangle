@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { errorMessage } from "./api";
 
 interface ResourceState<T> {
@@ -69,6 +70,20 @@ function fetchShared<T>(key: string, load: (signal: AbortSignal) => Promise<T>):
 /** Stores a response under `key` so a later `useResource(key)` renders it without another request. */
 export function primeResource(key: string, data: unknown): void {
   memory.set(key, { data, at: Date.now() });
+}
+
+/**
+ * A record opened through a link whose end was cut off (the API completes an id that only one record starts with):
+ * replace the address with the full one, so it can be shared and reloaded. The loaded record is cached under the full
+ * id first, so the switch does not fetch it again.
+ */
+export function useFullAddress(base: string, keyPrefix: string, requested: string | null, actual: string | null | undefined, data: unknown) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!requested || !actual || actual === requested || !actual.startsWith(requested)) return;
+    primeResource(`${keyPrefix}${actual}`, data);
+    router.replace(`${base}/${encodeURIComponent(actual)}`);
+  }, [base, keyPrefix, requested, actual, data, router]);
 }
 
 /**

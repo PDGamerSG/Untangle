@@ -7,7 +7,7 @@ import { KindTag } from "@/components/ui/Chip";
 import { DecisionCard } from "@/components/decisions/DecisionCard";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, externalHref } from "@/lib/api";
-import { useResource } from "@/lib/hooks";
+import { useFullAddress, useResource } from "@/lib/hooks";
 import { fmtDay, kindFromLabel } from "@/lib/format";
 import type { EntityResponse } from "@/lib/types";
 
@@ -46,6 +46,7 @@ export function EntityPage() {
     }
   })();
   const res = useResource(id ? `entity:${id}` : null, (signal) => api.entity(id!, signal));
+  useFullAddress("/entities", "entity:", id || null, res.data?.entity.id, res.data);
 
   if (res.loading)
     return (

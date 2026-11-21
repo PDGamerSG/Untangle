@@ -295,3 +295,43 @@ async def test_decisions_entities_search_timeline_stats(client, graph, seeded_ap
 async def test_meetings_answer_501_or_delegate(client, graph, seeded_api: Fixture):
     r = await client.get("/meetings", params={"repo": seeded_api.repo})
     assert r.status_code in (200, 501)
+
+
+async def test_a_link_cut_short_opens_the_one_record_it_starts_with(client, monkeypatch):
+    """Crawlers, chat apps and mail clients cut long URLs; a unique prefix still opens the record."""
+    full = "cfg:knadh/listmonk:config.toml.sample::smtp.my0.max_msg_retries"
+    asked = []
+
+    class PrefixGraph:
+        def read(self, cypher, params=None):
+            class Result:
+                records: list = []
+            result = Result()
+            asked.append(cypher)
+            if "STARTS WITH" in cypher and full.startswith(params["prefix"]):
+                result.records = [{"id": full}]
+            return result
+
+    def entity(entity_id, **kwargs):
+        if entity_id != full:
+            raise service.NotFound(f"no entity {entity_id!r}")
+        return {"entity": {"id": full, "label": "ConfigKey"}, "decisions": [], "people": [], "recent_commits": []}
+
+    monkeypatch.setattr(service, "get_graph", lambda: PrefixGraph())
+    monkeypatch.setattr(service, "entity", entity)
+    r = await client.get(f"/entities/{full[:60]}")
+    assert r.status_code == 200 and r.json()["entity"]["id"] == full
+    assert "MATCH (n:ConfigKey)" in asked[0]
+    # Too short, or of an unknown kind: never guessed.
+    assert (await client.get("/entities/cfg:knadh/lis")).status_code == 404
+    assert (await client.get("/entities/unknown:knadh/listmonk:config.toml.sample::smtp")).status_code == 404
+
+
+def test_cut_short_ids_resolve_only_when_one_record_matches():
+    class TwoMatches:
+        def read(self, cypher, params=None):
+            class Result:
+                records = [{"id": "dec:o/r:config_value:aaaa1111"}, {"id": "dec:o/r:config_value:aaaa2222"}]
+            return Result()
+
+    assert api._complete_id("dec:o/r:config_value:aaaa", TwoMatches()) is None

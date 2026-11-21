@@ -212,7 +212,7 @@ async def test_register_sign_in_session_and_sign_out(anon, graph, clean_accounts
 
     assert (await anon.post("/auth/logout")).status_code == 204
     anon.cookies.set(auth_api.cookie_name(), token)
-    assert (await anon.get("/auth/me")).status_code == 401
+    assert (await anon.get("/auth/me")).json() == {"user": None}
     assert (await anon.get("/repos")).status_code == 401
 
     again = await anon.post("/auth/login", json={"email": email.upper(), "password": PASSWORD}, headers=_ip())
@@ -300,7 +300,7 @@ async def test_deleting_an_account_ends_its_sessions(anon, graph, clean_accounts
     r = await _register(anon)
     user_id = r.json()["user"]["id"]
     assert (await anon.delete("/auth/account")).status_code == 204
-    assert (await anon.get("/auth/me")).status_code == 401
+    assert (await anon.get("/auth/me")).json() == {"user": None}
     assert not graph.read("MATCH (s:Session {user_id: $id}) RETURN s", {"id": user_id}).records
     assert not graph.read("MATCH (u:User {id: $id}) RETURN u", {"id": user_id}).records
 

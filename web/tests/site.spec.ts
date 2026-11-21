@@ -757,6 +757,25 @@ test("signed-out visitors are sent to sign-in and return to the page they asked 
   await expect(page).toHaveURL(/\/pulse$/);
 });
 
+test("an expired session is sent to sign-in without a failed request in the console", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
+  // The session cookie is still there but no longer valid: the API answers with no user, not with an error.
+  await page.route("**/api/auth/me", route => route.fulfill({ json: { user: null } }));
+  await page.goto("/pulse");
+  await expect(page).toHaveURL(/\/login\?next=%2Fpulse$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("a link whose end was cut off opens the record and shows its full address", async ({ page }) => {
+  const full = concurrencyKey.id;
+  const cut = full.slice(0, full.length - 6);
+  await page.goto(`/entities/${encodeURIComponent(cut)}`);
+  await expect(page).toHaveURL(`/entities/${encodeURIComponent(full)}`);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("app.concurrency");
+});
+
 test("sign-up checks the password before sending it and links to sign-in", async ({ page }) => {
   await page.context().clearCookies();
   await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));

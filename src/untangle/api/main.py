@@ -214,14 +214,44 @@ def speak_languages() -> dict[str, Any]:
     return {"available": bool(settings().sarvam_api_key), "languages": speech.languages()}
 
 
+# Id prefix -> label, for links whose end was cut off (some crawlers, chat apps and mail clients shorten long URLs).
+_ID_LABELS = {
+    "dec": "Decision", "mtg": "Meeting", "cfg": "ConfigKey", "file": "File", "module": "Module", "sym": "Symbol",
+    "dep": "Dependency", "pr": "PullRequest", "issue": "Issue", "commit": "Commit", "doc": "Document", "person": "Person",
+}
+_MIN_ID_PREFIX = 24
+
+
+def _complete_id(value: str, graph: Any = None) -> str | None:
+    """The one id of the matching kind that starts with `value`, or None when none or several do. The label keeps the
+    lookup on that label's unique-id index; the minimum length keeps a short prefix from matching by chance."""
+    label = _ID_LABELS.get(value.split(":", 1)[0])
+    if label is None or len(value) < _MIN_ID_PREFIX:
+        return None
+    rows = (graph or service.get_graph()).read(
+        f"MATCH (n:{label}) WHERE n.id STARTS WITH $prefix RETURN n.id AS id LIMIT 2", {"prefix": value}
+    ).records
+    return rows[0]["id"] if len(rows) == 1 and rows[0]["id"] != value else None
+
+
+def _with_full_id(value: str, load: Any) -> Any:
+    try:
+        return load(value)
+    except service.NotFound:
+        full = _complete_id(value)
+        if full is None:
+            raise
+        return load(full)
+
+
 @app.get("/decisions/{decision_id:path}", response_model=WhyPath)
 def decision(decision_id: str) -> Any:
-    return _english(service.why_path(decision_id[:300]))
+    return _english(_with_full_id(decision_id[:300], service.why_path))
 
 
 @app.get("/entities/{entity_id:path}", response_model=EntityResponse)
 def entity(entity_id: str) -> Any:
-    return _english(service.entity(entity_id[:300]))
+    return _english(_with_full_id(entity_id[:300], service.entity))
 
 
 @app.get("/search", response_model=SearchResponse)
@@ -393,6 +423,8 @@ def meetings(user: CurrentUser, repo: str = Query(min_length=3, max_length=200))
 def meeting(meeting_id: str, user: CurrentUser) -> Any:
     graph = service.get_graph()
     result = _kt("meeting")(meeting_id[:300], graph=graph)
+    if result is None and (full := _complete_id(meeting_id[:300], graph)) is not None:
+        result = _kt("meeting")(full, graph=graph)
     if result is None:
         raise HTTPException(status_code=404, detail="This handover call was not found.")
     return _english({**meeting_shape.detail_out(result, graph=graph), **_owner_fields(result.get("meeting") or result, user)})

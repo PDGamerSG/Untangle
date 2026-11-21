@@ -186,10 +186,10 @@ async def logout(request: Request, response: Response) -> Response:
 
 @router.get("/me")
 def me(request: Request) -> dict:
+    """The signed-in account, or `{"user": null}`: being signed out is an answer here, not an error, so the sign-in
+    page does not log a failed request in the browser console."""
     user = accounts.resolve(answers.get_graph(), session_token(request))
-    if user is None:
-        raise HTTPException(status_code=401, detail="Sign in to use Untangle.")
-    return {"user": user.public()}
+    return {"user": user.public() if user is not None else None}
 
 
 @router.delete("/account", status_code=204)

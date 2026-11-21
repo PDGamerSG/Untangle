@@ -170,7 +170,7 @@ async function loadRepositoryMap(repo: string, offset: number, signal?: AbortSig
 }
 
 export const api = {
-  me: (): Promise<{ user: Account }> => request("/auth/me"),
+  me: (): Promise<{ user: Account | null }> => request("/auth/me"),
   login: (body: { email: string; password: string }): Promise<{ user: Account }> =>
     request("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   register: (body: { email: string; password: string; name?: string }): Promise<{ user: Account }> =>

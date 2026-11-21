@@ -10,7 +10,7 @@ import { InlineCode } from "@/components/ask/AnswerText";
 import { CypherList } from "@/components/ask/WhyPanel";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, hrefFor } from "@/lib/api";
-import { useResource } from "@/lib/hooks";
+import { useFullAddress, useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDay, normaliseKind, predicateLabel, signalLabel } from "@/lib/format";
 import type { DecisionCard as DecisionCardT, Ref } from "@/lib/types";
 
@@ -91,6 +91,7 @@ export function DecisionPage() {
     }
   })();
   const res = useResource(id ? `decision:${id}` : null, (signal) => api.decision(id, signal));
+  useFullAddress("/decisions", "decision:", id || null, res.data?.decision.id, res.data);
 
   if (res.loading)
     return (

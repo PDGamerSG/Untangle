@@ -153,7 +153,7 @@ Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and th
   trusted origin (403 otherwise). Per-user limits answer 429 with `Retry-After`: 40 questions per hour, 10 handover
   uploads per day, 5 imports per day; administrators (`UNTANGLE_ADMIN_EMAILS`) are not limited.
 - `POST /auth/register {email, password, name?}` → 201 `{user}`; `POST /auth/login {email, password}` → `{user}`;
-  `POST /auth/logout` → 204; `GET /auth/me` → `{user}` or 401; `DELETE /auth/account` → 204.
+  `POST /auth/logout` → 204; `GET /auth/me` → `{user}`, with `user: null` when signed out; `DELETE /auth/account` → 204.
   `user = {id, email, name, role: member|admin, created_at_iso}`. Passwords: 10–128 characters, Argon2id hashes.
   Nodes: `(:User {id, email, name, role, password_hash, created_at, last_login_at})-[:HAS_SESSION]->(:Session {id =
   sha256(token), user_id, created_at, expires_at})`; `(:RateLimit {id, count, expires_at})` holds fixed windows.

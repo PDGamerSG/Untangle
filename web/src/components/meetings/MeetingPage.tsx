@@ -9,7 +9,7 @@ import { DecisionCard } from "@/components/decisions/DecisionCard";
 import { NotConfigured } from "./MeetingsPage";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, API_BASE, errorMessage, SAMPLE_MODE } from "@/lib/api";
-import { clearResources, useResource } from "@/lib/hooks";
+import { clearResources, useFullAddress, useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDuration, fmtOffset, meetingSourceLabel } from "@/lib/format";
 import type { MeetingDetail } from "@/lib/types";
 
@@ -144,6 +144,7 @@ export function MeetingPage() {
     }
   })();
   const res = useResource(id ? `meeting:${id}` : null, (signal) => api.meeting(id, signal));
+  useFullAddress("/meetings", "meeting:", id || null, res.data?.id, res.data);
 
   if (res.loading)
     return (
