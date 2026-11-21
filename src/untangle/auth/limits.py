@@ -24,9 +24,11 @@ HANDOVER_UPLOAD = Limit("handover", 10, 86_400)
 IMPORT = Limit("import", 5, 86_400)
 AGENT_CALL = Limit("agent-call", 300, 3600)
 AGENT_NOTE = Limit("agent-note", 50, 86_400)
-SIGN_IN_IP = Limit("signin-ip", 20, 900)
+# Network-wide limits are generous because a venue, office or campus shares one address; per-account lockout and
+# per-user quotas carry the real protection.
+SIGN_IN_IP = Limit("signin-ip", 60, 900)
 SIGN_IN_FAILURES = Limit("signin-fail", 5, 900)
-SIGN_UP_IP = Limit("signup-ip", 5, 3600)
+SIGN_UP_IP = Limit("signup-ip", 30, 3600)
 
 
 class LimitExceeded(Exception):

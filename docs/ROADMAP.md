@@ -78,7 +78,7 @@ rather than on connector count.
 | Reliability | Job leases, heartbeats and retries (live); page error boundaries and friendly errors (built) | Live and built | `src/untangle/repositories/jobs.py`, `web/src/app/(app)/error.tsx` |
 | UX | Refusals with next steps, loading states, better 404, links that prefill a question, meeting delete | Built | `src/untangle/answer/compose.py`, `web/src/components/ui/`, `web/src/app/not-found.tsx` |
 | Deployment | One Vercel project for Next.js and the Python API on two domains, functions in Mumbai beside the database | Live (previous release) | `vercel.json`, `app.py`, `docs/development/DEPLOYMENT.md` |
-| Tests | 306 Python tests and 54 browser and API-client tests; live suite signs in with a throwaway account | Pass locally; live run pending | `tests/`, `web/tests/`, `web/scripts/test-production.mjs` |
+| Tests | 309 Python tests and 55 browser and API-client tests; live suite signs in with a throwaway account | Pass locally; live run pending | `tests/`, `web/tests/`, `web/scripts/test-production.mjs` |
 
 ## 3. How the six evaluation criteria are met
 

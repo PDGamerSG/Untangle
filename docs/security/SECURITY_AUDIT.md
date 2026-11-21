@@ -59,8 +59,9 @@ at the end with their owners in the roadmap.
   Only the SHA-256 of the token is stored, so a database read cannot be replayed. Sessions last seven days; sign-out
   and account deletion revoke them. Each instance caches a resolved session for at most 20 seconds.
 - **Cross-site request forgery:** SameSite=Lax plus an `Origin`/`Sec-Fetch-Site` check on every POST and DELETE.
-- **Brute force:** 20 sign-in attempts per network per 15 minutes; 5 wrong passwords per account per 15 minutes
-  locks that account's sign-in for the rest of the window; 5 sign-ups per network per hour.
+- **Brute force:** 5 wrong passwords per account per 15 minutes locks that account's sign-in for the rest of the
+  window. Network-wide limits (60 sign-in attempts per 15 minutes, 30 sign-ups per hour) are generous because a
+  venue, office or campus shares one address.
 - **Roles:** `member` and `admin` (`UNTANGLE_ADMIN_EMAILS`). Administrators have no quotas and may delete any
   handover call. Members can delete only the calls they uploaded.
 - **Open redirects:** the `next` parameter after sign-in accepts only same-site paths.

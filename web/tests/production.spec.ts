@@ -326,13 +326,15 @@ test("legacy repositories expose maps and hosted errors explain unsupported impo
 });
 
 test("live access control: signed-out visitors are redirected and data endpoints refuse them", async ({ browser, baseURL }) => {
-  const anonymous = await apiRequest.newContext({ baseURL });
+  // An explicitly empty storage state: the suite's signed-in session must not leak into these checks.
+  const signedOut = { cookies: [], origins: [] };
+  const anonymous = await apiRequest.newContext({ baseURL, storageState: signedOut });
   for (const path of ["/api/repos", "/api/repository-imports", "/api/pulse?repo=PDGamerSG%2FUntangle"]) {
     expect((await anonymous.get(path)).status(), path).toBe(401);
   }
   expect((await anonymous.post("/api/ask", { data: { question: "why?", repo: "PDGamerSG/Untangle" } })).status()).toBe(401);
   expect((await anonymous.post("/api/auth/login", { data: { email: "x@example.com", password: "x" }, headers: { Origin: "https://evil.example" } })).status()).toBe(403);
-  const page = await (await browser.newContext()).newPage();
+  const page = await (await browser.newContext({ storageState: signedOut })).newPage();
   const response = await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
   expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
