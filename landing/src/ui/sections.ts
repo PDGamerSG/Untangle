@@ -183,7 +183,8 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
     for (const k of knots) {
       const s = secs.find((x) => x.id === k.dataset.rail);
       k.classList.toggle("is-past", !!s && y >= s.top - window.innerHeight * 0.5);
-      k.toggleAttribute("aria-current", k.dataset.rail === current);
+      if (k.dataset.rail === current) k.setAttribute("aria-current", "location");
+      else k.removeAttribute("aria-current");
     }
     // The nav stays put so the way into the dashboard is always one click away.
     nav.classList.toggle("is-solid", y > window.innerHeight * 0.6);

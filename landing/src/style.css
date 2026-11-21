@@ -323,6 +323,20 @@ code {
   transform: scale(1.35);
 }
 
+/* The chapter in view: a larger white knot and its name, so the current place in the story is always visible. */
+.rail__knots a[aria-current]::before {
+  background: var(--cotton);
+  border-color: var(--cotton);
+  transform: scale(1.5);
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.22);
+}
+
+.rail__knots a[aria-current] span {
+  opacity: 1;
+  transform: translate(0, -50%);
+  color: var(--cotton);
+}
+
 /* ---------- Hero ---------- */
 .hero {
   position: relative;
@@ -550,14 +564,22 @@ code {
   opacity: 0.35;
 }
 
+/* Copy fades in when its chapter arrives. Once faded out it is also hidden, so text that cannot be seen is not
+   read out or measured as low-contrast text; it becomes visible again at once when the chapter returns. */
 .chapter .copy > :not(.h2) {
   transition:
-    opacity 0.9s var(--ease-out) 0.15s,
-    transform 0.9s var(--ease-out) 0.15s;
+    opacity 0.45s var(--ease-out),
+    transform 0.45s var(--ease-out),
+    visibility 0s;
 }
 
 .chapter:not(.is-active) .copy > :not(.h2) {
   opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.45s var(--ease-out),
+    visibility 0s linear 0.45s;
 }
 
 .small {

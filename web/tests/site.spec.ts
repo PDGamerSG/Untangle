@@ -716,3 +716,23 @@ test("public pages meet WCAG AA in an automated check and publish sharing metada
   expect((await request.get("/sitemap.xml")).ok()).toBe(true);
   expect((await request.get("/og.png")).headers()["content-type"]).toBe("image/png");
 });
+
+test("every chapter of the landing story keeps WCAG AA contrast and marks the current chapter", async ({ page }) => {
+  test.setTimeout(120_000);
+  const { default: AxeBuilder } = await import("@axe-core/playwright");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/");
+  await page.waitForTimeout(1200);
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  const failures = new Set<string>();
+  for (let y = 0; y <= height; y += 700) {
+    await page.evaluate(top => window.scrollTo(0, top), y);
+    await page.waitForTimeout(600);
+    const result = await new AxeBuilder({ page }).withRules(["color-contrast"]).analyze();
+    for (const v of result.violations) for (const n of v.nodes) failures.add(`y=${y} ${n.target.join(" ")}`);
+  }
+  expect([...failures]).toEqual([]);
+  await page.evaluate(() => window.scrollTo(0, document.querySelector<HTMLElement>("#refuse")!.offsetTop + 10));
+  await expect(page.locator('[data-rail="refuse"]')).toHaveAttribute("aria-current", "location");
+  await expect(page.locator('[aria-current="location"]')).toHaveCount(1);
+});
