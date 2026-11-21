@@ -205,3 +205,16 @@ async def test_preflight_and_briefing_endpoints(graph, fx: Fixture):
         md = await client.get("/briefing/markdown", params={"repo": fx.repo})
         assert md.status_code == 200 and md.text.startswith(f"# Day-one briefing: {fx.repo}")
         assert "attachment" in md.headers["content-disposition"]
+
+
+@pytest.mark.neo4j
+def test_timeline_diff_reports_the_replaced_value(graph, fx: Fixture):
+    diff = service.timeline_diff(fx.repo, "2022-01-01", "2024-01-01", graph=graph)
+    assert diff.counts == {"changed": 1, "started": 0, "ended": 0}
+    assert diff.changed[0].before.id == fx.dec_old and diff.changed[0].after.id == fx.dec_new
+    reverse = service.timeline_diff(fx.repo, "2024-01-01", "2022-01-01", graph=graph)  # dates in either order
+    assert reverse.changed[0].after.id == fx.dec_new
+    early = service.timeline_diff(fx.repo, "2020-01-01", "2022-01-01", graph=graph)
+    assert early.counts["started"] == 1 and early.started[0].id == fx.dec_old
+    with pytest.raises(ValueError):
+        service.timeline_diff(fx.repo, "soon", "2022-01-01", graph=graph)

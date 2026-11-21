@@ -19,6 +19,7 @@ from untangle.answer.models import (
     CommitCard,
     Confidence,
     DecisionCard,
+    DecisionChange,
     EntityHit,
     EntityRef,
     EntityResponse,
@@ -32,6 +33,7 @@ from untangle.answer.models import (
     SearchResponse,
     Subgraph,
     Supersession,
+    TimelineDiff,
     TimelineResponse,
     Why,
     WhyPath,
@@ -368,6 +370,41 @@ def timeline(repo: str, at: str | int | None, *, graph: Graph | None = None) -> 
     return TimelineResponse(
         at_iso=iso(at_ms) or "", active=active, superseded_since=superseded,
         earliest_iso=iso(bounds.get("earliest")), latest_iso=iso(bounds.get("latest")),
+    )
+
+
+DIFF_STATE_LIMIT = 20000
+DIFF_SHOWN = 40
+
+
+def timeline_diff(repo: str, start: str | int, end: str | int, *, graph: Graph | None = None) -> TimelineDiff:
+    """Compare the decisions in force at two dates by decision key. Every in-force decision is read (as id and key
+    only), so counts are exact; cards are loaded for the newest `DIFF_SHOWN` of each kind."""
+    graph = graph or get_graph()
+    a, b = parse_at(start, end_of_period=True), parse_at(end, end_of_period=True)
+    if a is None or b is None:
+        raise ValueError("Give both dates as YYYY-MM-DD.")
+    if a > b:
+        a, b = b, a
+    rec = Recorder(graph, timeout_ms=10000)
+    before = {r["key"]: r["id"] for r in rec.run("decision_state", {"repo": repo, "t": a, "limit": DIFF_STATE_LIMIT})}
+    after = {r["key"]: r["id"] for r in rec.run("decision_state", {"repo": repo, "t": b, "limit": DIFF_STATE_LIMIT})}
+    changed = [(before[k], after[k]) for k in after if k in before and before[k] != after[k]]
+    started = [after[k] for k in after if k not in before]
+    ended = [before[k] for k in before if k not in after]
+    ids = [x for pair in changed[:DIFF_SHOWN * 4] for x in pair] + started[:DIFF_SHOWN * 4] + ended[:DIFF_SHOWN * 4]
+    cards = {r["id"]: decision_card(version_from_row(r)) for r in rec.run("decisions_by_id", {"ids": ids})} if ids else {}
+
+    def newest(items: list[DecisionCard]) -> list[DecisionCard]:
+        return sorted(items, key=lambda d: d.valid_from_iso or "", reverse=True)[:DIFF_SHOWN]
+
+    pairs = sorted((DecisionChange(before=cards[o], after=cards[n]) for o, n in changed if o in cards and n in cards),
+                   key=lambda c: c.after.valid_from_iso or "", reverse=True)[:DIFF_SHOWN]
+    return TimelineDiff(
+        from_iso=iso(a) or "", to_iso=iso(b) or "",
+        counts={"changed": len(changed), "started": len(started), "ended": len(ended)},
+        changed=pairs, started=newest([cards[i] for i in started if i in cards]), ended=newest([cards[i] for i in ended if i in cards]),
+        truncated=len(before) >= DIFF_STATE_LIMIT or len(after) >= DIFF_STATE_LIMIT,
     )
 
 

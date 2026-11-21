@@ -94,6 +94,8 @@ def tool_ask_why(args: dict[str, Any], user: User) -> tuple[str, dict[str, Any]]
     res = service.ask(question, repo, at=at, mode="graph")
     citations = [{"id": cid, "kind": c.kind, "title": c.title, "url": c.url} for cid, c in res.citations.items()]
     lines = [res.answer]
+    if res.premise and res.premise.status != "consistent":
+        lines.insert(0, f"Premise check ({res.premise.status}): {res.premise.text}")
     if res.refused:
         if res.closest:
             lines.append("Closest related: " + ", ".join(e.path or e.key or e.name or e.id for e in res.closest))
@@ -106,7 +108,8 @@ def tool_ask_why(args: dict[str, Any], user: User) -> tuple[str, dict[str, Any]]
         for c in citations:
             lines.append(f"[{c['id']}] {c['kind']}: {c['title'] or ''} {c['url'] or ''}".rstrip())
     structured = {"repo": repo, "answer": res.answer, "refused": res.refused, "confidence": res.confidence.score,
-                  "citations": citations, "closest": [e.model_dump() for e in res.closest], "ask": res.ask.model_dump() if res.ask else None}
+                  "citations": citations, "closest": [e.model_dump() for e in res.closest], "ask": res.ask.model_dump() if res.ask else None,
+                  "premise": res.premise.model_dump() if res.premise else None}
     return "\n".join(lines), structured
 
 

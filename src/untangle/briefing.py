@@ -181,7 +181,7 @@ def _summary(repo: str, counts: dict[str, int], areas: list[AreaBrief], guarded:
         lines.append(f"{active:,} decisions are recorded, but none carries a linked incident, issue or revert yet, so treat reasons as thin.")
     if people:
         names = ", ".join(p.name or p.login or p.id for p in people[:3])
-        lines.append(f"The people with the most authored history are {names}.")
+        lines.append(f"The most active recent authors are {names}.")
     if counts.get("meetings"):
         lines.append(f"{counts['meetings']} handover call{'s are' if counts['meetings'] != 1 else ' is'} linked to the code.")
     return lines

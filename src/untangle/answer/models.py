@@ -254,6 +254,23 @@ class TimelineResponse(BaseModel):
     latest_iso: str | None = None
 
 
+class DecisionChange(BaseModel):
+    before: DecisionCard
+    after: DecisionCard
+
+
+class TimelineDiff(BaseModel):
+    """What changed between two dates: values replaced, decisions that took effect and decisions that stopped."""
+
+    from_iso: str
+    to_iso: str
+    counts: dict[str, int] = Field(default_factory=dict)
+    changed: list[DecisionChange] = Field(default_factory=list)
+    started: list[DecisionCard] = Field(default_factory=list)
+    ended: list[DecisionCard] = Field(default_factory=list)
+    truncated: bool = False
+
+
 class CommitCard(BaseModel):
     id: str
     sha: str | None = None

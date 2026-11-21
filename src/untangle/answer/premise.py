@@ -90,15 +90,15 @@ def check(recorder: Any, repo: str, question: str) -> Premise | None:
         text = f"Both are declared: {_where(a_live[0])} and {_where(b_live[0])}."
     elif a_live:
         status = "consistent"
-        text = f"The premise holds: the repository declares {_where(a_live[0])}, and `{alternative}` is not a declared dependency."
+        text = f"The repository declares {_where(a_live[0])}, and `{alternative}` is not a declared dependency."
     elif b_live and a_gone:
         status = "outdated"
         when = fmt_date(a_gone[0].get("removed_at"))
-        text = (f"The premise is out of date: `{assumed}` was removed{' on ' + when if when else ''}, and the repository now "
+        text = (f"`{assumed}` was removed{' on ' + when if when else ''}, and the repository now "
                 f"declares {_where(b_live[0])}.")
     elif b_live:
         status = "contradicted"
-        text = f"The premise looks reversed: the repository declares {_where(b_live[0])}, not `{assumed}`."
+        text = f"The repository declares {_where(b_live[0])}, not `{assumed}`."
     elif a_gone:
         status = "outdated"
         when = fmt_date(a_gone[0].get("removed_at"))

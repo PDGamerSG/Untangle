@@ -31,6 +31,7 @@ from untangle.answer.models import (
     PulseResponse,
     RepoInfo,
     SearchResponse,
+    TimelineDiff,
     TimelineResponse,
     WhyPath,
 )
@@ -231,6 +232,13 @@ def search(repo: str = Query(min_length=3, max_length=200), q: str = Query(min_l
 @app.get("/timeline", response_model=TimelineResponse)
 def timeline(repo: str = Query(min_length=3, max_length=200), at: str | None = Query(default=None, max_length=40)) -> Any:
     return _english(service.timeline(repo, at))
+
+
+@app.get("/timeline/compare", response_model=TimelineDiff)
+def timeline_compare(repo: str = Query(min_length=3, max_length=200), start: str = Query(alias="from", max_length=40),
+                     end: str = Query(alias="to", max_length=40)) -> Any:
+    """Decisions that changed, started or ended between two dates."""
+    return _english(service.timeline_diff(repo, start, end))
 
 
 @app.get("/pulse", response_model=PulseResponse)
