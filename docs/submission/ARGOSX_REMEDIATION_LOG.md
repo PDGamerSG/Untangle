@@ -1,7 +1,13 @@
 # Untangle — ArgosX remediation log
 
 **Application scanned:** https://untangle.pallabdas.me (same build also at https://untangle-code.vercel.app)
-**Baseline scan:** `<date and time>` — report file: `<filename>` · **Final scan:** `<date and time>` — report file: `<filename>`
+**Baseline scan:** 21 November 2026, about 16:10 IST, free deep scan (public surface, 3 pages crawled: `/`, `/login`,
+`/signup`) — report https://getargosx.com/r/ipoczozg, **VibeScore 94/100** (Security 100, Performance 100, UX 88,
+Accessibility 84), 6 findings · **Final scan:** `<date and time>` — report `<link>`, VibeScore `<score>`
+
+**Context.** The security release (accounts, access control, rate limits, security headers, private API docs, safe
+errors) went live at 15:33 IST, shortly before the baseline scan, so ArgosX found no security issue on the public
+surface. Section 2 records what that release changed compared with the earlier build, from our own audit.
 
 Fill the "ArgosX finding" columns from the two reports. Do not list a finding that ArgosX did not report; our own
 audit findings are kept in the second table so the two sources stay separate.
@@ -10,11 +16,15 @@ audit findings are kept in the second table so the two sources stay separate.
 
 | # | ArgosX finding (as reported) | Severity | Baseline | Final | What we did | Commit | Status and reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | Found | | | | Fixed / Accepted / Open: why |
-| 2 | | | | | | | |
-| 3 | | | | | | | |
+| c7b886 | A11y: elements must meet minimum colour contrast (27 nodes, axe impact serious) | Medium | Found | `<final>` | Unspoken transcript lines on the landing page were dimmed with opacity (1.2:1); now dimmed with colour at 4.5:1 or more. Hero footnote raised to 74% white. Muted text token darkened from `#66758f` to `#5a6982` (5.2:1). | `2976760` | Fixed. A browser test runs axe-core on `/`, `/login`, `/signup` and fails on any serious violation. |
+| f95aed | A11y: scrollable region must have keyboard access (1 node) | Medium | Found | `<final>` | The quick-start `pre` block is now focusable (`tabindex="0"`) with a region label. | `2976760` | Fixed. |
+| e1f851 | Missing Open Graph tag: image | Low | Found | `<final>` | 1200×630 preview image, `og:image` with size and alt text, Twitter card, on the landing page and the app. | `2976760` | Fixed. |
+| 80ba7f | Missing canonical link tag | Low | Found | `<final>` | Canonical links on `/`, `/login`, `/signup`. | `2976760` | Fixed. |
+| 26a2a9 | No sitemap.xml at the site root | Low | Found | `<final>` | `/sitemap.xml` with the public pages, referenced from `robots.txt`. | `2976760` | Fixed. |
+| 2b56c7 | Words that look run together: "listmonk", "supersession" | Low | Found | `<final>` | No change. | — | Accepted: "listmonk" is the name of the open-source project used in the demo, and "supersession" is the correct term for one decision replacing another. |
+| — | (Found by us while checking the baseline, not by ArgosX) The live database lacked the unique email constraint, so one email could register twice | High | — | — | Sign-up merges on the email and returns 409; account constraints are applied automatically before the first sign-up. Verified on production with two throwaway sign-ups (both deleted). | `f02ca33` | Fixed. |
 
-**Totals:** found `__` at baseline · fixed `__` · accepted `__` (with reasons) · open `__` (with plan).
+**Totals:** ArgosX found 6 at baseline (2 medium, 4 low) · fixed 5 · accepted 1 (intentional product and domain terms) · open 0. We also found and fixed one high-severity issue that the public-surface scan could not see.
 
 ## 2. Changes made between the scans (from our own audit)
 
