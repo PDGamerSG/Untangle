@@ -32,35 +32,60 @@ const readout = makeReadout();
 const transcript = makeTranscript();
 const answer = $(".answer");
 
-function webglAvailable() {
+/**
+ * The GPU's name, or null when WebGL would fall back to a software renderer.
+ * Software rendering (blocklisted drivers, hardware acceleration turned off,
+ * virtual machines) draws the scene at a few frames a second.
+ */
+function hardwareGpu(): string | null {
   try {
     const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    const attrs = { failIfMajorPerformanceCaveat: true };
+    const gl = (c.getContext("webgl2", attrs) ?? c.getContext("webgl", attrs)) as WebGLRenderingContext | null;
+    if (!gl) return null;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? "");
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name) ? null : name;
   } catch {
-    return false;
+    return null;
   }
 }
 
+// `?quality=low` or `?quality=static` previews the lighter versions on any machine.
+const forced = new URLSearchParams(location.search).get("quality");
+const gpu = forced === "static" ? null : hardwareGpu();
+const small = matchMedia("(max-width: 900px)").matches;
+const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+// Integrated graphics outside Apple silicon share memory bandwidth with the CPU.
+const integrated = !!gpu && /intel|mali|adreno|powervr|vivante|videocore/i.test(gpu);
+const modest = forced === "low" || small || integrated || memory <= 4 || (navigator.hardwareConcurrency ?? 8) <= 4;
+// Light mode drops the full-screen grain blend and the background blurs, which
+// the compositor redraws over the moving canvas on every frame.
+if (modest || !gpu) root.classList.add("lite");
+
 const director = new Director(document);
 const chrome = makeChrome(() => director.sections);
-const small = matchMedia("(max-width: 900px)").matches;
-const modest = small || (navigator.hardwareConcurrency ?? 8) <= 4;
 
 let stage: Stage | null = null;
 let labels: Labels | null = null;
-if (webglAvailable()) {
-  stage = new Stage($<HTMLCanvasElement>("#gl"), {
-    strands: modest ? 210 : 380,
-    segments: modest ? 170 : 240,
-    maxPixelRatio: modest ? 1.5 : 2,
-  });
-  stage.loadNeedle(`${import.meta.env.BASE_URL}models/needle.glb`).catch(() => {
-    // The page reads fine without the needle; the thread simply ends in the air.
-  });
-  labels = new Labels($("#labels"));
-} else {
-  root.classList.add("no-webgl");
+if (gpu) {
+  try {
+    stage = new Stage($<HTMLCanvasElement>("#gl"), {
+      strands: modest ? 210 : 380,
+      segments: modest ? 170 : 240,
+      maxPixelRatio: modest ? 1.25 : 2,
+      antialias: (window.devicePixelRatio || 1) < 1.5,
+    });
+    stage.loadNeedle(`${import.meta.env.BASE_URL}models/needle.glb`).catch(() => {
+      // The page reads fine without the needle; the thread simply ends in the air.
+    });
+    labels = new Labels($("#labels"));
+  } catch {
+    stage = null;
+  }
 }
+if (!stage) root.classList.add("no-webgl");
 
 // ---------- Risk lanes ----------
 let laneIds: [number, number] = [-1, -1];
@@ -112,7 +137,9 @@ window.addEventListener("resize", () => {
 });
 
 // ---------- Smooth scroll and anchors ----------
-const lenis = reduced ? null : new Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
+// Smoothed scrolling advances with the frame loop, so on slower machines it feels
+// heavier than the browser's own scrolling, which stays on the compositor.
+const lenis = reduced || modest || !stage ? null : new Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
 document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
   a.addEventListener("click", (e) => {
     const id = a.getAttribute("href")!;
@@ -276,24 +303,37 @@ function step(now: number) {
   }
 }
 
-// If frames stay slow, drop to one device pixel per CSS pixel. Fill rate is
-// the cost that grows fastest on high-density screens.
+// Every animation is time-based, so 120 and 144 Hz screens gain nothing from
+// drawing the scene twice as often.
+let minFrameMs = 1000 / 60;
+
+// While frames stay slow, step down one level at a time: fewer pixels first
+// (fill rate grows fastest on dense screens), then light mode, then 30 fps.
 let slowFrames = 0;
-let downgraded = false;
 let frameEma = 1 / 60;
+let exhausted = false;
 function watchFrameRate(dt: number, since: number) {
-  if (downgraded || !stage || since < 4 || document.hidden) return;
-  frameEma += (dt - frameEma) * 0.05;
-  slowFrames = frameEma > 1 / 38 ? slowFrames + 1 : 0;
-  if (slowFrames > 90 && stage.renderer.getPixelRatio() > 1) {
-    downgraded = true;
-    stage.setMaxPixelRatio(1);
-  }
+  if (exhausted || !stage || since < 2.5 || document.hidden) return;
+  frameEma += (dt - frameEma) * 0.08;
+  slowFrames = frameEma > 1 / 40 ? slowFrames + 1 : 0;
+  if (slowFrames < 45) return;
+  slowFrames = 0;
+  frameEma = 1 / 60;
+  const ratio = stage.renderer.getPixelRatio();
+  const next = [1.5, 1.25, 1, 0.75].find((r) => r < ratio - 0.01);
+  if (next !== undefined) stage.setMaxPixelRatio(next);
+  else if (!root.classList.contains("lite")) root.classList.add("lite");
+  else if (minFrameMs < 1000 / 31) minFrameMs = 1000 / 30;
+  else exhausted = true;
 }
 
+let lastFrame = -Infinity;
 function loop(now: number) {
-  step(now);
   requestAnimationFrame(loop);
+  // Small tolerance so a 60 Hz display, whose frames arrive a little early or late, keeps every frame.
+  if (now - lastFrame < minFrameMs - 2) return;
+  lastFrame = now;
+  step(now);
 }
 requestAnimationFrame(loop);
 

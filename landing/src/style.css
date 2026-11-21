@@ -91,9 +91,10 @@ body::before {
   display: none;
 }
 
+/* Sized to the viewport: the blend is recomposited over the moving canvas every frame. */
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: 50;
   pointer-events: none;
   opacity: 0.07;
@@ -1588,6 +1589,34 @@ code {
 @media (max-width: 900px) and (max-height: 600px) {
   .pulse__hint {
     display: none;
+  }
+}
+
+/* Light mode (slower graphics, or set when frames stay slow): no full-screen blend
+   and no background blurs, which are redrawn over the moving canvas every frame. */
+.lite .grain {
+  display: none;
+}
+
+.lite .query,
+.lite .terminal {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.lite .query {
+  background: rgb(11 31 77 / 0.9);
+}
+
+.lite .terminal {
+  background: rgb(6 16 40 / 0.95);
+}
+
+@media (max-width: 900px) {
+  .lite .nav.is-solid {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgb(11 31 77 / 0.95);
   }
 }
 

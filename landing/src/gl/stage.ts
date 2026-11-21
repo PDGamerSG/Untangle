@@ -28,6 +28,8 @@ export interface StageOptions {
   strands: number;
   segments: number;
   maxPixelRatio: number;
+  /** Multisampling costs four samples per pixel; dense screens hide the aliasing anyway. */
+  antialias: boolean;
 }
 
 export class Stage {
@@ -44,9 +46,11 @@ export class Stage {
     this.maxPixelRatio = opts.maxPixelRatio;
     this.renderer = new WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: opts.antialias,
       alpha: true,
       powerPreference: "high-performance",
+      // A software renderer draws this scene at a few frames a second; the page reads better without it.
+      failIfMajorPerformanceCaveat: true,
     });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = SRGBColorSpace;
