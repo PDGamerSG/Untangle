@@ -157,6 +157,17 @@ Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and th
   `user = {id, email, name, role: member|admin, created_at_iso}`. Passwords: 10–128 characters, Argon2id hashes.
   Nodes: `(:User {id, email, name, role, password_hash, created_at, last_login_at})-[:HAS_SESSION]->(:Session {id =
   sha256(token), user_id, created_at, expires_at})`; `(:RateLimit {id, count, expires_at})` holds fixed windows.
+- Agents: `POST /mcp` is a stateless MCP Streamable HTTP endpoint (protocol `2025-11-25`, `2025-06-18` or
+  `2025-03-26`): one JSON-RPC message per request, answered with `application/json`; notifications get 202; `GET`
+  and `DELETE` answer 405. It accepts `Authorization: Bearer utg_…` personal access tokens (or a session) and no other
+  route accepts tokens. Tokens: `GET /auth/tokens`, `POST /auth/tokens {name}` (the only response containing the
+  token), `DELETE /auth/tokens/{id}`; stored as `(:User)-[:HAS_TOKEN]->(:ApiToken {id = sha256(token), name, prefix,
+  created_at, last_used_at})`. Tools: `list_repositories`, `ask_why`, `list_decisions`, `decision_timeline`,
+  `who_to_ask`, `search_repository`, `remember_decision`, `recall_agent_notes`. `remember_decision` records
+  `Decision {kind: 'agent', key: 'agent|<entity id>|<topic>', signal: 'agent_memory', recorded_by, recorded_by_name,
+  source_url}` with an `ABOUT` edge through `21_record_decision`/`22_link_decision`; agent keys never match code keys.
+  `GET /agent-notes?repo=` lists them for the web app. Limits: 300 tool calls per hour, 50 notes per day, and `ask_why`
+  counts against the question limit.
 - `GET /health` → `ok`, `status` (`ok` or `degraded`), `version`, `neo4j: {ok, aura}`, `graph: {ok, aura}`,
   `llm: {backend: hosted|fake, available}`, `embed: {backend: local|fake, dim, available}`, `sarvam: {configured}`
   and `optional_backends`. It never returns hosts, versions, model names or error text.

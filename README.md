@@ -180,6 +180,20 @@ Decisions are keyed by subject and predicate. A later value links to the older v
 `valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and
 are reconciled with the active code decision as `CONFIRMS` or `CONTRADICTS`.
 
+## 🤖 Decision memory for coding agents
+
+Untangle is also an MCP server. Create a token on the **Agents** page, then connect Claude Code, Cursor or any MCP
+client to `https://untangle.pallabdas.me/api/mcp`:
+
+```bash
+claude mcp add --transport http untangle https://untangle.pallabdas.me/api/mcp --header "Authorization: Bearer <token>"
+```
+
+Agents can ask why something is the way it is (`ask_why`), list decisions and their history, see who to ask, and
+record what they decided with `remember_decision`. Notes are stored in the Neo4j decision graph as labelled agent
+decisions; a later note on the same subject and topic supersedes the earlier one, and notes never replace evidence
+from the code history.
+
 ## 🔐 Accounts and security
 
 Every workspace page and data endpoint requires a signed-in account. Passwords are stored as Argon2id hashes and

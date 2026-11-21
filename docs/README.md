@@ -21,6 +21,12 @@ Start with the [project overview](../README.md) to run the application, or the
 - [Demo runbook](guides/DEMO.md): a walkthrough of the product.
 - [Handover recordings](../data/kt/README.md): sample transcript and recording guidance.
 
+## Finale submission
+
+- [Finale build plan](submission/FINALE_BUILD_PLAN.md), [Market Fit Canvas](submission/MARKET_FIT_CANVAS.md),
+  [Persona Use Case Matrix](submission/PERSONA_USE_CASE_MATRIX.md), [3 Customer Test](submission/CUSTOMER_TEST.md)
+  and the [ArgosX remediation log](submission/ARGOSX_REMEDIATION_LOG.md).
+
 ## Product, security and research
 
 - [Roadmap](ROADMAP.md): what is built, how the evaluation criteria are met, and what comes next.
