@@ -17,3 +17,7 @@ web/node_modules/
 web/.next/
 web/out/
 .DS_Store
+# Local video renders and editor lock files are not part of the repository.
+*.mp4
+*.mov
+~$*

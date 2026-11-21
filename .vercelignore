@@ -15,3 +15,17 @@ landing-preview.png
 dist
 landing/dist
 web/public/welcome
+
+# Media, design and research material is not part of the application.
+*.mp4
+*.mov
+*.docx
+*.pdf
+~$*
+/research_notes
+/reports
+/wireframes
+/architecture-diagrams
+/docs
+/tests
+/eval
