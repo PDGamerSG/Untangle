@@ -1,0 +1,31 @@
+name: graph keepalive
+
+# Aura Free pauses an instance after 72 hours without a write and deletes it after
+# 30 days paused. Most traffic only reads the graph, so record one small write a day.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Write a heartbeat through the Aura Query API
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+        run: |
+          host="${NEO4J_URI#*://}"
+          host="${host%%[:/]*}"
+          curl --silent --show-error --fail-with-body --max-time 60 --retry 3 --retry-all-errors \
+            --user "$NEO4J_USER:$NEO4J_PASSWORD" \
+            --header 'Content-Type: application/json' \
+            --data '{"statement": "MERGE (h:Heartbeat {id: \"graph-keepalive\"}) SET h.at = datetime() RETURN toString(h.at) AS at"}' \
+            "https://$host/db/${NEO4J_DATABASE:-neo4j}/query/v2"
