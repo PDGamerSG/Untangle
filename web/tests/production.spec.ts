@@ -1,6 +1,34 @@
-import { expect, test } from "@playwright/test";
+import { expect, request as apiRequest, test as base } from "@playwright/test";
 import type { Download } from "@playwright/test";
+import { writeFile } from "node:fs/promises";
 import type { ImportJob, RepositoryOverview } from "../src/lib/types";
+
+// Every workspace page and data endpoint needs a session. Each worker signs in once: with UNTANGLE_LIVE_EMAIL and
+// UNTANGLE_LIVE_PASSWORD when set, otherwise with a fresh throwaway account that is deleted when the worker ends.
+const test = base.extend<object, { session: string }>({
+  session: [async ({}, provide, workerInfo) => {
+    const baseURL = String(workerInfo.project.use.baseURL ?? process.env.E2E_BASE_URL);
+    const api = await apiRequest.newContext({ baseURL });
+    const supplied = process.env.UNTANGLE_LIVE_EMAIL && process.env.UNTANGLE_LIVE_PASSWORD;
+    const email = process.env.UNTANGLE_LIVE_EMAIL ?? `live-check-${Date.now()}-${workerInfo.workerIndex}@example.com`;
+    const password = process.env.UNTANGLE_LIVE_PASSWORD ?? `live check ${crypto.randomUUID()}`;
+    const signIn = supplied
+      ? await api.post("/api/auth/login", { data: { email, password } })
+      : await api.post("/api/auth/register", { data: { email, password, name: "Live check" } });
+    expect(signIn.ok(), `sign-in for live checks: ${signIn.status()} ${await signIn.text()}`).toBe(true);
+    const path = workerInfo.project.outputDir + `/session-${workerInfo.workerIndex}.json`;
+    await writeFile(path, JSON.stringify(await api.storageState()));
+    await provide(path);
+    if (!supplied) expect((await api.delete("/api/auth/account")).status()).toBe(204);
+    await api.dispose();
+  }, { scope: "worker" }],
+  storageState: async ({ session }, provide) => provide(session),
+  request: async ({ session, baseURL }, provide) => {
+    const context = await apiRequest.newContext({ baseURL, storageState: session });
+    await provide(context);
+    await context.dispose();
+  },
+});
 
 // Explicit opt-in: these checks use the deployed database and real Claude billing.
 // No uploads. Fresh public imports are prepared separately; duplicate submissions verify job reuse.
@@ -21,8 +49,13 @@ test("live graph, decision workbench and risk exports", async ({ page, request }
   expect(response.ok()).toBe(true);
   const health = await response.json();
   expect(health.ok).toBe(true);
-  expect(health.llm.backend).toBe("anthropic");
-  expect(health.embed.backend).toBe("fastembed");
+  // Public health reports readiness only: no database host, versions or model names.
+  expect(health.llm).toEqual({ backend: "hosted", available: true });
+  expect(health.embed.backend).toBe("local");
+  expect(JSON.stringify(health)).not.toMatch(/databases\.neo4j\.io|claude|anthropic|fastembed/i);
+  expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect((await request.get("/api/docs")).status()).toBe(404);
+  expect((await request.get("/api/openapi.json")).status()).toBe(404);
 
   await page.goto("/dashboard");
   await expect(page.getByLabel("Repository", { exact: true })).toHaveValue("PDGamerSG/Untangle", { timeout: 30_000 });
@@ -290,4 +323,18 @@ test("legacy repositories expose maps and hosted errors explain unsupported impo
     expect(response.status()).toBe(status);
     expect((await response.json()).error).toBeTruthy();
   }
+});
+
+test("live access control: signed-out visitors are redirected and data endpoints refuse them", async ({ browser, baseURL }) => {
+  const anonymous = await apiRequest.newContext({ baseURL });
+  for (const path of ["/api/repos", "/api/repository-imports", "/api/pulse?repo=PDGamerSG%2FUntangle"]) {
+    expect((await anonymous.get(path)).status(), path).toBe(401);
+  }
+  expect((await anonymous.post("/api/ask", { data: { question: "why?", repo: "PDGamerSG/Untangle" } })).status()).toBe(401);
+  expect((await anonymous.post("/api/auth/login", { data: { email: "x@example.com", password: "x" }, headers: { Origin: "https://evil.example" } })).status()).toBe(403);
+  const page = await (await browser.newContext()).newPage();
+  const response = await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
+  expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
+  await anonymous.dispose();
 });
