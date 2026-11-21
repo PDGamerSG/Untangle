@@ -19,7 +19,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from neo4j.exceptions import Neo4jError
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from starlette.concurrency import run_in_threadpool
 
 from untangle import __version__
@@ -244,6 +244,43 @@ async def mcp_endpoint(request: Request, user: CurrentUser) -> Response:
     if reply is None:
         return Response(status_code=202)
     return JSONResponse(_english(reply) if "result" in reply else reply)
+
+
+class AgentChatMessage(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(max_length=8000)
+
+
+class AgentChatRequest(BaseModel):
+    repo: str | None = Field(default=None, max_length=200)
+    messages: list[AgentChatMessage] = Field(min_length=1, max_length=40)
+
+
+@app.post("/agent/chat")
+async def agent_chat(body: AgentChatRequest, request: Request, user: CurrentUser) -> Any:
+    """The built-in agent on the Agents page: answers with the deployment's model and read-only graph tools."""
+    from untangle import agent_chat as chat
+
+    charge(request, limits.ASK, "You have asked 40 questions in the last hour. Please wait before asking more.")
+
+    def charge_call(kind: str) -> None:
+        if user.is_admin:
+            return
+        limit = limits.for_guest(limits.AGENT_CALL) if user.is_guest else limits.AGENT_CALL
+        try:
+            limits.hit(service.get_graph(), limit, user.id, f"The agent has made {limit.count} lookups for you in the last hour. Please wait.")
+        except limits.LimitExceeded as exc:
+            raise chat.AgentLimit(str(exc), exc.retry_after) from exc
+
+    try:
+        result = await run_in_threadpool(chat.chat, [m.model_dump() for m in body.messages], body.repo, user, charge=charge_call)
+    except chat.AgentUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except chat.AgentLimit as exc:
+        raise HTTPException(status_code=429, detail=str(exc), headers={"Retry-After": str(exc.retry_after or 60)}) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _english(result)
 
 
 @app.get("/agent-notes")

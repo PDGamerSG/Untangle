@@ -29,6 +29,13 @@ AGENT_NOTE = Limit("agent-note", 50, 86_400)
 SIGN_IN_IP = Limit("signin-ip", 60, 900)
 SIGN_IN_FAILURES = Limit("signin-fail", 5, 900)
 SIGN_UP_IP = Limit("signup-ip", 30, 3600)
+# Guests try Untangle without an account. One network may start a handful of guest sessions an hour, and a guest
+# gets a quarter of a member's quota for paid or shared actions.
+GUEST_IP = Limit("guest-ip", 20, 3600)
+
+
+def for_guest(limit: Limit) -> Limit:
+    return Limit(f"{limit.bucket}-guest", max(1, limit.count // 4), limit.window_s)
 
 
 class LimitExceeded(Exception):

@@ -23,7 +23,9 @@ export interface Account {
   id: string;
   email: string;
   name: string;
-  role: "member" | "admin";
+  role: "member" | "admin" | "guest";
+  /** A temporary account for trying Untangle; signing up or signing in keeps its work. */
+  guest?: boolean;
   created_at_iso: string;
 }
 
@@ -371,6 +373,12 @@ export interface ImportJob {
   error: string | null;
   summary: Record<string, number | string> | null;
   warnings: string[];
+}
+
+export interface AgentChatTurn {
+  role: "user" | "assistant";
+  content: string;
+  steps?: { tool: string; input: string; ok: boolean }[];
 }
 
 export interface GitHubIdentity {

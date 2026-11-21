@@ -14,6 +14,23 @@ When the range is exceeded the tracker says so instead of counting down to a fal
 The public deployment accepts publicly readable GitHub repositories. Imported evidence is shared with other
 visitors. It does not request users' GitHub passwords or tokens and cannot import private repositories.
 
+## Trying without an account
+
+The sign-in page offers **Try it on your repository, no account**. It starts a guest session: a temporary account
+that can add a public repository, ask about it and use every page. Guests get a quarter of a member's hourly and
+daily allowances, and cannot create agent tokens. A banner offers **Create account** and **Sign in** on every page.
+Creating an account turns the guest into that account and keeps its repositories. Signing in to an existing account,
+by email or with GitHub, moves the guest's saved repositories there and deletes the guest. One network can start
+20 guest sessions an hour.
+
+## Built-in agent
+
+The Agents page answers questions with the deployment's configured Claude model and the same read-only tools that
+coding agents reach over MCP (`ask_why`, `list_decisions`, `decision_timeline`, `who_to_ask`, `search_repository`,
+`recall_agent_notes`, `list_repositories`). It needs no token. It cannot write to the graph. Each message counts
+against the Ask allowance and each lookup against the agent-call allowance. **Use your own agent** below it keeps
+the token and MCP setup for Claude Code, Cursor and other clients.
+
 ## Your repositories and GitHub sign-in
 
 **Continue with GitHub** on the sign-in and sign-up pages creates or opens an account from a GitHub identity.

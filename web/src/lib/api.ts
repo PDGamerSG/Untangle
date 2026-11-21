@@ -171,10 +171,16 @@ export const api = {
   register: (body: { email: string; password: string; name?: string }): Promise<{ user: Account }> =>
     request("/auth/register", { method: "POST", body: JSON.stringify(body) }),
   logout: (): Promise<void> => request("/auth/logout", { method: "POST" }),
+  startGuest: (): Promise<{ user: Account }> => request("/auth/guest", { method: "POST" }),
   deleteAccount: (): Promise<void> => request("/auth/account", { method: "DELETE" }),
   agentTokens: (signal?: AbortSignal): Promise<{ tokens: AgentToken[]; max: number }> => request("/auth/tokens", { signal }),
   createAgentToken: (name: string): Promise<AgentToken> => request("/auth/tokens", { method: "POST", body: JSON.stringify({ name }) }),
   revokeAgentToken: (id: string): Promise<void> => request(`/auth/tokens/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  agentChat: (body: { repo: string | null; messages: { role: "user" | "assistant"; content: string }[] }, signal?: AbortSignal):
+    Promise<{ reply: string; steps: { tool: string; input: string; ok: boolean }[] }> =>
+    SAMPLE_MODE
+      ? Promise.reject(new ApiError(400, "The agent is available in the live app."))
+      : request("/agent/chat", { method: "POST", body: JSON.stringify(body), signal }, 120_000),
   agentNotes: (repo: string, signal?: AbortSignal): Promise<{ repo: string; notes: AgentNote[] }> =>
     request(`/agent-notes${q({ repo })}`, { signal }),
   deleteMeeting: (id: string): Promise<void> => {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { LogOut, UserRound } from "lucide-react";
 import { api, errorMessage } from "@/lib/api";
@@ -13,7 +14,10 @@ export function AccountCard() {
   if (!user) return null;
 
   async function remove() {
-    if (!window.confirm("Delete your Untangle account? This signs you out everywhere and cannot be undone. Repositories and handover calls you added stay available to other members.")) return;
+    const question = user?.guest
+      ? "End this guest session? Your saved repository list is deleted. Imported repositories stay available to everyone."
+      : "Delete your Untangle account? This signs you out everywhere and cannot be undone. Repositories and handover calls you added stay available to other members.";
+    if (!window.confirm(question)) return;
     setBusy(true);
     try {
       await api.deleteAccount();
@@ -32,7 +36,14 @@ export function AccountCard() {
         <UserRound size={16} className="mt-0.5 shrink-0 text-nav-ink-2" aria-hidden />
         <div className="min-w-0">
           <p className="truncate text-[0.86rem] font-semibold text-nav-ink" title={user.name}>{user.name}</p>
-          <p className="truncate text-[0.74rem] text-nav-ink-2" title={user.email}>{user.email}{user.role === "admin" ? " · admin" : ""}</p>
+          {user.guest ? (
+            <p className="text-[0.74rem] text-nav-ink-2">
+              Trying without an account.{" "}
+              <Link href="/signup?next=/repositories" className="font-semibold text-nav-ink underline underline-offset-2">Keep my work</Link>
+            </p>
+          ) : (
+            <p className="truncate text-[0.74rem] text-nav-ink-2" title={user.email}>{user.email}{user.role === "admin" ? " · admin" : ""}</p>
+          )}
         </div>
       </div>
       <div className="mt-2.5 flex items-center justify-between gap-2">
@@ -40,7 +51,7 @@ export function AccountCard() {
           <LogOut size={14} aria-hidden /> Sign out
         </button>
         <button type="button" onClick={() => void remove()} disabled={busy} className="rounded-md text-[0.74rem] text-nav-ink-2 underline-offset-4 hover:text-nav-ink hover:underline">
-          {busy ? "Deleting…" : "Delete account"}
+          {busy ? "Deleting…" : user.guest ? "End guest session" : "Delete account"}
         </button>
       </div>
       {error ? <p role="alert" className="mt-2 text-[0.74rem] text-nav-ink">{error}</p> : null}

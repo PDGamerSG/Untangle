@@ -48,8 +48,12 @@ class User:
     def is_admin(self) -> bool:
         return self.role == "admin"
 
+    @property
+    def is_guest(self) -> bool:
+        return self.role == "guest"
+
     def public(self) -> dict[str, Any]:
-        return {"id": self.id, "email": self.email, "name": self.name, "role": self.role,
+        return {"id": self.id, "email": "" if self.is_guest else self.email, "name": self.name, "role": self.role, "guest": self.is_guest,
                 "created_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at / 1000))}
 
 
@@ -110,11 +114,68 @@ def _start_session(graph: Graph, user_id: str, *, rehash: str | None = None) -> 
     return token
 
 
-def register(graph: Graph, email: str, password: str, name: str | None, *, ip: str) -> tuple[User, str]:
+GUEST_DOMAIN = "guest.untangle.invalid"
+
+
+def start_guest(graph: Graph, *, ip: str) -> tuple[User, str]:
+    """A temporary account for trying Untangle. Creating an account or signing in later keeps its repositories."""
+    try:
+        limits.hit(graph, limits.GUEST_IP, ip, "Too many guest sessions were started from this network. Create an account to continue.")
+    except limits.LimitExceeded as exc:
+        raise AuthProblem(429, str(exc), retry_after=exc.retry_after) from exc
+    ensure_account_schema(graph)
+    key = uuid.uuid4().hex
+    row = {"id": f"user:{key}", "email": f"guest-{key}@{GUEST_DOMAIN}", "name": "Guest", "role": "guest",
+           "password_hash": None, "created_at": int(time.time() * 1000)}
+    created = graph.run_named("auth_create_user", {"u": row}, write=True).records
+    user = _user(created[0])
+    return user, _start_session(graph, user.id)
+
+
+def adopt_guest(graph: Graph, guest: User | None, into: User) -> None:
+    """Move a guest's saved repositories and agent tokens to the account they signed in to, then delete the guest."""
+    if guest is None or not guest.is_guest or guest.id == into.id:
+        return
+    graph.query("""MATCH (g:User {id:$guest, role:'guest'}), (u:User {id:$user})
+      OPTIONAL MATCH (g)-[:SAVED]->(s:SavedRepository)
+      WITH g, u, collect(s) AS saved
+      FOREACH (s IN saved |
+        MERGE (n:SavedRepository {id: $user + '|' + s.repo_key})
+        ON CREATE SET n.user_id = $user, n.repo = s.repo, n.repo_key = s.repo_key, n.saved_at = s.saved_at,
+                      n.seen_sha = s.seen_sha, n.seen_at = s.seen_at
+        MERGE (u)-[:SAVED]->(n)
+        DETACH DELETE s)
+      WITH g
+      OPTIONAL MATCH (g)-[:HAS_SESSION]->(session:Session)
+      DETACH DELETE session, g""", {"guest": guest.id, "user": into.id})
+    with _cache_lock:
+        _cache.clear()
+
+
+def _upgrade_guest(graph: Graph, guest: User, email: str, password: str, name: str | None) -> User | None:
+    rows = graph.query("""MATCH (u:User {id:$id, role:'guest'})
+      WHERE NOT EXISTS { MATCH (o:User {email:$email}) WHERE o.id <> u.id }
+      SET u.email = $email, u.password_hash = $hash, u.name = $name, u.role = 'member', u.upgraded_at = $now
+      RETURN u.id AS id, u.email AS email, u.name AS name, u.role AS role, u.created_at AS created_at""",
+                       {"id": guest.id, "email": email, "hash": passwords.hash_password(password), "name": normalize_name(name, email),
+                        "now": int(time.time() * 1000)}).records
+    with _cache_lock:
+        _cache.clear()
+    return _user(rows[0]) if rows else None
+
+
+def register(graph: Graph, email: str, password: str, name: str | None, *, ip: str, current: User | None = None) -> tuple[User, str]:
     email = normalize_email(email)
     problem = passwords.policy_problem(password or "", email)
     if problem:
         raise AuthProblem(400, problem)
+    if email.endswith("@" + GUEST_DOMAIN):
+        raise AuthProblem(400, "Enter a valid email address.")
+    if current is not None and current.is_guest:
+        upgraded = _upgrade_guest(graph, current, email, password, name)
+        if upgraded is None:
+            raise AuthProblem(409, "An account with this email already exists. Sign in instead.")
+        return upgraded, _start_session(graph, upgraded.id)
     try:
         limits.hit(graph, limits.SIGN_UP_IP, ip, "Too many accounts were created from this network. Try again later.")
     except limits.LimitExceeded as exc:

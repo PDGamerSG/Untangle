@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent } from "react";
-import { Bot, KeyRound, Trash2 } from "lucide-react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { ArrowUp, Bot, KeyRound, LoaderCircle, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { EmptyState, ErrorState, SectionTitle, SkeletonLines } from "@/components/ui/states";
 import { RepoSelect } from "@/components/repositories/RepoSelect";
@@ -10,7 +12,148 @@ import { NoRepository } from "@/components/repositories/NoRepository";
 import { api, API_BASE, errorMessage, externalHref } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";
-import type { AgentToken } from "@/lib/types";
+import type { AgentChatTurn, AgentToken } from "@/lib/types";
+
+const STARTERS = [
+  "What changed most recently, and why?",
+  "Who knows the most about the configuration?",
+  "Which dependencies have a recorded reason?",
+];
+
+const TOOL_LABEL: Record<string, string> = {
+  ask_why: "Asked why",
+  list_decisions: "Listed decisions",
+  decision_timeline: "Checked the timeline",
+  who_to_ask: "Found people",
+  search_repository: "Searched",
+  recall_agent_notes: "Read agent notes",
+  list_repositories: "Listed repositories",
+};
+
+/** The built-in agent: answers here with the deployment's model and Untangle's read-only tools. No token needed. */
+function BuiltInAgent() {
+  const { repo } = useRepo();
+  const [turns, setTurns] = useState<AgentChatTurn[]>([]);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputId = useId();
+  const endRef = useRef<HTMLDivElement>(null);
+  const controller = useRef<AbortController | null>(null);
+
+  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "nearest" });
+  }, [turns, busy]);
+
+  async function send(question: string) {
+    const text = question.trim();
+    if (!text || busy) return;
+    const next: AgentChatTurn[] = [...turns, { role: "user", content: text }];
+    setTurns(next);
+    setDraft("");
+    setError(null);
+    setBusy(true);
+    controller.current = new AbortController();
+    try {
+      const result = await api.agentChat(
+        { repo, messages: next.map(({ role, content }) => ({ role, content })) },
+        controller.current.signal,
+      );
+      setTurns([...next, { role: "assistant", content: result.reply, steps: result.steps }]);
+    } catch (e) {
+      setError(errorMessage(e));
+      setTurns(turns);
+      setDraft(text);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="space-y-4" aria-labelledby="agent-chat-heading">
+      <SectionTitle hint={repo ? `Reading ${repo}` : "No repository selected"}>
+        <span id="agent-chat-heading">Ask the Untangle agent</span>
+      </SectionTitle>
+      <div className="card p-4 sm:p-5">
+        {turns.length ? (
+          <ol className="space-y-4" aria-label="Conversation" aria-live="polite">
+            {turns.map((t, i) => (
+              <li key={i} className={t.role === "user" ? "flex justify-end" : ""}>
+                {t.role === "user" ? (
+                  <p className="max-w-[85%] whitespace-pre-wrap rounded-lg bg-accent-soft px-3 py-2 text-[0.92rem] text-ink">{t.content}</p>
+                ) : (
+                  <div className="max-w-full">
+                    {t.steps?.length ? (
+                      <p className="mb-1.5 text-[0.76rem] text-ink-3">
+                        {t.steps.map((s) => `${TOOL_LABEL[s.tool] ?? s.tool}${s.input ? `: ${s.input}` : ""}${s.ok ? "" : " (no result)"}`).join(" · ")}
+                      </p>
+                    ) : null}
+                    <p className="whitespace-pre-wrap text-[0.92rem] leading-relaxed text-ink">{t.content}</p>
+                  </div>
+                )}
+              </li>
+            ))}
+            {busy ? (
+              <li className="flex items-center gap-2 text-[0.85rem] text-ink-3">
+                <LoaderCircle size={15} className="animate-spin motion-reduce:animate-none" aria-hidden /> Looking through the history…
+              </li>
+            ) : null}
+          </ol>
+        ) : (
+          <div>
+            <p className="text-[0.9rem] text-ink-2">
+              Ask why something in {repo ?? "the selected repository"} is the way it is. The agent looks up decisions, evidence and people
+              in the indexed history and cites what it finds. No token or setup needed.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {STARTERS.map((q) => (
+                <button key={q} type="button" className="btn btn-line btn-sm" disabled={busy || !repo} onClick={() => void send(q)}>
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div ref={endRef} />
+        <form
+          className="mt-4 flex items-end gap-2 border-t border-rule pt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send(draft);
+          }}
+        >
+          <label htmlFor={inputId} className="sr-only">Message the agent</label>
+          <textarea
+            id={inputId}
+            className="field min-h-[2.75rem] flex-1 resize-y"
+            rows={1}
+            maxLength={4000}
+            placeholder={repo ? "Why is the retry limit 3?" : "Select a repository first"}
+            value={draft}
+            disabled={!repo}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                void send(draft);
+              }
+            }}
+          />
+          <button type="submit" className="btn btn-primary" disabled={busy || !draft.trim() || !repo} aria-label="Send">
+            {busy ? <LoaderCircle size={16} className="animate-spin motion-reduce:animate-none" aria-hidden /> : <ArrowUp size={16} aria-hidden />}
+          </button>
+        </form>
+        {error ? <p role="alert" className="mt-2 text-[0.85rem] text-bad">{error}</p> : null}
+        {turns.length ? (
+          <button type="button" className="mt-2 text-[0.8rem] text-ink-3 underline-offset-4 hover:underline" onClick={() => { setTurns([]); setError(null); }}>
+            Start a new conversation
+          </button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
 
 const TOOLS: [string, string][] = [
   ["ask_why", "Cited answer to “why is this like this?”, or a refusal with the person to ask."],
@@ -60,6 +203,24 @@ function NewToken({ token }: { token: AgentToken }) {
 }
 
 function Tokens() {
+  const { user } = useAuth();
+  if (user?.guest) {
+    return (
+      <section className="space-y-2" aria-labelledby="tokens-heading">
+        <SectionTitle>
+          <span id="tokens-heading">Agent tokens</span>
+        </SectionTitle>
+        <p className="text-[0.88rem] text-ink-2">
+          <Link href="/signup?next=/agents" className="font-semibold text-accent underline-offset-4 hover:underline">Create an account</Link>{" "}
+          to connect your own agent. The built-in agent above works without one.
+        </p>
+      </section>
+    );
+  }
+  return <TokenManager />;
+}
+
+function TokenManager() {
   const res = useResource("agent-tokens", (signal) => api.agentTokens(signal));
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -192,30 +353,40 @@ export function AgentsPage() {
     <div className="space-y-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">Connect a coding agent</h1>
+          <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">Agents</h1>
           <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">
-            Give Claude Code, Cursor or any MCP client the same decision graph you use here. Before changing a value or a
-            dependency, the agent can ask why it is the way it is; after settling something, it records the decision for
-            the next person. Agent notes are labelled, attributed to you, and never replace evidence from the code history.
+            Ask the built-in agent here, or give your own coding agent the same decision graph. Agent answers cite the
+            repository&apos;s history and never replace it.
           </p>
         </div>
         <RepoSelect compact />
       </header>
-      <section aria-labelledby="tools-heading" className="space-y-3">
-        <SectionTitle>
-          <span id="tools-heading" className="flex items-center gap-2"><Bot size={16} aria-hidden /> What an agent can do</span>
-        </SectionTitle>
-        <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
-          {TOOLS.map(([name, what]) => (
-            <div key={name} className="text-[0.88rem]">
-              <dt className="t-code text-ink">{name}</dt>
-              <dd className="text-ink-2">{what}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-      <Tokens />
-      <Notes />
+      <BuiltInAgent />
+      <div className="space-y-8 border-t border-rule pt-8">
+        <div>
+          <h2 className="text-[1.25rem] font-semibold text-ink">Use your own agent</h2>
+          <p className="mt-1 max-w-2xl text-[0.9rem] text-ink-2">
+            Prefer your own model or coding agent? Connect Claude Code, Cursor or any MCP client with a token. Before changing a value
+            or a dependency, it can ask why it is the way it is; after settling something, it records the decision for the next person.
+            Agent notes are labelled, attributed to you, and never replace evidence from the code history.
+          </p>
+        </div>
+        <section aria-labelledby="tools-heading" className="space-y-3">
+          <SectionTitle>
+            <span id="tools-heading" className="flex items-center gap-2"><Bot size={16} aria-hidden /> What a connected agent can do</span>
+          </SectionTitle>
+          <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+            {TOOLS.map(([name, what]) => (
+              <div key={name} className="text-[0.88rem]">
+                <dt className="t-code text-ink">{name}</dt>
+                <dd className="text-ink-2">{what}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+        <Tokens />
+        <Notes />
+      </div>
     </div>
   );
 }

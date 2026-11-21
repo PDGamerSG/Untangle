@@ -47,10 +47,26 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     return () => controller.abort();
   }, []);
 
-  // Already signed in (for example after using the back button): continue to the workspace.
+  // Already signed in (for example after using the back button): continue to the workspace. Guests stay here to
+  // create an account or sign in; their work moves with them.
   useEffect(() => {
-    if (user) router.replace(next);
+    if (user && !user.guest) router.replace(next);
   }, [user, next, router]);
+
+  async function tryAsGuest() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await api.startGuest();
+      setUser(result.user);
+      const wanted = params.get("next");
+      router.replace(wanted && wanted !== "/dashboard" ? safeNext(wanted) : "/repositories");
+    } catch (e) {
+      setError(errorMessage(e));
+      setBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -75,6 +91,20 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4" aria-describedby={error ? ids.error : undefined}>
+      {user?.guest ? (
+        <p className="rounded-md border border-accent/30 bg-accent-soft px-3 py-2 text-[0.85rem] text-ink">
+          {signup
+            ? "Your guest repositories and history move to the new account."
+            : "Signing in moves your guest repositories to your account."}
+        </p>
+      ) : !signup ? (
+        <div className="space-y-2">
+          <button type="button" className="btn btn-primary w-full justify-center" onClick={() => void tryAsGuest()} disabled={busy}>
+            Try it on your repository, no account
+          </button>
+          <p className="text-center text-[0.78rem] text-ink-3">Add a public GitHub repository and ask about it. Create an account later to keep it.</p>
+        </div>
+      ) : null}
       {github ? (
         <>
           <a

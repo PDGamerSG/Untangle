@@ -24,7 +24,15 @@ from urllib.parse import urlencode
 import httpx
 
 from untangle.auth import limits
-from untangle.auth.service import AuthProblem, User, _start_session, _user, ensure_account_schema, normalize_name
+from untangle.auth.service import (
+    AuthProblem,
+    User,
+    _start_session,
+    _user,
+    adopt_guest,
+    ensure_account_schema,
+    normalize_name,
+)
 from untangle.config import settings
 from untangle.graph.db import Graph
 
@@ -125,14 +133,20 @@ def _linked(graph: Graph, github_id: int) -> dict | None:
     return rows[0] if rows else None
 
 
-def sign_in(graph: Graph, profile: dict, *, current: User | None, ip: str) -> tuple[User, str]:
-    """Return the account for this GitHub identity and a new session token."""
+def sign_in(graph: Graph, profile: dict, *, current: User | None, ip: str, _guest: User | None = None) -> tuple[User, str]:
+    """Return the account for this GitHub identity and a new session token. A guest's work moves to that account."""
     ensure_account_schema(graph)
-    try:
-        limits.hit(graph, limits.SIGN_IN_IP, ip, "Too many sign-in attempts from this network. Try again in a few minutes.")
-    except limits.LimitExceeded as exc:
-        raise AuthProblem(429, str(exc), retry_after=exc.retry_after) from exc
+    if _guest is None:
+        try:
+            limits.hit(graph, limits.SIGN_IN_IP, ip, "Too many sign-in attempts from this network. Try again in a few minutes.")
+        except limits.LimitExceeded as exc:
+            raise AuthProblem(429, str(exc), retry_after=exc.retry_after) from exc
     now = int(time.time() * 1000)
+    guest = current if current is not None and current.is_guest else None
+    if guest is not None:
+        user, token = sign_in(graph, profile, current=None, ip=ip, _guest=guest)
+        adopt_guest(graph, guest, user)
+        return user, token
     existing = _linked(graph, profile["id"])
     if existing:
         if current and current.id != existing["id"]:

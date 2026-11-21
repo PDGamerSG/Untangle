@@ -643,6 +643,26 @@ test("a connected GitHub account lists its repositories and saved ones show comm
   await expect(fromGitHub.getByRole("button", { name: "Import" })).toBeEnabled();
 });
 
+test("a visitor tries Untangle as a guest and is offered an account to keep the work", async ({ page, context }) => {
+  await context.clearCookies();
+  const guest = { id: "user:guest1", email: "", name: "Guest", role: "guest", guest: true, created_at_iso: "2026-11-21T00:00:00Z" };
+  let signedIn = false;
+  await page.route("**/api/auth/me", (route) =>
+    signedIn ? route.fulfill({ json: { user: guest } }) : route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  await page.route("**/api/auth/guest", async (route) => {
+    signedIn = true;
+    await context.addCookies([{ name: "untangle_session", value: "guest-session", url: "http://127.0.0.1:3100" }]);
+    return route.fulfill({ status: 201, json: { user: guest } });
+  });
+  await page.goto("/login?next=/dashboard");
+  await page.getByRole("button", { name: "Try it on your repository, no account" }).click();
+  await expect(page).toHaveURL(/\/repositories$/);
+  await expect(page.getByText("You are trying Untangle as a guest.")).toBeVisible();
+  await page.getByRole("link", { name: "Create account" }).first().click();
+  await expect(page).toHaveURL(/\/signup\?next=%2Frepositories/);
+  await expect(page.getByText("Your guest repositories and history move to the new account.")).toBeVisible();
+});
+
 test("sign-in offers GitHub and keeps the requested page", async ({ page, context }) => {
   await context.clearCookies();
   await page.route("**/api/auth/me", (route) => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
@@ -745,7 +765,8 @@ test("a member creates an agent token, copies the connection command and revokes
     rationale: "Higher values hit the provider's rate limit.", status: "active", recorded_by: "Asha Verma", source_url: "javascript:alert(1)",
     about: ["schema.sql::app.concurrency"], recorded_at_iso: "2026-11-21T10:05:00Z" }] } }));
   await page.goto("/agents");
-  await expect(page.getByRole("heading", { level: 1, name: "Connect a coding agent" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Agents" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Use your own agent" })).toBeVisible();
   await expect(page.getByText("remember_decision", { exact: true })).toBeVisible();
   await page.getByLabel("Token name").fill("Claude Code laptop");
   await page.getByRole("button", { name: "Create token" }).click();
@@ -757,6 +778,25 @@ test("a member creates an agent token, copies the connection command and revokes
   page.once("dialog", dialog => dialog.accept());
   await page.getByRole("button", { name: "Revoke Claude Code laptop" }).click();
   await expect(page.getByText("No tokens yet.", { exact: false })).toBeVisible();
+});
+
+test("the built-in agent answers on the Agents page without a token", async ({ page }) => {
+  let sent: { repo: string | null; messages: { role: string; content: string }[] } | null = null;
+  await page.route("**/api/agent/chat", (route) => {
+    sent = route.request().postDataJSON();
+    return route.fulfill({ json: { reply: "app.concurrency is 10 because of the SES quota (PR #1412).",
+      steps: [{ tool: "ask_why", input: "why is app.concurrency 10?", ok: true }] } });
+  });
+  await page.route("**/api/agent-notes?**", (route) => route.fulfill({ json: { repo: "knadh/listmonk", notes: [] } }));
+  await page.goto("/agents");
+  const box = page.getByLabel("Message the agent");
+  await box.fill("Why is app.concurrency 10?");
+  await box.press("Enter");
+  await expect(page.getByRole("list", { name: "Conversation" })).toContainText("because of the SES quota");
+  await expect(page.getByRole("list", { name: "Conversation" })).toContainText("Asked why: why is app.concurrency 10?");
+  expect(sent).toEqual({ repo: "knadh/listmonk", messages: [{ role: "user", content: "Why is app.concurrency 10?" }] });
+  await page.getByRole("button", { name: "Start a new conversation" }).click();
+  await expect(page.getByRole("list", { name: "Conversation" })).toHaveCount(0);
 });
 
 test("public pages meet WCAG AA in an automated check and publish sharing metadata", async ({ page, request }) => {

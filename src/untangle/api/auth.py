@@ -20,7 +20,7 @@ from untangle.auth import service as accounts
 from untangle.auth.service import AuthProblem, User
 from untangle.config import settings
 
-PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me", "/auth/github/start",
+PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me", "/auth/guest", "/auth/github/start",
                            "/auth/github/callback", "/auth/providers"})
 # Routes a coding agent may call with a personal access token instead of a browser session.
 TOKEN_ROUTES = frozenset({"/mcp"})
@@ -116,6 +116,9 @@ def charge(request: Request, limit: limits.Limit, message: str) -> None:
     user = current_user(request)
     if user.is_admin:
         return
+    if user.is_guest:
+        limit = limits.for_guest(limit)
+        message = f"{message} Guests have a smaller allowance: create an account for more."
     try:
         limits.hit(answers.get_graph(), limit, user.id, message)
     except limits.LimitExceeded as exc:
@@ -133,10 +136,26 @@ class SignInRequest(BaseModel):
     password: str = Field(min_length=1, max_length=512)
 
 
+@router.post("/guest", status_code=201)
+async def guest(request: Request, response: Response) -> dict:
+    """Try Untangle without an account. An existing session is kept rather than replaced."""
+    current = accounts.resolve(answers.get_graph(), session_token(request))
+    if current is not None:
+        return {"user": current.public()}
+    try:
+        user, token = await run_in_threadpool(accounts.start_guest, answers.get_graph(), ip=client_ip(request))
+    except AuthProblem as exc:
+        raise _problem(exc) from exc
+    _set_cookie(response, token)
+    return {"user": user.public()}
+
+
 @router.post("/register", status_code=201)
 async def register(body: RegisterRequest, request: Request, response: Response) -> dict:
+    current = accounts.resolve(answers.get_graph(), session_token(request))
     try:
-        user, token = await run_in_threadpool(accounts.register, answers.get_graph(), body.email, body.password, body.name, ip=client_ip(request))
+        user, token = await run_in_threadpool(accounts.register, answers.get_graph(), body.email, body.password, body.name,
+                                              ip=client_ip(request), current=current)
     except AuthProblem as exc:
         raise _problem(exc) from exc
     _set_cookie(response, token)
@@ -145,10 +164,12 @@ async def register(body: RegisterRequest, request: Request, response: Response) 
 
 @router.post("/login")
 async def login(body: SignInRequest, request: Request, response: Response) -> dict:
+    current = accounts.resolve(answers.get_graph(), session_token(request))
     try:
         user, token = await run_in_threadpool(accounts.sign_in, answers.get_graph(), body.email, body.password, ip=client_ip(request))
     except AuthProblem as exc:
         raise _problem(exc) from exc
+    await run_in_threadpool(accounts.adopt_guest, answers.get_graph(), current, user)
     _set_cookie(response, token)
     return {"user": user.public()}
 
@@ -191,6 +212,8 @@ def list_tokens(user: CurrentUser) -> dict:
 @router.post("/tokens", status_code=201)
 def create_token(body: TokenRequest, user: CurrentUser) -> dict:
     """The token is in this response only; Untangle keeps just its hash."""
+    if user.is_guest:
+        raise HTTPException(status_code=403, detail="Create an account to connect your own agent.")
     try:
         return tokens.create(answers.get_graph(), user, body.name)
     except AuthProblem as exc:
