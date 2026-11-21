@@ -1,5 +1,5 @@
-import { KindTag } from "@/components/Chip";
-import { SectionTitle } from "@/components/states";
+import { KindTag } from "@/components/ui/Chip";
+import { SectionTitle } from "@/components/ui/states";
 import { AnswerText } from "./AnswerText";
 import { normaliseKind, KIND_LABEL } from "@/lib/format";
 import type { AskResponse } from "@/lib/types";

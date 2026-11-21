@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowUpRight, ExternalLink, GitCommitHorizontal, UserRound } from "lucide-react";
-import { KindTag } from "./Chip";
-import { DecisionCard } from "./DecisionCard";
-import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
+import { KindTag } from "@/components/ui/Chip";
+import { DecisionCard } from "@/components/decisions/DecisionCard";
+import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDay, kindFromLabel } from "@/lib/format";

@@ -4,7 +4,76 @@ import { decisionBrief, matchesDecision, snapshotDecisions } from "../src/lib/ev
 import type { DecisionCard } from "../src/lib/types";
 import pulse from "../sample/pulse.json";
 import mapFixture from "../sample/repository-map.json";
-import { commitImpact, featureFiles, type RepositoryMap } from "../src/lib/repository-map";
+import { commitImpact, featureFiles, mapGraph, type RepositoryMap } from "../src/lib/repository-map";
+import { createElement, useLayoutEffect } from "react";
+import { act, create, type ReactTestRenderer } from "react-test-renderer";
+import { invalidateRepositoryResources, primeResource, useResource } from "../src/lib/hooks";
+
+test("inventory resolves when shared data arrives between render and effects", async () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+  function Panel() {
+    const resource = useResource("cache-race-test", async () => "loaded");
+    // A sibling's request or a primed response can finish before passive effects run.
+    useLayoutEffect(() => primeResource("cache-race-test", "loaded"), []);
+    return createElement("output", null, resource.loading ? "loading" : resource.data);
+  }
+  let root!: ReactTestRenderer;
+  try {
+    await act(async () => { root = create(createElement(Panel)); });
+    expect(root.toJSON()).toMatchObject({ children: ["loaded"] });
+  } finally { await act(async () => root?.unmount()); }
+});
+
+test("completing an import refreshes an already mounted inventory", async () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+  primeResource("overview:refresh/repo", "old counts");
+  function Panel() {
+    const resource = useResource("overview:refresh/repo", async () => "complete counts");
+    return createElement("output", null, resource.data);
+  }
+  let root!: ReactTestRenderer;
+  try {
+    await act(async () => { root = create(createElement(Panel)); });
+    expect(root.toJSON()).toMatchObject({ children: ["old counts"] });
+    await act(async () => invalidateRepositoryResources("refresh/repo"));
+    expect(root.toJSON()).toMatchObject({ children: ["complete counts"] });
+  } finally { await act(async () => root?.unmount()); }
+});
+
+test("expanded maps retain every file beyond the old drawing limit", () => {
+  const files = Array.from({ length: 201 }, (_, i) => ({ path: `file-${i}.ts`, alive: true }));
+  const data = { ...mapFixture, files, features: [{ ...mapFixture.features[0], entrypoints: files.map(f => f.path) }], imports: [] } as RepositoryMap;
+  const graph = mapGraph(data, data.features[0].id, null, false);
+  expect(graph.nodes.filter(n => n.kind === "file")).toHaveLength(201);
+  expect(graph.omitted).toBe(0);
+});
+
+test("map loading assembles all pages before exposing a complete graph", async () => {
+  const original = globalThis.fetch;
+  const base = { ...mapFixture, total_files: 3, total_imports: 1, total_features: 0, features: [], index_status: "ready" };
+  globalThis.fetch = async url => {
+    const page = new URL(String(url), "http://localhost").searchParams.get("structure_page");
+    return Response.json(page === "0" ? { ...base, structure_page: 0, structure_has_more: true, files: [{ path: "a.ts", alive: true }], imports: [{ source: "a.ts", target: "c.ts", line: 1, specifier: "./c" }] } :
+      { ...base, structure_page: 1, structure_has_more: false, files: [{ path: "b.ts", alive: true }, { path: "c.ts", alive: true }], imports: [], commits: [] });
+  };
+  try {
+    const result = await api.repositoryMap("o/r", 0);
+    expect(result.files.map(f => f.path)).toEqual(["a.ts", "b.ts", "c.ts"]);
+    expect(result.imports[0].target).toBe("c.ts");
+    expect(result.structure_has_more).toBe(false);
+  } finally { globalThis.fetch = original; }
+});
+
+test("map loading rejects missing nodes and changing snapshots", async () => {
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => Response.json({ ...mapFixture, total_files: 100 });
+    await expect(api.repositoryMap("o/r", 0)).rejects.toThrow("incomplete");
+    globalThis.fetch = async url => Response.json({ ...mapFixture, structure_page: 0, structure_has_more: true,
+      head_sha: String(url).includes("structure_page=1") ? "new-version" : mapFixture.head_sha });
+    await expect(api.repositoryMap("o/r", 0)).rejects.toThrow("changed while");
+  } finally { globalThis.fetch = original; }
+});
 
 test("backend errors retain the actionable message", async () => {
   const original = globalThis.fetch;

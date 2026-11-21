@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { AudioLines, Mic } from "lucide-react";
-import { RepoSelect } from "./RepoSelect";
-import { useRepo } from "./RepoContext";
-import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDuration, meetingSourceLabel } from "@/lib/format";

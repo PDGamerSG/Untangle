@@ -1,7 +1,7 @@
 import { CircleSlash } from "lucide-react";
-import { CitationChip, EntityChip } from "@/components/Chip";
-import { CopyButton } from "@/components/CopyButton";
-import { SectionTitle } from "@/components/states";
+import { CitationChip, EntityChip } from "@/components/ui/Chip";
+import { CopyButton } from "@/components/ui/CopyButton";
+import { SectionTitle } from "@/components/ui/states";
 import { AnswerText } from "./AnswerText";
 import { BaselineCompare } from "./BaselineCompare";
 import { ConfidenceMeter } from "./ConfidenceMeter";

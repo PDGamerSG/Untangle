@@ -2,15 +2,15 @@
 
 import { CalendarDays, Search } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { RepoSelect } from "@/components/RepoSelect";
-import { useRepo } from "@/components/RepoContext";
-import { ErrorState, Skeleton, SkeletonLines } from "@/components/states";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, errorMessage } from "@/lib/api";
 import { examplesFor } from "@/lib/examples";
 import type { AskRequest, AskResponse } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
-import { useStarterQuestions } from "@/components/RepositoryOverview";
-import { WaitStatus } from "@/components/WaitStatus";
+import { useStarterQuestions } from "@/components/repositories/RepositoryOverview";
+import { WaitStatus } from "@/components/ui/WaitStatus";
 
 function examplesOf(repo: string | null) {
   const e = examplesFor(repo);

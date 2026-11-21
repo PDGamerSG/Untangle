@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { CitationChip, EntityChip } from "./Chip";
+import { CitationChip, EntityChip } from "@/components/ui/Chip";
 import { fmtDay, predicateLabel, signalLabel } from "@/lib/format";
 import type { DecisionCard as DecisionCardT } from "@/lib/types";
 

@@ -1,5 +1,7 @@
 export interface MapFeature { id: string; name: string; description: string; source: "manifest" | "directory"; entrypoints: string[] }
 export interface RepositoryMap { index_status?: "ready" | "basic" }
+export interface RepositoryMap { structure_page?: number; structure_has_more?: boolean; total_imports?: number; total_features?: number }
+export interface MapLoadProgress { loaded: number; total: number }
 export interface MapImport { source: string; target: string; line: number; specifier: string }
 export interface MapCommit { sha: string; title: string; author: string | null; authored_at_iso: string | null; parents: string[]; parents_known: boolean; is_merge: boolean; files: { path: string; change: string; additions?: number; deletions?: number }[] }
 export interface RepositoryMap { repo: string; head_sha: string | null; indexed_at_iso: string | null; total_files: number; files: { path: string; alive: boolean }[]; features: MapFeature[]; imports: MapImport[]; commits: MapCommit[]; total_commits: number; offset: number; has_more: boolean; coverage: Record<string, number>; warnings: string[] }
@@ -48,7 +50,9 @@ export function commitImpact(data: RepositoryMap, commit: MapCommit): CommitImpa
   };
 }
 
-export function mapGraph(data: RepositoryMap, featureId: string | null, commit: MapCommit | null, history: boolean): { nodes: MapNode[]; edges: MapEdge[]; omitted: number } {
+export function mapGraph(data: RepositoryMap, featureId: string | null, commit: MapCommit | null, history: boolean, allFiles = false): { nodes: MapNode[]; edges: MapEdge[]; omitted: number } {
+  if (allFiles) return { nodes: data.files.map(f => ({ id: f.path, name: f.path.split("/").pop()!, kind: "file" })),
+    edges: data.imports.map(edge => ({ source: edge.source, target: edge.target, kind: "imports" })), omitted: 0 };
   if (history) {
     const ids = new Set(data.commits.map(c => c.sha));
     return { nodes: data.commits.map(c => ({ id: c.sha, name: c.sha.slice(0, 7), kind: "commit", affected: c.sha === commit?.sha })),
@@ -56,8 +60,8 @@ export function mapGraph(data: RepositoryMap, featureId: string | null, commit: 
   }
   if (commit) {
     const impact = commitImpact(data, commit);
-    const allPaths = [...new Set([...impact.features.flatMap(f => f.path), ...impact.direct])];
-    const paths = allPaths.slice(0, 65);
+    const allPaths = [...new Set([...impact.features.flatMap(f => f.path), ...impact.direct, ...impact.indirect])];
+    const paths = allPaths;
     const ids = new Set(paths);
     const features = impact.features.filter(f => ids.has(f.path[0]));
     return {
@@ -73,7 +77,7 @@ export function mapGraph(data: RepositoryMap, featureId: string | null, commit: 
   const feature = data.features.find(f => f.id === featureId);
   if (feature) {
     const all = [...featureFiles(data, feature)];
-    const paths = all.slice(0, 65);
+    const paths = all;
     const ids = new Set(paths);
     return { nodes: [{ id: feature.id, name: feature.name, kind: "feature" }, ...paths.map(p => ({ id: p, name: p.split("/").pop()!, kind: "file" as const }))],
       edges: [...feature.entrypoints.filter(p => ids.has(p)).map(p => ({ source: feature.id, target: p, kind: "entry" as const })),

@@ -16,12 +16,12 @@
       "web/src/app/globals.css"
     ],
     "components": [
-      "web/src/components/Chip.tsx",
-      "web/src/components/DecisionCard.tsx",
-      "web/src/components/states.tsx"
+      "web/src/components/ui/Chip.tsx",
+      "web/src/components/decisions/DecisionCard.tsx",
+      "web/src/components/ui/states.tsx"
     ],
     "assets": [
-      "web/src/components/Logo.tsx"
+      "web/src/components/layout/Logo.tsx"
     ],
     "instructions": [
       "web/AGENTS.md"

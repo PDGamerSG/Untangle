@@ -1,8 +1,8 @@
 import { InlineCode } from "./AnswerText";
 import Link from "next/link";
 import { ChevronRight, ExternalLink } from "lucide-react";
-import { StatusMark } from "@/components/DecisionCard";
-import { SectionTitle } from "@/components/states";
+import { StatusMark } from "@/components/decisions/DecisionCard";
+import { SectionTitle } from "@/components/ui/states";
 import { hrefFor } from "@/lib/api";
 import { fmtDay, fmtDateTime, kindFromId } from "@/lib/format";
 import type { EvidenceStep } from "@/lib/types";

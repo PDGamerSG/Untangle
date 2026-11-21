@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, ExternalLink, MessageCircleWarning, ShieldAlert, UserRound } from "lucide-react";
-import { EntityChip, CitationChip } from "@/components/Chip";
+import { EntityChip, CitationChip } from "@/components/ui/Chip";
 import { fmtDay, predicateLabel } from "@/lib/format";
 import type { PulseCategory, PulseRisk } from "@/lib/types";
 

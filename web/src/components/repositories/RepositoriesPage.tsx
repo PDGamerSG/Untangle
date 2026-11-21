@@ -6,9 +6,9 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ArrowUpRight, CheckCircle2, Circle, CircleAlert, ExternalLink, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
 import { useRepo } from "./RepoContext";
 import { RepositoryOverviewPanel } from "./RepositoryOverview";
-import { EmptyState, ErrorState, SkeletonLines } from "./states";
+import { EmptyState, ErrorState, SkeletonLines } from "@/components/ui/states";
 import { api, ApiError, errorMessage } from "@/lib/api";
-import { useResource, useStoredValue } from "@/lib/hooks";
+import { invalidateRepositoryResources, useResource, useStoredValue } from "@/lib/hooks";
 import { fmtDateTime, fmtDay, fmtRelative } from "@/lib/format";
 import type { ImportJob, ImportStatus, RepositoryImports, RepoSummary } from "@/lib/types";
 
@@ -139,6 +139,7 @@ function JobTracker({
           setPollError(null);
           setNow(Date.now());
           if (before && pending(before) && next.status === "complete") {
+            invalidateRepositoryResources(next.repo);
             setRepo(next.repo);
             reload();
             setSelected(true);
@@ -228,6 +229,7 @@ function JobTracker({
             <p className="text-[0.84rem] leading-relaxed text-ink-2">
               Waiting for the indexing worker, which usually picks jobs up within a few minutes. You can leave this page; the import keeps going
               and this page finds it again when you return.
+              {job.queue_ahead ? ` ${job.queue_ahead} ${job.queue_ahead === 1 ? "repository is" : "repositories are"} ahead of this import; the estimate includes that work.` : null}
               {worker?.scheduling ? <> Schedule: {worker.scheduling}.</> : null}
             </p>
           ) : null}

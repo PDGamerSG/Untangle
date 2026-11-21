@@ -1,10 +1,10 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { RepoSelect } from "./RepoSelect";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
 import { PulseQueue } from "./PulseQueue";
-import { useRepo } from "./RepoContext";
-import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 

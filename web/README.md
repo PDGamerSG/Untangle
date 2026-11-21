@@ -73,13 +73,22 @@ The API adds an `x-request-id` response header to every request. Errors from the
 ## Layout of `src/`
 
 ```
-app/                 routes (layout, page, decisions/[id], timeline, meetings, meetings/[id], not-found)
-components/          Nav, HealthDot, RepoSelect/RepoContext, DecisionCard, Chip, states, pages
-components/ask/      AskPage, AnswerCard, AnswerText, EvidenceChain, SupersessionBanner,
-                     ConfidenceMeter, WhyPanel, Subgraph, BaselineCompare
-lib/types.ts         the API contract from docs/CONTRACTS.md §6
+app/                      routes, metadata, global styles and application layout
+components/ask/           questions, answers, citations and evidence
+components/dashboard/    dashboard, search, statistics and entity inspection
+components/decisions/    decision cards, workbench, detail and timeline
+components/layout/       navigation, logo, connection status and sample banner
+components/map/          repository graph and explorer
+components/meetings/     handover list, detail and upload
+components/pulse/        risk cards, queue and triage
+components/repositories/ selection context, selector, imports and inventory
+components/ui/           shared chips, buttons, exports and loading/error states
+lib/types.ts         the API contract from docs/architecture/CONTRACTS.md §6
 lib/api.ts           fetch client (ApiError with status), sample-mode switch, link resolution
 lib/sample.ts        fixture loader for sample mode
 lib/hooks.ts         useResource, useStoredValue (localStorage via useSyncExternalStore), useDebounced
 lib/format.ts        dates, kinds, labels
 ```
+
+Use relative imports within a feature and `@/components/<feature>/<name>` across features.
+The [project structure guide](../docs/development/PROJECT_STRUCTURE.md) documents the full repository.

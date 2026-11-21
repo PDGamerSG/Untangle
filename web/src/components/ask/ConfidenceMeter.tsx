@@ -1,4 +1,4 @@
-import { SectionTitle } from "@/components/states";
+import { SectionTitle } from "@/components/ui/states";
 import type { AskResponse } from "@/lib/types";
 
 export function ConfidenceMeter({ confidence }: { confidence: AskResponse["confidence"] }) {

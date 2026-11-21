@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { EntityPage } from "@/components/EntityPage";
-import { SkeletonLines } from "@/components/states";
+import { EntityPage } from "@/components/dashboard/EntityPage";
+import { SkeletonLines } from "@/components/ui/states";
 
 export default function Page() {
   return (

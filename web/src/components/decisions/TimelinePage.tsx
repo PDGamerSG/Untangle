@@ -2,9 +2,9 @@
 
 import { useId, useState } from "react";
 import { DecisionWorkbench } from "./DecisionWorkbench";
-import { RepoSelect } from "./RepoSelect";
-import { useRepo } from "./RepoContext";
-import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { primeResource, useDebounced, useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";

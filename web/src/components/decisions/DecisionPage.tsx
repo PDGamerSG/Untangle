@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronDown, ExternalLink } from "lucide-react";
-import { CitationChip } from "./Chip";
+import { CitationChip } from "@/components/ui/Chip";
 import { DecisionCard, StatusMark } from "./DecisionCard";
-import { CypherList } from "./ask/WhyPanel";
-import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "./states";
+import { CypherList } from "@/components/ask/WhyPanel";
+import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api, hrefFor } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDay, normaliseKind, predicateLabel, signalLabel } from "@/lib/format";

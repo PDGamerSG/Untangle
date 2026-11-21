@@ -3,8 +3,8 @@
 import { useId, useState } from "react";
 import { Search } from "lucide-react";
 import { PulseRiskCard } from "./PulseRiskCard";
-import { EmptyState } from "./states";
-import { ExportBrief } from "./ExportBrief";
+import { EmptyState } from "@/components/ui/states";
+import { ExportBrief } from "@/components/ui/ExportBrief";
 import { briefFilename, matchesDecision, riskBrief } from "@/lib/evidence-brief";
 import { fmtDateTime } from "@/lib/format";
 import type { PulseCategory, PulseResponse } from "@/lib/types";

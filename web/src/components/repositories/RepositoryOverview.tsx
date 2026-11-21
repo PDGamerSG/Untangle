@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Activity, AlertTriangle, ArrowUpRight, AudioLines, ExternalLink, FileText, History, MessageCircleQuestion, Network, Package, Puzzle } from "lucide-react";
-import { EmptyState, ErrorState, SkeletonLines } from "./states";
+import { EmptyState, ErrorState } from "@/components/ui/states";
+import { WaitStatus } from "@/components/ui/WaitStatus";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";
@@ -266,7 +267,7 @@ function Inventory({ data }: { data: RepositoryOverview }) {
 export function RepositoryOverviewPanel({ repo, compact = false }: { repo: string; compact?: boolean }) {
   const res = useOverview(repo);
   const data = res.data;
-  if (res.loading) return <SkeletonLines rows={compact ? 3 : 5} />;
+  if (res.loading) return <WaitStatus key={repo} label={`Loading inventory for ${repo}.`} min={1} max={5} />;
   if (res.error) {
     if (res.errorStatus === 404)
       return (

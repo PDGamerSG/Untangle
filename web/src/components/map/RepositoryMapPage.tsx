@@ -6,12 +6,12 @@ import { Download, ExternalLink, GitBranch, GitCommitHorizontal, Network, Search
 import { api, API_BASE, errorMessage } from "@/lib/api";
 import { useResource, useStoredValue } from "@/lib/hooks";
 import { fmtDay, fmtDateTime } from "@/lib/format";
-import { commitImpact, featureFiles, mapGraph, type MapCommit, type MapNode, type RepositoryMap } from "@/lib/repository-map";
-import { useRepo } from "./RepoContext";
-import { RepoSelect } from "./RepoSelect";
-import { EmptyState, ErrorState, SkeletonLines } from "./states";
+import { commitImpact, featureFiles, mapGraph, type MapCommit, type MapNode, type MapLoadProgress, type RepositoryMap } from "@/lib/repository-map";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
+import { EmptyState, ErrorState, SkeletonLines } from "@/components/ui/states";
 import { RepositoryGraph } from "./RepositoryGraph";
-import { WaitStatus } from "./WaitStatus";
+import { WaitStatus } from "@/components/ui/WaitStatus";
 
 function BasicMapNotice({ repo }: { repo: string }) {
   const router = useRouter();
@@ -37,7 +37,7 @@ function BasicMapNotice({ repo }: { repo: string }) {
 }
 
 function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: number; setOffset: (offset: number) => void }) {
-  const [mode, setMode] = useState<"features" | "impact" | "history">("features");
+  const [mode, setMode] = useState<"features" | "files" | "impact" | "history">("features");
   const [featureId, setFeatureId] = useState<string | null>(null);
   const [commitSha, setCommitSha] = useState<string | null>(null);
   const [selected, setSelected] = useState<MapNode | null>(null);
@@ -45,7 +45,7 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
   const commit = data.commits.find(c => c.sha === commitSha) ?? null;
   const feature = data.features.find(f => f.id === featureId) ?? null;
   const impact = useMemo(() => commit ? commitImpact(data, commit) : null, [data, commit]);
-  const graph = useMemo(() => mapGraph(data, featureId, mode === "features" ? null : commit, mode === "history"), [data, featureId, commit, mode]);
+  const graph = useMemo(() => mapGraph(data, featureId, mode === "features" ? null : commit, mode === "history", mode === "files"), [data, featureId, commit, mode]);
   const history = data.commits.filter(c => `${c.sha} ${c.title} ${c.author}`.toLowerCase().includes(query.toLowerCase().trim()));
   const source = `https://github.com/${data.repo}/blob/${data.head_sha ?? "HEAD"}/`;
   const fileUrl = (path: string) => `${source}${path.split("/").map(encodeURIComponent).join("/")}`;
@@ -62,7 +62,7 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
     <dl className="stat-strip grid-cols-2 lg:grid-cols-4">
       <div><dt>Feature definitions</dt><dd>{data.features.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">{data.features.some(f => f.source === "manifest") ? "from repository manifest" : "inferred directory groups"}</p></div>
       <div><dt>Files in this map</dt><dd>{data.files.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">of {data.total_files} indexed paths</p></div>
-      <div><dt>Import connections</dt><dd>{data.imports.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">at the indexed HEAD</p></div>
+      <div><dt>Import connections</dt><dd>{data.imports.length}</dd><p className="mt-1 text-[0.76rem] text-ink-3">at the indexed HEAD{data.coverage.unsupported_files ? ` · ${data.coverage.unsupported_files} files mapped without language import analysis` : ""}</p></div>
       <div><dt>Indexed commits</dt><dd>{data.total_commits}</dd><p className="mt-1 text-[0.76rem] text-ink-3">browse the history below</p></div>
     </dl>
 
@@ -70,18 +70,19 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-1" role="group" aria-label="Map view">
           <button type="button" className="filter-pill inline-flex items-center gap-2" aria-pressed={mode === "features"} onClick={overview}><Network size={15} />Feature connections</button>
+          <button type="button" className="filter-pill" aria-pressed={mode === "files"} onClick={() => { setMode("files"); setFeatureId(null); setCommitSha(null); setSelected(null); }}>All files</button>
           <button type="button" className="filter-pill inline-flex items-center gap-2" aria-pressed={mode === "history"} onClick={() => { setMode("history"); setSelected(null); }}><GitBranch size={15} />Commit history</button>
           {commit ? <button type="button" className="filter-pill" aria-pressed={mode === "impact"} onClick={() => setMode("impact")}>Impact of {commit.sha.slice(0, 7)}</button> : null}
         </div>
         <a className="btn btn-line btn-sm" href={`${API_BASE}/repository-map/obsidian?${new URLSearchParams({ repo: data.repo, offset: "0", limit: "200" })}`} download><Download size={14} />Export to Obsidian</a>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-[0.8rem] text-ink-2">
-        <p>{mode === "history" ? "Arrows point from each commit to its parents. Ancestry does not imply feature dependency." : mode === "impact" ? "Red marks changed files and potentially affected features. Follow arrows to inspect dependency paths." : feature ? `Entry points and imports behind ${feature.name}.` : "Dashed connections mean features share code. Select a feature to trace its imports."}</p>
+        <p>{mode === "files" ? `All ${data.files.length.toLocaleString()} indexed paths, including files without import connections. Pan to explore larger maps.` : mode === "history" ? "Arrows point from each commit to its parents. Ancestry does not imply feature dependency." : mode === "impact" ? "Red marks changed files and potentially affected features. Follow arrows to inspect dependency paths." : feature ? `Entry points and imports behind ${feature.name}.` : "Dashed connections mean features share code. Select a feature to trace its imports."}</p>
         {feature ? <button type="button" className="btn btn-ghost btn-sm" onClick={overview}>All features</button> : null}
       </div>
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0"><RepositoryGraph key={`${mode}:${featureId}:${commitSha}`} nodes={graph.nodes} edges={graph.edges} selected={selected?.id ?? null} onSelect={chooseNode} />
-          {graph.omitted ? <p className="mt-2 text-[0.76rem] text-ink-3">{graph.omitted} files omitted from the drawing to keep it readable; impact counts use the whole returned map.</p> : null}
+          <p className="mt-2 text-[0.76rem] text-ink-3">Map loaded · {graph.nodes.length.toLocaleString()} nodes in this view · {graph.edges.length.toLocaleString()} connections</p>
         </div>
         <section aria-label="Graph inspector" className="card min-w-0 space-y-4 p-5">
           {commit && mode !== "features" ? <>
@@ -130,9 +131,10 @@ function Explorer({ data, offset, setOffset }: { data: RepositoryMap; offset: nu
 
 function RepositoryMapBody({ repo }: { repo: string }) {
   const [offset, setOffset] = useState(0);
-  const resource = useResource(`repository-map:${repo}:${offset}`, signal => api.repositoryMap(repo, offset, signal));
+  const [progress, setProgress] = useState<MapLoadProgress | null>(null);
+  const resource = useResource(`repository-map:${repo}:${offset}`, signal => api.repositoryMap(repo, offset, signal, setProgress));
   if (resource.error) return <ErrorState title="Could not load the repository map" error={resource.error} onRetry={resource.reload} />;
-  if (!resource.data) return <div className="space-y-4"><WaitStatus label="Loading files, features and commit history." min={1} max={5} /><div className="card p-6" aria-label="Loading repository map"><SkeletonLines rows={8} /></div></div>;
+  if (!resource.data) return <div className="space-y-4"><WaitStatus key={`${repo}:${offset}`} label={progress ? `Loading map: ${progress.loaded.toLocaleString()} of ${progress.total.toLocaleString()} files, groups and connections.` : "Loading files, features and commit history."} min={1} max={progress ? Math.max(5, Math.ceil(progress.total / 500) * 2) : 5} /><div className="card p-6" aria-label="Loading repository map"><SkeletonLines rows={8} /></div></div>;
   if (!resource.data.files.length && !resource.data.commits.length) return <EmptyState title="No files or commits have been indexed yet.">Open Repositories to check this repository&apos;s import status and retry an interrupted import.</EmptyState>;
   return <Explorer key={`${repo}:${offset}:${resource.data.head_sha}`} data={resource.data} offset={offset} setOffset={setOffset} />;
 }

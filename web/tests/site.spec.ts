@@ -76,6 +76,48 @@ test("landing assets load and the app opens", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("dashboard inventory shows a wait estimate and replaces it with records", async ({ page }) => {
+  let finish!: () => void;
+  const pending = new Promise<void>(resolve => { finish = resolve; });
+  await page.route("**/api/repository-overview?**", async route => {
+    await pending;
+    await route.fulfill({ json: overview });
+  });
+  await page.goto("/dashboard");
+  await expect(page.getByText("Loading inventory for knadh/listmonk.", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Estimated wait: 1–5 seconds/)).toBeVisible();
+  finish();
+  await expect(page.getByLabel("Indexed records", { exact: true })).toBeVisible();
+  await expect(page.getByText("Loading inventory for knadh/listmonk.", { exact: true })).toHaveCount(0);
+});
+
+test("large maps load every page and retain all nodes without freezing navigation", async ({ page }) => {
+  const files = Array.from({ length: 2101 }, (_, i) => ({ path: `area-${i % 85}/file-${i}.py`, alive: true }));
+  const imports = files.slice(0, -1).map(file => ({ source: file.path, target: files[2100].path, line: 1, specifier: "helper" }));
+  const features = Array.from({ length: 85 }, (_, i) => ({ id: `area-${i}`, name: `area-${i}`, source: "directory", entrypoints: files.filter(f => f.path.startsWith(`area-${i}/`)).map(f => f.path), description: "Code area" }));
+  await page.route("**/api/repository-map?**", route => {
+    const n = Number(new URL(route.request().url()).searchParams.get("structure_page"));
+    return route.fulfill({ json: { ...repositoryMap, index_status: "ready", total_files: 2101, total_imports: 2100, total_features: 85,
+      structure_page: n, structure_has_more: n < 4, files: files.slice(n * 500, (n + 1) * 500), imports: imports.slice(n * 2000, (n + 1) * 2000),
+      features: features.slice(n * 100, (n + 1) * 100) } });
+  });
+  await page.goto("/map");
+  await page.getByRole("button", { name: "All files", exact: true }).click();
+  const graph = page.getByRole("group", { name: "Repository graph", exact: true });
+  await expect(graph.getByRole("button")).toHaveCount(2101);
+  expect(await graph.evaluate(svg => {
+    const frame = svg.getBoundingClientRect();
+    return [...svg.querySelectorAll("[data-node] circle.map-node-dot")].every(node => {
+      const rect = node.getBoundingClientRect();
+      return rect.left >= frame.left && rect.right <= frame.right && rect.top >= frame.top && rect.bottom <= frame.bottom;
+    });
+  })).toBe(true);
+  await expect(page.getByText("Map loaded · 2,101 nodes in this view · 2,100 connections", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Feature connections", exact: true }).click();
+  await expect(graph.getByRole("button")).toHaveCount(85);
+});
+
 test("new sessions prefer Untangle and preserve a subsequent repository choice", async ({ page }) => {
   await page.route("**/api/repos", route => route.fulfill({ json: [
     ...repos,
@@ -399,7 +441,7 @@ test("feature map explores dependencies and commit impact with evidence", async 
 });
 
 test("feature map handles repositories that have not been indexed", async ({ page }) => {
-  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, head_sha: null, files: [], commits: [], features: [], imports: [] } }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, total_files: 0, total_commits: 0, head_sha: null, files: [], commits: [], features: [], imports: [] } }));
   await page.goto("/map");
   await expect(page.getByText("No files or commits have been indexed yet.", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Export to Obsidian", exact: true })).toHaveCount(0);
@@ -409,7 +451,8 @@ test("connected features remain readable beside an isolated feature on desktop a
   const names = ["Ask & evidence", "Decision history", "Feature map", "Handover calls", "History ingestion", "Knowledge risks", "Landing experience", "Repository discovery"];
   const features = names.map((name, i) => ({ ...repositoryMap.features[0], id: `feature:${i}`, name, entrypoints: [`entry-${i}.ts`] }));
   const imports = features.filter((_, i) => i !== 6).map(feature => ({ source: feature.entrypoints[0], target: "shared.ts", line: 1, specifier: "./shared" }));
-  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, features, imports } }));
+  const files = [...features.flatMap(f => f.entrypoints), "shared.ts"].map(path => ({ path, alive: true }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, total_files: files.length, files, features, imports } }));
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/map");
@@ -426,7 +469,7 @@ test("connected features remain readable beside an isolated feature on desktop a
 test("dense graphs reveal source names on keyboard focus and keep selected files inspectable", async ({ page }) => {
   const files = Array.from({ length: 20 }, (_, i) => ({ path: `dependency-${i}.ts`, alive: true }));
   const imports = files.map(file => ({ source: "ask.ts", target: file.path, line: 1, specifier: `./${file.path}` }));
-  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, files: [...repositoryMap.files, ...files], imports } }));
+  await page.route("**/api/repository-map?**", route => route.fulfill({ json: { ...repositoryMap, total_files: repositoryMap.files.length + files.length, files: [...repositoryMap.files, ...files], imports } }));
   await page.goto("/map");
   const graph = page.getByRole("group", { name: "Repository graph", exact: true });
   await graph.getByRole("button", { name: "Feature Ask", exact: true }).click();

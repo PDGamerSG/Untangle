@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { MeetingPage } from "@/components/MeetingPage";
-import { SkeletonLines } from "@/components/states";
+import { MeetingPage } from "@/components/meetings/MeetingPage";
+import { SkeletonLines } from "@/components/ui/states";
 
 export default function Page() {
   return (

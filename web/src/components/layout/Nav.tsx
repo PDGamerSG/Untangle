@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Activity, AudioLines, BookOpen, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
 import { HealthDot, HealthPanel, useHealth } from "./HealthDot";
 import { Logo } from "./Logo";
-import { useRepo } from "./RepoContext";
+import { useRepo } from "@/components/repositories/RepoContext";
 import { fmtDay } from "@/lib/format";
 
 const GROUPS = [

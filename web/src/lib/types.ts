@@ -1,5 +1,5 @@
 /**
- * Types mirroring docs/CONTRACTS.md §6. Keep field names identical to the API;
+ * Types mirroring docs/architecture/CONTRACTS.md §6. Keep field names identical to the API;
  * the UI never renames or reshapes what the backend sends.
  */
 
@@ -320,6 +320,7 @@ export interface MeetingDetail extends MeetingSummary {
 export type ImportStatus = "queued" | "running" | "complete" | "failed";
 
 export interface ImportJob {
+  queue_ahead?: number;
   estimate?: { elapsed_seconds: number; remaining_min_seconds: number; remaining_max_seconds: number | null; overdue: boolean };
   id: string;
   repo: string;

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EntityChip } from "./Chip";
-import { useRepo } from "./RepoContext";
-import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "./states";
+import { EntityChip } from "@/components/ui/Chip";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDateTime } from "@/lib/format";

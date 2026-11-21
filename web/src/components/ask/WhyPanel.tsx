@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { Subgraph } from "./Subgraph";
 import type { CypherCall, Why } from "@/lib/types";
 

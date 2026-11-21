@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TimelinePage } from "@/components/TimelinePage";
+import { TimelinePage } from "@/components/decisions/TimelinePage";
 
 export const metadata: Metadata = { title: "Timeline" };
 

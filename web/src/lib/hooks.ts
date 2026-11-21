@@ -25,16 +25,35 @@ interface Entry {
 const memory = new Map<string, Entry>();
 const inflight = new Map<string, Promise<unknown>>();
 const FRESH_MS = 30_000;
+let resourceRevision = 0;
+const resourceListeners = new Set<() => void>();
+const subscribeResources = (listener: () => void) => {
+  resourceListeners.add(listener);
+  return () => { resourceListeners.delete(listener); };
+};
+const resourceSnapshot = () => resourceRevision;
+
+/** Completed imports must refresh mounted inventories and maps, including a reimport of the selected repo. */
+export function invalidateRepositoryResources(repo: string): void {
+  for (const key of new Set([...memory.keys(), ...inflight.keys()])) {
+    if (key === "repos" || key === "repository-imports" || key.split(":")[1] === repo) {
+      memory.delete(key);
+      inflight.delete(key);
+    }
+  }
+  resourceRevision++;
+  resourceListeners.forEach(listener => listener());
+}
 
 function fetchShared<T>(key: string, load: (signal: AbortSignal) => Promise<T>): Promise<T> {
   const running = inflight.get(key) as Promise<T> | undefined;
   if (running) return running;
   const p = load(new AbortController().signal)
     .then((data) => {
-      memory.set(key, { data, at: Date.now() });
+      if (inflight.get(key) === p) memory.set(key, { data, at: Date.now() });
       return data;
     })
-    .finally(() => inflight.delete(key));
+    .finally(() => { if (inflight.get(key) === p) inflight.delete(key); });
   inflight.set(key, p);
   return p;
 }
@@ -50,15 +69,19 @@ export function primeResource(key: string, data: unknown): void {
  * inside the effect; a cached value is read during render instead.
  */
 export function useResource<T>(key: string | null, load: (signal: AbortSignal) => Promise<T>) {
+  const revision = useSyncExternalStore(subscribeResources, resourceSnapshot, () => 0);
   const [state, setState] = useState<ResourceState<T>>({ key: null });
   const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     if (key === null) return;
     const hit = memory.get(key);
-    if (hit && nonce === 0 && Date.now() - hit.at < FRESH_MS) return;
     let cancelled = false;
-    fetchShared(key, load).then(
+    // The cache can fill after render but before this effect (another subscriber,
+    // or a primed response). Always deliver that value to this subscriber too.
+    const pending = hit && nonce === 0 && Date.now() - hit.at < FRESH_MS
+      ? Promise.resolve(hit.data as T) : fetchShared(key, load);
+    pending.then(
       (data) => {
         if (!cancelled) setState({ key, data });
       },
@@ -71,7 +94,7 @@ export function useResource<T>(key: string | null, load: (signal: AbortSignal) =
     };
     // The loader is identified by `key`; `nonce` forces a refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, nonce]);
+  }, [key, nonce, revision]);
 
   const cached = key !== null ? memory.get(key) : undefined;
   const current: ResourceState<T> | undefined =

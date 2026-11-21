@@ -3,10 +3,10 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, FileText, GitBranch, Search, UserRound } from "lucide-react";
-import { CitationChip, EntityChip } from "./Chip";
+import { CitationChip, EntityChip } from "@/components/ui/Chip";
 import { StatusMark } from "./DecisionCard";
-import { EmptyState } from "./states";
-import { ExportBrief } from "./ExportBrief";
+import { EmptyState } from "@/components/ui/states";
+import { ExportBrief } from "@/components/ui/ExportBrief";
 import { briefFilename, decisionBrief, matchesDecision, snapshotDecisions, type SnapshotDecision } from "@/lib/evidence-brief";
 import { fmtDay, predicateLabel, signalLabel } from "@/lib/format";
 import type { Timeline } from "@/lib/types";

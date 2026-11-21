@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { DecisionPage } from "@/components/DecisionPage";
-import { SkeletonLines } from "@/components/states";
+import { DecisionPage } from "@/components/decisions/DecisionPage";
+import { SkeletonLines } from "@/components/ui/states";
 
 export default function Page() {
   return (

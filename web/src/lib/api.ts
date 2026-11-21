@@ -16,7 +16,7 @@ import type {
   WhyPath,
 } from "./types";
 import * as sample from "./sample";
-import type { RepositoryMap } from "./repository-map";
+import type { MapLoadProgress, RepositoryMap } from "./repository-map";
 
 export const API_BASE = (process.env.NEXT_PUBLIC_UNTANGLE_API ?? "/api").replace(/\/+$/, "");
 export const SAMPLE_MODE = process.env.NEXT_PUBLIC_UNTANGLE_SAMPLE === "1";
@@ -80,6 +80,51 @@ const q = (params: Record<string, string | null | undefined>) => {
   return str ? `?${str}` : "";
 };
 
+async function loadRepositoryMap(repo: string, offset: number, signal?: AbortSignal, onProgress?: (progress: MapLoadProgress) => void): Promise<RepositoryMap> {
+  const page = (structurePage: number) => request<RepositoryMap>(`/repository-map${q({ repo, offset: String(offset), limit: "40", structure_page: String(structurePage) })}`, { signal });
+  const data = await page(0);
+  let current = data;
+  const report = () => onProgress?.({ loaded: data.files.length + data.imports.length + data.features.length,
+    total: data.total_files + (data.total_imports ?? data.imports.length) + (data.total_features ?? data.features.length) });
+  report();
+  const maxPages = Math.max(1, data.total_files + (data.total_imports ?? 0) + (data.total_features ?? 0));
+  for (let next = 1; current.structure_has_more; next++) {
+    if (next > maxPages) throw new ApiError(502, "Map loading made no progress. Please retry.");
+    current = await page(next);
+    if (current.structure_page !== next || current.head_sha !== data.head_sha || current.indexed_at_iso !== data.indexed_at_iso ||
+        current.total_files !== data.total_files || current.total_imports !== data.total_imports || current.total_features !== data.total_features) {
+      throw new ApiError(409, "The repository changed while its map was loading. Please retry to load the complete version.");
+    }
+    if (current.structure_has_more && !current.files.length && !current.imports.length && !current.features.length)
+      throw new ApiError(502, "Map loading made no progress. Please retry.");
+    data.files.push(...current.files);
+    data.imports.push(...current.imports);
+    data.features.push(...current.features);
+    report();
+  }
+  const known = new Set(data.files.map(file => file.path));
+  if (known.size !== data.total_files || known.size !== data.files.length ||
+      (data.total_imports != null && data.imports.length !== data.total_imports) ||
+      (data.total_features != null && data.features.length !== data.total_features) ||
+      data.imports.some(edge => !known.has(edge.source) || !known.has(edge.target))) {
+    throw new ApiError(502, "The repository map is incomplete. Please retry or refresh its import from Repositories.");
+  }
+  if (data.index_status === "basic") {
+    const groups = new Map<string, string[]>();
+    for (const file of data.files.filter(f => f.alive)) {
+      const directory = file.path.includes("/") ? file.path.slice(0, file.path.lastIndexOf("/")) : ".";
+      const members = groups.get(directory) ?? [];
+      members.push(file.path); groups.set(directory, members);
+    }
+    data.features = [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([name, entrypoints]) => ({
+      id: `feature:${repo}:${name}`, name, entrypoints, source: "directory", description: "Inferred directory group; not a verified product feature.",
+    }));
+    data.total_features = data.features.length;
+  }
+  data.structure_has_more = false;
+  return data;
+}
+
 export const api = {
   health: (signal?: AbortSignal): Promise<Health> => (SAMPLE_MODE ? sample.sampleHealth() : request("/health", { signal })),
 
@@ -102,8 +147,8 @@ export const api = {
       ? Promise.resolve({ nodes: 0, relationships: 0, labels: {}, relationship_types: {} })
       : request(`/stats${q({ repo })}`, { signal }),
 
-  repositoryMap: (repo: string, offset: number, signal?: AbortSignal): Promise<RepositoryMap> =>
-    SAMPLE_MODE ? Promise.reject(new ApiError(400, "Repository maps require a live indexed repository.")) : request(`/repository-map${q({ repo, offset: String(offset), limit: "40" })}`, { signal }),
+  repositoryMap: (repo: string, offset: number, signal?: AbortSignal, onProgress?: (progress: MapLoadProgress) => void): Promise<RepositoryMap> =>
+    SAMPLE_MODE ? Promise.reject(new ApiError(400, "Repository maps require a live indexed repository.")) : loadRepositoryMap(repo, offset, signal, onProgress),
 
   timeline: (repo: string, atIso: string, signal?: AbortSignal): Promise<Timeline> =>
     SAMPLE_MODE ? sample.sampleTimeline(atIso) : request(`/timeline${q({ repo, at: atIso })}`, { signal }),

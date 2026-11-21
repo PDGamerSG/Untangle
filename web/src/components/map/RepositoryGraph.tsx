@@ -25,6 +25,15 @@ const nodeRadius = (node: MapNode) => node.kind === "feature" ? 25 : node.kind =
 function layout(nodesIn: MapNode[], edgesIn: MapEdge[], W: number, H: number) {
   const nodes: Node[] = nodesIn.map(n => ({ ...n }));
   const edges: Edge[] = edgesIn.map(e => ({ ...e }));
+  // Large maps must not run hundreds of quadratic collision passes on the UI
+  // thread. Lay out every node deterministically and keep the full graph pannable.
+  if (nodes.length > 80) {
+    const columns = Math.ceil(Math.sqrt(nodes.length));
+    nodes.forEach((node, i) => { node.x = 85 + (i % columns) * 150; node.y = 100 + Math.floor(i / columns) * 110; });
+    const byId = new Map(nodes.map(node => [node.id, node]));
+    for (const edge of edges) { edge.source = byId.get(edge.source as string)!; edge.target = byId.get(edge.target as string)!; }
+    return { nodes, edges };
+  }
   let seed = 21;
   const simulation = forceSimulation(nodes).randomSource(() => ((seed = seed * 16807 % 2147483647) - 1) / 2147483646)
     .force("link", forceLink<Node, Edge>(edges).id(n => n.id).distance(e => e.kind === "shared" ? 190 : 100).strength(0.35))
@@ -76,19 +85,27 @@ export function RepositoryGraph({ nodes: inputNodes, edges: inputEdges, selected
     return () => observer.disconnect();
   }, []);
   const { nodes, edges } = useMemo(() => layout(inputNodes, inputEdges, W, H), [inputNodes, inputEdges, W, H]);
-  const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
+  const fitView = useMemo(() => {
+    if (nodes.length <= 80) return { x: 0, y: 0, zoom: 1 };
+    const right = Math.max(...nodes.map(node => node.x!)) + 85;
+    const bottom = Math.max(...nodes.map(node => node.y!)) + 80;
+    const zoom = Math.min((W - 40) / right, (H - 80) / bottom);
+    return { x: (W / 2 - right / 2) * zoom, y: (H / 2 - bottom / 2) * zoom, zoom };
+  }, [nodes, W, H]);
+  const [adjustedView, setView] = useState<{ x: number; y: number; zoom: number } | null>(null);
+  const view = adjustedView ?? fitView;
   const drag = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
   const arrow = useId().replace(/:/g, "");
-  const zoom = (factor: number) => setView(v => ({ ...v, zoom: Math.max(0.5, Math.min(3, v.zoom * factor)) }));
+  const zoom = (factor: number) => setView(v => { const current = v ?? fitView; return { ...current, zoom: Math.max(Math.min(0.5, fitView.zoom), Math.min(3, current.zoom * factor)) }; });
   return <div className="map-canvas" ref={container}>
     <div className="absolute right-3 top-3 z-10 flex gap-1 rounded-lg border border-rule bg-surface p-1">
       <button className="btn btn-ghost btn-sm" type="button" aria-label="Zoom out" onClick={() => zoom(0.8)}><Minus size={16} /></button>
       <button className="btn btn-ghost btn-sm" type="button" aria-label="Zoom in" onClick={() => zoom(1.25)}><Plus size={16} /></button>
-      <button className="btn btn-ghost btn-sm" type="button" aria-label="Reset graph view" onClick={() => setView({ x: 0, y: 0, zoom: 1 })}><RotateCcw size={15} /></button>
+      <button className="btn btn-ghost btn-sm" type="button" aria-label="Reset graph view" onClick={() => setView(null)}><RotateCcw size={15} /></button>
     </div>
     <svg viewBox={`0 0 ${W} ${H}`} style={{ height: H }} className="block w-full touch-none" role="group" aria-label="Repository graph"
       onPointerDown={event => { if ((event.target as Element).closest("[data-node]")) return; event.currentTarget.setPointerCapture(event.pointerId); drag.current = { x: event.clientX, y: event.clientY, startX: view.x, startY: view.y }; }}
-      onPointerMove={event => { if (!drag.current) return; const factor = W / event.currentTarget.getBoundingClientRect().width; setView(v => ({ ...v, x: drag.current!.startX + (event.clientX - drag.current!.x) * factor, y: drag.current!.startY + (event.clientY - drag.current!.y) * factor })); }}
+      onPointerMove={event => { if (!drag.current) return; const factor = W / event.currentTarget.getBoundingClientRect().width; setView(v => ({ ...(v ?? fitView), x: drag.current!.startX + (event.clientX - drag.current!.x) * factor, y: drag.current!.startY + (event.clientY - drag.current!.y) * factor })); }}
       onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}>
       <defs><marker id={arrow} viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="var(--ink-3)" /></marker></defs>
       <g transform={`translate(${W / 2 + view.x}, ${H / 2 + view.y}) scale(${view.zoom}) translate(${-W / 2}, ${-H / 2})`}>

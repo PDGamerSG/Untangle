@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces } from "next/font/google";
-import { Nav } from "@/components/Nav";
-import { RepoProvider } from "@/components/RepoContext";
-import { SampleBanner } from "@/components/SampleBanner";
+import { Nav } from "@/components/layout/Nav";
+import { RepoProvider } from "@/components/repositories/RepoContext";
+import { SampleBanner } from "@/components/layout/SampleBanner";
 import "./globals.css";
 
 const fraunces = Fraunces({

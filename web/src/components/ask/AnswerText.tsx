@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { CitationChip } from "@/components/Chip";
+import { CitationChip } from "@/components/ui/Chip";
 import type { Citation } from "@/lib/types";
 
 /** Matches "[dec:…]" style citations: ids may contain ":", "/", "#", ".", "-", "_", "@". */
