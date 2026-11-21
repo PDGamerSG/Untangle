@@ -22,7 +22,7 @@ export function useHealth() {
       ? [`API unreachable: ${health.error}`]
       : d
         ? [
-            `Graph database: Neo4j ${d.neo4j.version}${d.neo4j.aura ? ", hosted" : ""}`,
+            `Graph database: ${(d.graph?.ok ?? d.neo4j.ok) ? `Neo4j${d.neo4j.aura ? ", hosted" : ""}` : "not connected"}`,
             `Answers: ${answerLine(d)}`,
             `Search index: ${d.embed.available === false ? "unavailable" : "ready"} (${d.embed.dim} dimensions)`,
             `Speech and translation: ${(d.sarvam?.configured ?? d.optional_backends?.sarvam.configured) ? "ready" : "not configured"}`,

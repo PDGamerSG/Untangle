@@ -3,6 +3,7 @@ import { ArrowUpRight, ExternalLink, MessageCircleWarning, ShieldAlert, UserRoun
 import { EntityChip, CitationChip } from "@/components/ui/Chip";
 import { fmtDay, predicateLabel } from "@/lib/format";
 import type { PulseCategory, PulseRisk } from "@/lib/types";
+import { externalHref } from "@/lib/api";
 
 const CATEGORY: Record<PulseCategory, { label: string; icon: typeof ShieldAlert; color: string }> = {
   contradiction: { label: "Code and handover disagree", icon: MessageCircleWarning, color: "text-bad" },
@@ -72,7 +73,7 @@ export function PulseRiskCard({ risk }: { risk: PulseRisk }) {
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-3">
         <Link href={`/ask?question=${encodeURIComponent(question)}`} className="btn btn-primary btn-sm">Ask why <ArrowUpRight size={13} /></Link>
         <Link href={`/decisions/${encodeURIComponent(risk.decision.id)}`} className="btn btn-line btn-sm">Open evidence path <ArrowUpRight size={13} /></Link>
-        {risk.evidence[0]?.url ? <a href={risk.evidence[0].url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">Source <ExternalLink size={13} /></a> : null}
+        {externalHref(risk.evidence[0]?.url) ? <a href={externalHref(risk.evidence[0]?.url)} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">Source <ExternalLink size={13} /></a> : null}
       </div>
     </article>
   );

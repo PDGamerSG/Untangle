@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { Play } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Play, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { EntityChip } from "@/components/ui/Chip";
 import { DecisionCard } from "@/components/decisions/DecisionCard";
 import { NotConfigured } from "./MeetingsPage";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
-import { api, API_BASE, SAMPLE_MODE } from "@/lib/api";
-import { useResource } from "@/lib/hooks";
+import { api, API_BASE, errorMessage, SAMPLE_MODE } from "@/lib/api";
+import { clearResources, useResource } from "@/lib/hooks";
 import { fmtDateTime, fmtDuration, fmtOffset, meetingSourceLabel } from "@/lib/format";
 import type { MeetingDetail } from "@/lib/types";
 
-function audioSrc(uri: string): string {
-  if (/^https?:\/\//i.test(uri) || SAMPLE_MODE) return uri;
-  return uri.startsWith("/") ? `${API_BASE}${uri}` : uri;
+/** Recordings play only from this site. A transcript cannot point visitors' browsers at another host. */
+function audioSrc(uri: string): string | null {
+  if (SAMPLE_MODE && uri.startsWith("/")) return uri;
+  if (uri.startsWith("/") && !uri.startsWith("//")) return `${API_BASE}${uri}`;
+  return null;
 }
 
 const SPEAKER_TONES = ["var(--speaker-1)", "var(--speaker-2)", "var(--speaker-3)", "var(--speaker-4)", "var(--speaker-5)"];
@@ -40,9 +42,9 @@ function Transcript({ m }: { m: MeetingDetail }) {
 
   return (
     <>
-      {m.audio_uri ? (
+      {m.audio_uri && audioSrc(m.audio_uri) ? (
         <div className="sticky top-[5.3rem] z-30 sm:top-14 lg:top-0 -mx-4 border-b border-rule bg-bg/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
-          <audio ref={audio} controls preload="metadata" src={audioSrc(m.audio_uri)} className="w-full" aria-label={`Recording of ${m.title}`} />
+          <audio ref={audio} controls preload="metadata" src={audioSrc(m.audio_uri) ?? undefined} className="w-full" aria-label={`Recording of ${m.title}`} />
         </div>
       ) : null}
 
@@ -104,6 +106,34 @@ function Transcript({ m }: { m: MeetingDetail }) {
   );
 }
 
+/** The uploader (or an administrator) can remove a call, for example when a participant withdraws consent. */
+function DeleteMeeting({ id, title }: { id: string; title: string }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function remove() {
+    if (!window.confirm(`Delete "${title}"? Its transcript and the decisions taken from it are removed for everyone. This cannot be undone.`)) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api.deleteMeeting(id);
+      clearResources();
+      router.replace("/meetings");
+    } catch (e) {
+      setError(errorMessage(e));
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-3">
+      <button type="button" className="btn btn-line btn-sm" onClick={() => void remove()} disabled={busy}>
+        <Trash2 size={14} aria-hidden /> {busy ? "Deleting…" : "Delete this call"}
+      </button>
+      {error ? <p role="alert" className="mt-2 text-[0.82rem] text-bad">{error}</p> : null}
+    </div>
+  );
+}
+
 export function MeetingPage() {
   const params = useParams<{ id: string }>();
   const id = (() => {
@@ -157,6 +187,8 @@ export function MeetingPage() {
           {fmtDateTime(m.started_at_iso)} · {fmtDuration(m.duration_ms)} · {m.utterances.length} utterances
         </p>
         {m.summary ? <p className="mt-3 max-w-3xl text-[0.95rem] leading-relaxed text-ink-2">{m.summary}</p> : null}
+        {m.uploaded_by_me ? <p className="mt-2 text-[0.82rem] text-ink-3">You added this call.</p> : null}
+        {m.can_delete ? <DeleteMeeting id={m.id} title={m.title} /> : null}
       </header>
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">

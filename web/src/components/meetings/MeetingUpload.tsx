@@ -20,6 +20,7 @@ export function MeetingUpload({ repo, onUploaded }: { repo: string | null; onUpl
       const file = values.get("file");
       setError(""); setMeeting(null);
       if (!(file instanceof File) || !file.size) { setError("Choose a recording or transcript first."); return; }
+      if (!values.get("consent")) { setError("Confirm that everyone in the conversation agreed to share it."); return; }
       if (file.size > 4_000_000) { setError("Choose a file smaller than 4 MB, or upload a transcript of the recording."); return; }
       const body = new FormData();
       body.set("repo", repo);
@@ -38,7 +39,11 @@ export function MeetingUpload({ repo, onUploaded }: { repo: string | null; onUpl
         <label className="space-y-1 text-sm">Meeting title<input name="title" className="field w-full" placeholder="Architecture handover" maxLength={200} disabled={busy} /></label>
         <label className="space-y-1 text-sm">Recording or transcript<input name="file" type="file" className="field w-full" accept="audio/*,.json,.txt" required disabled={busy} /></label>
       </div>
-      <p className="text-xs text-ink-3">Up to 4 MB. Recordings are processed for transcription and are not stored for playback. Only upload conversations you have permission to share.</p>
+      <p className="text-xs text-ink-3">Up to 4 MB. Transcripts are JSON or plain text with one <code className="t-code">Speaker: words</code> line per turn. A recording takes one to three minutes to transcribe and is not stored for playback.</p>
+      <label className="flex items-start gap-2 text-sm text-ink-2">
+        <input name="consent" type="checkbox" required disabled={busy} className="mt-0.5 h-4 w-4 accent-[var(--accent)]" />
+        <span>Everyone in this conversation agreed to it being transcribed and shared with other members of this workspace.</span>
+      </label>
       <button className="btn btn-primary" disabled={busy || !repo} type="submit">{busy ? "Processing handover…" : "Upload handover"}</button>
       <div aria-live="polite">
         {error ? <p role="alert" className="text-sm text-bad">{error}</p> : null}

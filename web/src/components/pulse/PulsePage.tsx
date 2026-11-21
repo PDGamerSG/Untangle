@@ -7,6 +7,7 @@ import { useRepo } from "@/components/repositories/RepoContext";
 import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
+import { NoRepository } from "@/components/repositories/NoRepository";
 
 function PulseSkeleton() {
   return (
@@ -79,7 +80,7 @@ export function PulsePage() {
           )}
         </>
       ) : (
-        <EmptyState title="Choose an ingested repository to open Pulse" />
+        <NoRepository what="open Pulse" />
       )}
     </div>
   );

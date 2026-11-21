@@ -12,6 +12,7 @@ import { RepoSelect } from "@/components/repositories/RepoSelect";
 import { EmptyState, ErrorState, SkeletonLines } from "@/components/ui/states";
 import { RepositoryGraph } from "./RepositoryGraph";
 import { WaitStatus } from "@/components/ui/WaitStatus";
+import { NoRepository } from "@/components/repositories/NoRepository";
 
 function BasicMapNotice({ repo }: { repo: string }) {
   const router = useRouter();
@@ -141,5 +142,5 @@ function RepositoryMapBody({ repo }: { repo: string }) {
 
 export function RepositoryMapPage() {
   const { repo } = useRepo();
-  return <div className="space-y-7"><header className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow mb-2">Repository map</p><h1 className="t-display text-[2.1rem] leading-tight sm:text-[2.5rem]">How the repository fits together.</h1><p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-ink-2">Trace features through their code and commit history. Explore what a change could affect before deciding what to test.</p></div><RepoSelect compact /></header>{repo ? <RepositoryMapBody key={repo} repo={repo} /> : <EmptyState title="Choose an ingested repository to explore its map." />}</div>;
+  return <div className="space-y-7"><header className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow mb-2">Repository map</p><h1 className="t-display text-[2.1rem] leading-tight sm:text-[2.5rem]">How the repository fits together.</h1><p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-ink-2">Trace features through their code and commit history. Explore what a change could affect before deciding what to test.</p></div><RepoSelect compact /></header>{repo ? <RepositoryMapBody key={repo} repo={repo} /> : <NoRepository what="explore its map" />}</div>;
 }

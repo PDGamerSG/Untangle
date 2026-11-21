@@ -6,7 +6,7 @@ import { ArrowUpRight, ExternalLink, GitCommitHorizontal, UserRound } from "luci
 import { KindTag } from "@/components/ui/Chip";
 import { DecisionCard } from "@/components/decisions/DecisionCard";
 import { EmptyState, ErrorState, SectionTitle, Skeleton, SkeletonLines } from "@/components/ui/states";
-import { api } from "@/lib/api";
+import { api, externalHref } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { fmtDay, kindFromLabel } from "@/lib/format";
 import type { EntityResponse } from "@/lib/types";
@@ -36,7 +36,15 @@ function facts(entity: EntityResponse["entity"]): [string, string][] {
 
 export function EntityPage() {
   const params = useParams<{ id: string }>();
-  const id = params?.id ? decodeURIComponent(params.id) : null;
+  // A malformed escape in a pasted link is shown as "not found" rather than crashing the page.
+  const id = (() => {
+    if (!params?.id) return null;
+    try {
+      return decodeURIComponent(params.id);
+    } catch {
+      return params.id;
+    }
+  })();
   const res = useResource(id ? `entity:${id}` : null, (signal) => api.entity(id!, signal));
 
   if (res.loading)
@@ -133,8 +141,8 @@ export function EntityPage() {
                   <GitCommitHorizontal size={15} className="mt-1 shrink-0 text-ink-3" aria-hidden />
                   <div className="min-w-0 text-[0.9rem]">
                     <p className="text-ink">
-                      {c.url ? (
-                        <a href={c.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline-offset-4 hover:underline">
+                      {externalHref(c.url) ? (
+                        <a href={externalHref(c.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline-offset-4 hover:underline">
                           {c.title ?? c.sha?.slice(0, 7)} <ExternalLink size={12} aria-hidden />
                         </a>
                       ) : (

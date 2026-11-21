@@ -54,7 +54,7 @@ function SystemStatus() {
         <p className="text-[0.88rem] text-bad">The API is not reachable: {res.error}</p>
       ) : d ? (
         <dl className="divide-y divide-rule border-y border-rule">
-          <StatusRow label="Graph database" value={d.neo4j?.version ? `Neo4j ${d.neo4j.version}${d.neo4j.aura ? ", hosted" : ""}` : "Not connected"} tone={d.ok ? "ok" : "bad"} />
+          <StatusRow label="Graph database" value={(d.graph?.ok ?? d.neo4j?.ok) ? `Neo4j${d.neo4j?.aura ? ", hosted" : ""}` : "Not connected"} tone={d.ok ? "ok" : "bad"} />
           <StatusRow
             label="Answers"
             value={answerLine(d)}
@@ -62,7 +62,7 @@ function SystemStatus() {
           />
           <StatusRow
             label="Search index"
-            value={`Ready, ${d.embed.dim} dimensions`}
+            value={(d.embed.available ?? d.optional_backends?.embeddings.available) === false ? "Unavailable: answers use the graph and full-text search" : `Ready, ${d.embed.dim} dimensions`}
             tone={(d.embed.available ?? d.optional_backends?.embeddings.available) === false ? "warn" : "ok"}
           />
           <StatusRow

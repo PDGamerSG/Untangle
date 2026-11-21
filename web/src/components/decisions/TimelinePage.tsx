@@ -4,10 +4,11 @@ import { useId, useState } from "react";
 import { DecisionWorkbench } from "./DecisionWorkbench";
 import { RepoSelect } from "@/components/repositories/RepoSelect";
 import { useRepo } from "@/components/repositories/RepoContext";
-import { EmptyState, ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
+import { ErrorState, Skeleton, SkeletonLines } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { primeResource, useDebounced, useResource } from "@/lib/hooks";
 import { fmtDay } from "@/lib/format";
+import { NoRepository } from "@/components/repositories/NoRepository";
 
 const DAY_MS = 86_400_000;
 
@@ -129,7 +130,7 @@ export function TimelinePage() {
         <DecisionWorkbench key={`${repo}:${timeline.data.at_iso}`} repo={repo} snapshot={timeline.data} />
       ) : repo ? (
         <div className="card p-5" role="status" aria-label="Loading decisions"><Skeleton className="h-7 w-48" /><SkeletonLines rows={5} className="mt-5" /></div>
-      ) : <EmptyState title="Choose an ingested repository to explore decisions" />}
+      ) : <NoRepository what="explore its decisions" />}
     </div>
   );
 }

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /$
+Allow: /welcome/
+Allow: /login
+Allow: /signup
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /ask
+Disallow: /timeline
+Disallow: /pulse
+Disallow: /map
+Disallow: /meetings
+Disallow: /repositories
+Disallow: /decisions
+Disallow: /entities

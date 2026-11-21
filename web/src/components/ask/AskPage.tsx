@@ -62,16 +62,28 @@ function AskWorkspace({ repo }: { repo: string | null }) {
   const busy = turn !== null && !turn.res && !turn.error;
 
   // A question handed over in the URL (from the dashboard, Pulse or an entity page) is asked straight away.
+  // A link from another site only fills in the question: answers count against the reader's quota, so a stranger's
+  // link must not spend it without a click.
   const [pending, setPending] = useState<string | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const initial = params.get("question");
+    const initial = params.get("question")?.slice(0, 2000) ?? null;
     const date = params.get("at");
     if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date))
       && new Date(date).toISOString().slice(0, 10) === date) setAt(date);
     if (!initial) return;
     setQuestion(initial);
-    setPending(initial);
+    let fromThisSite = false;
+    try {
+      // In-app navigation keeps the document that was first loaded; a fresh load of this URL came from a link.
+      const first = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      const loadedHere = !first || new URL(first.name).pathname === window.location.pathname;
+      const sameOriginReferrer = !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+      fromThisSite = !loadedHere || sameOriginReferrer;
+    } catch {
+      fromThisSite = false;
+    }
+    if (fromThisSite) setPending(initial);
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
 

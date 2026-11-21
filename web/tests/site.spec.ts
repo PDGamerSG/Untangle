@@ -35,12 +35,18 @@ const importJob = (status: "queued" | "running" | "complete" | "failed", extra: 
 
 const concurrencyKey = { id: "cfg:knadh/listmonk:schema.sql::app.concurrency", label: "ConfigKey", name: "app.concurrency", path: "schema.sql", key: "app.concurrency", score: 1 };
 
-test.beforeEach(async ({ page }) => {
+const account = { id: "user:asha", email: "asha@example.com", name: "Asha Verma", role: "member", created_at_iso: "2026-11-01T00:00:00Z" };
+
+test.beforeEach(async ({ page, baseURL }) => {
+  // Browser tests run as a signed-in member; the API's session checks are covered by the backend suite.
+  await page.context().addCookies([{ name: "untangle_session", value: "browser-test-session", url: baseURL ?? "http://127.0.0.1:3100" }]);
   await page.route("**/api/**", async (route) => {
     const url = new URL(route.request().url());
     const path = decodeURIComponent(url.pathname.slice(4));
     let body: unknown;
-    if (path === "/health") body = health;
+    if (path === "/auth/me") body = { user: account };
+    else if (path === "/auth/logout") return route.fulfill({ status: 204, body: "" });
+    else if (path === "/health") body = health;
     else if (path === "/repos") body = repos;
     else if (path === "/pulse") body = pulse;
     else if (path === "/repository-map") body = repositoryMap;
@@ -213,7 +219,7 @@ test("missing decisions and pages return to Ask", async ({ page }) => {
   await page.getByRole("link", { name: "Ask a question", exact: true }).click();
   await expect(page).toHaveURL(/\/ask$/);
   await page.goto("/missing-page");
-  await page.getByRole("link", { name: "Ask page", exact: true }).click();
+  await page.getByRole("link", { name: "ask a question", exact: true }).click();
   await expect(page).toHaveURL(/\/ask$/);
 });
 
@@ -246,6 +252,7 @@ test("upload a handover and open its transcript", async ({ page }) => {
   await page.goto("/meetings");
   await page.getByLabel("Meeting title", { exact: true }).fill("Test handover");
   await page.getByLabel("Recording or transcript", { exact: true }).setInputFiles({ name: "handover.txt", mimeType: "text/plain", buffer: Buffer.from("Sam: We use Neo4j for decision history.") });
+  await page.getByLabel(/Everyone in this conversation agreed/).check();
   await page.getByRole("button", { name: "Upload handover", exact: true }).click();
   await page.getByRole("link", { name: "View transcript and decisions" }).click();
   await expect(page.getByRole("list", { name: "Transcript", exact: true })).toBeVisible();
@@ -401,10 +408,21 @@ test("Pulse triage filters risks and exports only the visible evidence", async (
   expect(markdown).toContain(pulse.risks[0].contradictions[0].id);
 });
 
-test("invalid historical URL dates do not reach the answer API", async ({ page }) => {
+test("invalid historical URL dates do not reach the answer API", async ({ page, baseURL }) => {
   const request = page.waitForRequest(req => req.url().endsWith("/api/ask") && req.method() === "POST");
-  await page.goto("/ask?question=why%20is%20app.concurrency%20like%20this&at=2020-02-31");
+  await page.goto("/ask?question=why%20is%20app.concurrency%20like%20this&at=2020-02-31", { referer: `${baseURL}/dashboard` });
   expect((await request).postDataJSON().at).toBeNull();
+});
+
+test("a question linked from another site is filled in but waits for a click", async ({ page }) => {
+  let asked = 0;
+  page.on("request", req => { if (req.url().endsWith("/api/ask") && req.method() === "POST") asked += 1; });
+  await page.goto("/ask?question=why%20is%20app.concurrency%20like%20this", { referer: "https://elsewhere.example/post" });
+  await expect(page.getByRole("textbox", { name: /question/i })).toHaveValue("why is app.concurrency like this");
+  await page.waitForTimeout(1000);
+  expect(asked).toBe(0);
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect.poll(() => asked).toBe(1);
 });
 
 test("an empty timeline explains the snapshot and disables export", async ({ page }) => {
@@ -571,4 +589,80 @@ test("the repositories page shows the indexed inventory of the selected reposito
   await page.getByRole("link", { name: "why is app.concurrency set the way it is?" }).click();
   await expect(page).toHaveURL(/\/ask/);
   await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency set the way it is?");
+});
+
+test("signed-out visitors are sent to sign-in and return to the page they asked for", async ({ page }) => {
+  await page.context().clearCookies();
+  await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  await page.route("**/api/auth/login", async route => {
+    const body = route.request().postDataJSON();
+    if (body.password !== "correct horse battery staple") return route.fulfill({ status: 401, json: { detail: "Email or password is incorrect." } });
+    await page.context().addCookies([{ name: "untangle_session", value: "fresh", url: page.url() }]);
+    return route.fulfill({ json: { user: account } });
+  });
+  await page.goto("/pulse");
+  await expect(page).toHaveURL(/\/login\?next=%2Fpulse$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in" })).toBeVisible();
+  await page.getByLabel("Email").fill("asha@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("wrong password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "incorrect" })).toHaveText("Email or password is incorrect.");
+  await page.unroute("**/api/auth/me");
+  await page.getByLabel("Password", { exact: true }).fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/pulse$/);
+});
+
+test("sign-up checks the password before sending it and links to sign-in", async ({ page }) => {
+  await page.context().clearCookies();
+  await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  let sent = false;
+  await page.route("**/api/auth/register", route => { sent = true; return route.fulfill({ status: 201, json: { user: account } }); });
+  await page.goto("/signup");
+  await page.getByLabel("Email").fill("asha@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("short");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "characters" })).toContainText("at least 10 characters");
+  expect(sent).toBe(false);
+  await page.getByRole("link", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/login$/);
+});
+
+test("a crafted next link cannot send people to another site after sign-in", async ({ page }) => {
+  await page.context().clearCookies();
+  await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  await page.route("**/api/auth/login", async route => {
+    await page.context().addCookies([{ name: "untangle_session", value: "fresh", url: page.url() }]);
+    return route.fulfill({ json: { user: account } });
+  });
+  await page.goto("/login?next=//evil.example/steal");
+  await page.getByLabel("Email").fill("asha@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/127\.0\.0\.1:3100\/dashboard$/);
+});
+
+test("signing out ends the session from the sidebar", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  let signedOut = false;
+  await page.route("**/api/auth/logout", route => { signedOut = true; return route.fulfill({ status: 204, body: "" }); });
+  await page.goto("/dashboard");
+  await expect(page.getByText("asha@example.com")).toBeVisible();
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/login/);
+  expect(signedOut).toBe(true);
+});
+
+test("pages and the landing page send security headers", async ({ request }) => {
+  for (const path of ["/", "/login"]) {
+    const response = await request.get(path, { maxRedirects: 0 });
+    const headers = response.headers();
+    expect(headers["x-frame-options"], path).toBe("DENY");
+    expect(headers["x-content-type-options"], path).toBe("nosniff");
+    expect(headers["content-security-policy"], path).toContain("frame-ancestors 'none'");
+    expect(headers["referrer-policy"], path).toBe("strict-origin-when-cross-origin");
+    expect(headers["x-powered-by"], path).toBeUndefined();
+  }
+  expect((await request.get("/")).headers()["content-security-policy"]).toContain("script-src 'self';");
+  expect((await request.get("/.well-known/security.txt")).ok()).toBe(true);
 });

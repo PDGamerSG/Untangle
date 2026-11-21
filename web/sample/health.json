@@ -1,20 +1,38 @@
 {
  "ok": true,
+ "status": "ok",
  "version": "0.1.0",
  "neo4j": {
   "ok": true,
-  "version": "2026.09.0",
-  "aura": false,
-  "uri": "bolt://localhost:7687",
-  "edition": "enterprise"
+  "aura": false
+ },
+ "graph": {
+  "ok": true,
+  "aura": false
  },
  "llm": {
   "backend": "fake",
-  "model": "fake",
   "available": false
  },
  "embed": {
-  "backend": "fastembed",
-  "dim": 384
+  "backend": "local",
+  "dim": 384,
+  "available": true
+ },
+ "sarvam": {
+  "configured": false
+ },
+ "optional_backends": {
+  "llm": {
+   "backend": "fake",
+   "available": false
+  },
+  "embeddings": {
+   "backend": "local",
+   "available": true
+  },
+  "sarvam": {
+   "configured": false
+  }
  }
 }
