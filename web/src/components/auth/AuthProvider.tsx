@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.logout();
     } finally {
-      clearResources();
+      clearResources({ refetch: false });
       setUserState(null);
       // A full page load drops every client-side cache that belonged to the signed-out account.
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination

@@ -47,9 +47,12 @@ export function invalidateRepositoryResources(repo: string): void {
 }
 
 /** Forget every cached response, for example when a different account signs in. */
-export function clearResources(): void {
+export function clearResources({ refetch = true }: { refetch?: boolean } = {}): void {
   memory.clear();
   inflight.clear();
+  // Mounted pages load again only when asked: right before leaving the page (signing out) that would send requests
+  // without a session, which fail and are logged in the browser console.
+  if (!refetch) return;
   resourceRevision++;
   resourceListeners.forEach(listener => listener());
 }

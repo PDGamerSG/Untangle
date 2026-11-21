@@ -809,11 +809,19 @@ test("signing out ends the session from the sidebar", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   let signedOut = false;
   await page.route("**/api/auth/logout", route => { signedOut = true; return route.fulfill({ status: 204, body: "" }); });
-  await page.goto("/dashboard");
+  // Once the session has ended, the page must not ask for workspace data again: those requests would fail.
+  const afterSignOut: string[] = [];
+  page.on("request", request => {
+    const path = new URL(request.url()).pathname;
+    if (signedOut && path.startsWith("/api/") && !/^\/api\/(auth\/|health$)/.test(path)) afterSignOut.push(path);
+  });
+  // A page keyed by a record id (not by the selected repository) is where a reload after sign-out showed up.
+  await page.goto(`/meetings/${encodeURIComponent(meeting.id)}`);
   await expect(page.getByText("asha@example.com")).toBeVisible();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login/);
   expect(signedOut).toBe(true);
+  expect(afterSignOut).toEqual([]);
 });
 
 test("pages and the landing page send security headers", async ({ request }) => {
