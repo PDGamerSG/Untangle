@@ -141,6 +141,56 @@ test("live feature map traces commits and downloads an Obsidian vault", async ({
   expect(errors).toEqual([]);
 });
 
+test("live pre-flight, briefing, date compare, replay and benchmarks", async ({ page, request }, testInfo) => {
+  const repo = "PDGamerSG/Untangle";
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+
+  const briefing = await request.get(`/api/briefing?repo=${encodeURIComponent(repo)}`);
+  expect(briefing.ok(), await briefing.text()).toBe(true);
+  const brief = await briefing.json();
+  expect(brief.areas.length).toBeGreaterThan(0);
+  expect(brief.summary.length).toBeGreaterThan(0);
+  const markdown = await request.get(`/api/briefing/markdown?repo=${encodeURIComponent(repo)}`);
+  expect(markdown.ok()).toBe(true);
+  expect(await markdown.text()).toContain(`# Day-one briefing: ${repo}`);
+  const diff = await request.get(`/api/timeline/compare?repo=${encodeURIComponent(repo)}&from=2020-01-01&to=${new Date().toISOString().slice(0, 10)}`);
+  expect(diff.ok(), await diff.text()).toBe(true);
+  expect(Object.keys((await diff.json()).counts).sort()).toEqual(["changed", "ended", "started"]);
+  const languages = await (await request.get("/api/speak/languages")).json();
+  expect(languages.languages.map((l: { code: string }) => l.code)).toContain("hi-IN");
+
+  await page.goto("/briefing");
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { level: 1, name: `Your first day in ${repo}` })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Code areas" })).toBeVisible({ timeout: 30_000 });
+  await page.screenshot({ path: testInfo.outputPath("live-briefing.png"), fullPage: true });
+
+  await page.goto("/preflight");
+  await expect(page.getByLabel("Repository", { exact: true })).toHaveValue(repo, { timeout: 30_000 });
+  await page.getByLabel("The change", { exact: true }).fill("Upgrade neo4j to the next major version");
+  await page.getByLabel(/^Files/).fill("pyproject.toml");
+  const checked = page.waitForResponse(res => new URL(res.url()).pathname === "/api/preflight");
+  await page.getByRole("button", { name: "Check change", exact: true }).click();
+  const result = await checked;
+  expect(result.ok(), await result.text()).toBe(true);
+  const preflight = await result.json();
+  expect(preflight.targets.map((t: { path?: string }) => t.path)).toContain("pyproject.toml");
+  await expect(page.getByRole("heading", { name: "Review level" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Next steps" })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("live-preflight.png"), fullPage: true });
+
+  const replayed = brief.changes[0]?.newer?.id;
+  if (replayed) {
+    await page.goto(`/decisions/${encodeURIComponent(replayed)}`);
+    await expect(page.getByRole("region", { name: "Replay this decision" })).toBeVisible({ timeout: 30_000 });
+  }
+  await page.goto("/benchmarks");
+  await expect(page.getByRole("heading", { level: 1, name: "How often Untangle is right" })).toBeVisible();
+  expect(await page.locator("body").innerText()).not.toMatch(/\b(Claude|Haiku|Sonnet|Opus|GPT-\d)\b/i);
+  expect(errors).toEqual([]);
+});
+
 test("live landing, application icons and phone navigation", async ({ page, request }, testInfo) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Open dashboard/i }).first()).toBeVisible();
