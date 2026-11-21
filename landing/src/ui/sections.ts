@@ -174,6 +174,20 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
   const nav = $(".nav");
   const rail = $(".rail");
   const knots = [...document.querySelectorAll<HTMLAnchorElement>("[data-rail]")];
+  // A clicked knot is marked at once; the scroll it starts then keeps the mark on the chapter in view.
+  let pinned: { id: string; until: number } | null = null;
+  const mark = (id: string | undefined) => {
+    for (const k of knots) {
+      if (k.dataset.rail === id) k.setAttribute("aria-current", "location");
+      else k.removeAttribute("aria-current");
+    }
+  };
+  for (const k of knots) {
+    k.addEventListener("click", () => {
+      pinned = { id: k.dataset.rail!, until: performance.now() + 1500 };
+      mark(pinned.id);
+    });
+  }
   return (y: number) => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     rail.style.setProperty("--progress", (y / Math.max(max, 1)).toFixed(4));
@@ -183,9 +197,9 @@ export function makeChrome(sections: () => { id: string; top: number }[]) {
     for (const k of knots) {
       const s = secs.find((x) => x.id === k.dataset.rail);
       k.classList.toggle("is-past", !!s && y >= s.top - window.innerHeight * 0.5);
-      if (k.dataset.rail === current) k.setAttribute("aria-current", "location");
-      else k.removeAttribute("aria-current");
     }
+    if (pinned && (performance.now() > pinned.until || pinned.id === current)) pinned = null;
+    mark(pinned?.id ?? current);
     // The nav stays put so the way into the dashboard is always one click away.
     nav.classList.toggle("is-solid", y > window.innerHeight * 0.6);
   };

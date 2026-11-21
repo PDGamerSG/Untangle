@@ -721,7 +721,10 @@ test("every chapter of the landing story keeps WCAG AA contrast and marks the cu
   test.setTimeout(120_000);
   const { default: AxeBuilder } = await import("@axe-core/playwright");
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "load" });
+  // Checked immediately too: the intro animation must not leave text at low contrast while the page loads.
+  const early = await new AxeBuilder({ page }).withRules(["color-contrast"]).analyze();
+  expect(early.violations.flatMap(v => v.nodes.map(n => `t=0 ${n.target.join(" ")}`))).toEqual([]);
   await page.waitForTimeout(1200);
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
   const failures = new Set<string>();
@@ -734,5 +737,9 @@ test("every chapter of the landing story keeps WCAG AA contrast and marks the cu
   expect([...failures]).toEqual([]);
   await page.evaluate(() => window.scrollTo(0, document.querySelector<HTMLElement>("#refuse")!.offsetTop + 10));
   await expect(page.locator('[data-rail="refuse"]')).toHaveAttribute("aria-current", "location");
+  await expect(page.locator('[aria-current="location"]')).toHaveCount(1);
+  // Clicking a chapter marks it at once, before the scroll it starts has finished.
+  await page.locator('[data-rail="time"]').click();
+  await expect(page.locator('[data-rail="time"]')).toHaveAttribute("aria-current", "location", { timeout: 300 });
   await expect(page.locator('[aria-current="location"]')).toHaveCount(1);
 });
