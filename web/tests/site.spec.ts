@@ -703,6 +703,8 @@ test("a member creates an agent token, copies the connection command and revokes
 test("public pages meet WCAG AA in an automated check and publish sharing metadata", async ({ page, request }) => {
   const { default: AxeBuilder } = await import("@axe-core/playwright");
   await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
+  // Desktop width: the landing page's progress rail only appears on wide screens.
+  await page.setViewportSize({ width: 1280, height: 800 });
   for (const path of ["/", "/login", "/signup"]) {
     await page.context().clearCookies();
     await page.goto(path);
