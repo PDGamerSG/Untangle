@@ -1,5 +1,7 @@
 import type {
   Account,
+  AgentNote,
+  AgentToken,
   AskRequest,
   AskResponse,
   EntityResponse,
@@ -166,6 +168,11 @@ export const api = {
     request("/auth/register", { method: "POST", body: JSON.stringify(body) }),
   logout: (): Promise<void> => request("/auth/logout", { method: "POST" }),
   deleteAccount: (): Promise<void> => request("/auth/account", { method: "DELETE" }),
+  agentTokens: (signal?: AbortSignal): Promise<{ tokens: AgentToken[]; max: number }> => request("/auth/tokens", { signal }),
+  createAgentToken: (name: string): Promise<AgentToken> => request("/auth/tokens", { method: "POST", body: JSON.stringify({ name }) }),
+  revokeAgentToken: (id: string): Promise<void> => request(`/auth/tokens/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  agentNotes: (repo: string, signal?: AbortSignal): Promise<{ repo: string; notes: AgentNote[] }> =>
+    request(`/agent-notes${q({ repo })}`, { signal }),
   deleteMeeting: (id: string): Promise<void> => {
     if (SAMPLE_MODE) return Promise.reject(new ApiError(400, "Deleting is available in the live app."));
     return request(`/meetings/${encodeURIComponent(id)}`, { method: "DELETE" });

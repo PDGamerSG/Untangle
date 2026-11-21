@@ -1,0 +1,221 @@
+"use client";
+
+import { useEffect, useId, useState, type FormEvent } from "react";
+import { Bot, KeyRound, Trash2 } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
+import { EmptyState, ErrorState, SectionTitle, SkeletonLines } from "@/components/ui/states";
+import { RepoSelect } from "@/components/repositories/RepoSelect";
+import { useRepo } from "@/components/repositories/RepoContext";
+import { NoRepository } from "@/components/repositories/NoRepository";
+import { api, API_BASE, errorMessage, externalHref } from "@/lib/api";
+import { useResource } from "@/lib/hooks";
+import { fmtDay } from "@/lib/format";
+import type { AgentToken } from "@/lib/types";
+
+const TOOLS: [string, string][] = [
+  ["ask_why", "Cited answer to “why is this like this?”, or a refusal with the person to ask."],
+  ["list_decisions", "Every recorded decision about a file, config key, dependency or module, with its history."],
+  ["decision_timeline", "What was in force on a date, and what has been replaced since."],
+  ["who_to_ask", "The people with the most relevant history for a part of the code."],
+  ["search_repository", "Find files, keys, dependencies, symbols and people by name."],
+  ["remember_decision", "Record a decision the agent settled, so the next agent or engineer finds the reason."],
+  ["recall_agent_notes", "Recent notes that coding agents recorded in a repository."],
+  ["list_repositories", "The repositories this workspace has indexed."],
+];
+
+function endpoint(): string {
+  if (typeof window === "undefined") return `${API_BASE}/mcp`;
+  return new URL(`${API_BASE}/mcp`, window.location.origin).href;
+}
+
+function NewToken({ token }: { token: AgentToken }) {
+  const url = endpoint();
+  const claude = `claude mcp add --transport http untangle ${url} --header "Authorization: Bearer ${token.token}"`;
+  const json = JSON.stringify({ mcpServers: { untangle: { type: "http", url, headers: { Authorization: `Bearer ${token.token}` } } } }, null, 2);
+  return (
+    <div className="card space-y-4 border-accent/40 p-4 sm:p-5" role="status">
+      <p className="text-[0.9rem] text-ink">
+        <strong>Copy this token now.</strong> Untangle keeps only a fingerprint of it, so it cannot be shown again.
+      </p>
+      <div className="flex items-center gap-2">
+        <code className="t-code min-w-0 flex-1 truncate rounded-md bg-surface-2 px-3 py-2" aria-label="New token">{token.token}</code>
+        <CopyButton text={token.token ?? ""} label="Copy token" />
+      </div>
+      <div>
+        <p className="mb-1.5 text-[0.85rem] font-semibold text-ink">Claude Code</p>
+        <div className="flex items-start gap-2">
+          <pre className="code-block min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-all text-[0.78rem]">{claude}</pre>
+          <CopyButton text={claude} label="Copy command" />
+        </div>
+      </div>
+      <div>
+        <p className="mb-1.5 text-[0.85rem] font-semibold text-ink">Cursor and other MCP clients (mcp.json)</p>
+        <div className="flex items-start gap-2">
+          <pre className="code-block min-w-0 flex-1 overflow-x-auto text-[0.78rem]">{json}</pre>
+          <CopyButton text={json} label="Copy configuration" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tokens() {
+  const res = useResource("agent-tokens", (signal) => api.agentTokens(signal));
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<AgentToken | null>(null);
+  const nameId = useId();
+
+  async function create(event: FormEvent) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      setCreated(await api.createAgentToken(name.trim() || "Coding agent"));
+      setName("");
+      res.reload();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revoke(token: AgentToken) {
+    if (!window.confirm(`Revoke "${token.name}"? Agents using it lose access immediately.`)) return;
+    try {
+      await api.revokeAgentToken(token.id);
+      if (created?.id === token.id) setCreated(null);
+      res.reload();
+    } catch (e) {
+      setError(errorMessage(e));
+    }
+  }
+
+  return (
+    <section className="space-y-4" aria-labelledby="tokens-heading">
+      <SectionTitle hint={res.data ? `${res.data.tokens.length} of ${res.data.max}` : undefined}>
+        <span id="tokens-heading">Agent tokens</span>
+      </SectionTitle>
+      <form onSubmit={create} className="card flex flex-wrap items-end gap-3 p-4">
+        <div className="min-w-[14rem] flex-1">
+          <label htmlFor={nameId} className="mb-1.5 block text-[0.85rem] font-medium text-ink">Token name</label>
+          <input id={nameId} className="field" maxLength={60} placeholder="Claude Code on my laptop" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={busy}>
+          <KeyRound size={15} aria-hidden /> {busy ? "Creating…" : "Create token"}
+        </button>
+      </form>
+      {error ? <p role="alert" className="text-[0.85rem] text-bad">{error}</p> : null}
+      {created ? <NewToken token={created} /> : null}
+      {res.loading ? (
+        <SkeletonLines rows={2} />
+      ) : res.error ? (
+        <ErrorState title="Tokens could not be loaded" error={res.error} onRetry={res.reload} />
+      ) : res.data && res.data.tokens.length ? (
+        <ul className="card divide-y divide-rule" aria-label="Your agent tokens">
+          {res.data.tokens.map((t) => (
+            <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <div className="min-w-0">
+                <p className="font-semibold text-ink">{t.name}</p>
+                <p className="t-num text-[0.8rem] text-ink-3">
+                  <code className="t-code">{t.prefix}…</code> · created {fmtDay(t.created_at_iso)} ·{" "}
+                  {t.last_used_at_iso ? `last used ${fmtDay(t.last_used_at_iso)}` : "not used yet"}
+                </p>
+              </div>
+              <button type="button" className="btn btn-line btn-sm" onClick={() => void revoke(t)} aria-label={`Revoke ${t.name}`}>
+                <Trash2 size={14} aria-hidden /> Revoke
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-[0.88rem] text-ink-3">No tokens yet. Create one for each agent or machine, so you can revoke them separately.</p>
+      )}
+    </section>
+  );
+}
+
+function Notes() {
+  const { repo } = useRepo();
+  const res = useResource(repo ? `agent-notes:${repo}` : null, (signal) => api.agentNotes(repo!, signal));
+  // Notes are written by agents while this page is open: refresh when the tab regains focus.
+  const reload = res.reload;
+  useEffect(() => {
+    const again = () => { if (document.visibilityState === "visible") reload(); };
+    document.addEventListener("visibilitychange", again);
+    return () => document.removeEventListener("visibilitychange", again);
+  }, [reload]);
+  if (!repo) return <NoRepository what="see notes from coding agents" />;
+  return (
+    <section className="space-y-4" aria-labelledby="notes-heading">
+      <SectionTitle hint={res.data ? `${res.data.notes.length}` : undefined}>
+        <span id="notes-heading">Decisions recorded by agents in {repo}</span>
+      </SectionTitle>
+      {res.loading ? (
+        <SkeletonLines rows={3} />
+      ) : res.error ? (
+        <ErrorState title="Agent notes could not be loaded" error={res.error} onRetry={res.reload} />
+      ) : res.data && res.data.notes.length ? (
+        <ul className="space-y-3" aria-label="Agent notes">
+          {res.data.notes.map((n) => (
+            <li key={n.id} className="card p-4">
+              <p className="flex flex-wrap items-center gap-2 text-[0.8rem] text-ink-3">
+                <span className="chip">Agent note</span>
+                <span className={n.status === "active" ? "text-ok" : "mark-superseded"}>{n.status}</span>
+                <span>· {n.about.join(", ") || n.subject} · {n.topic}</span>
+                <span>· {fmtDay(n.recorded_at_iso)}{n.recorded_by ? ` · for ${n.recorded_by}` : ""}</span>
+              </p>
+              <p className="mt-1.5 text-[0.95rem] text-ink">{n.decision}</p>
+              {n.rationale ? <p className="mt-1 text-[0.88rem] text-ink-2">Why: {n.rationale}</p> : null}
+              {externalHref(n.source_url) ? (
+                <a href={externalHref(n.source_url)} target="_blank" rel="noreferrer" className="mt-1 inline-block text-[0.82rem] text-accent underline-offset-4 hover:underline">
+                  Source
+                </a>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState title="No agent has recorded a decision here yet">
+          Connect an agent with a token above, then ask it to record a decision with <code className="t-code">remember_decision</code>.
+        </EmptyState>
+      )}
+    </section>
+  );
+}
+
+export function AgentsPage() {
+  return (
+    <div className="space-y-10">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="t-display text-[2.1rem] leading-[1.05] text-ink sm:text-[2.4rem]">Connect a coding agent</h1>
+          <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">
+            Give Claude Code, Cursor or any MCP client the same decision graph you use here. Before changing a value or a
+            dependency, the agent can ask why it is the way it is; after settling something, it records the decision for
+            the next person. Agent notes are labelled, attributed to you, and never replace evidence from the code history.
+          </p>
+        </div>
+        <RepoSelect compact />
+      </header>
+      <section aria-labelledby="tools-heading" className="space-y-3">
+        <SectionTitle>
+          <span id="tools-heading" className="flex items-center gap-2"><Bot size={16} aria-hidden /> What an agent can do</span>
+        </SectionTitle>
+        <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+          {TOOLS.map(([name, what]) => (
+            <div key={name} className="text-[0.88rem]">
+              <dt className="t-code text-ink">{name}</dt>
+              <dd className="text-ink-2">{what}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <Tokens />
+      <Notes />
+    </div>
+  );
+}

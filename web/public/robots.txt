@@ -13,3 +13,4 @@ Disallow: /meetings
 Disallow: /repositories
 Disallow: /decisions
 Disallow: /entities
+Disallow: /agents

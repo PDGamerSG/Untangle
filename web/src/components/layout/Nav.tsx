@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
-import { Activity, AudioLines, BookOpen, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
+import { Activity, AudioLines, BookOpen, Bot, FolderGit2, History, LayoutDashboard, MessageCircleQuestion, Network } from "lucide-react";
 import { HealthDot, HealthPanel, useHealth } from "./HealthDot";
 import { Logo } from "./Logo";
 import { AccountCard, SignOutButton } from "@/components/auth/AccountMenu";
@@ -25,6 +25,7 @@ const GROUPS = [
     links: [
       { href: "/pulse", label: "Pulse", icon: Activity },
       { href: "/meetings", label: "Meetings", icon: AudioLines },
+      { href: "/agents", label: "Agents", icon: Bot },
     ],
   },
 ] as const;
@@ -148,7 +149,7 @@ export function Nav() {
       </div>
       <nav
         aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 bg-nav z-40 grid grid-cols-6 gap-0.5 border-t border-nav-rule px-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-6px_20px_rgb(12_29_59/0.18)] lg:static lg:block lg:flex-1 lg:overflow-y-auto lg:border-0 lg:bg-transparent lg:px-3 lg:pb-0 lg:pt-0 lg:shadow-none"
+        className="fixed inset-x-0 bottom-0 bg-nav z-40 grid grid-cols-7 gap-0.5 border-t border-nav-rule px-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-6px_20px_rgb(12_29_59/0.18)] lg:static lg:block lg:flex-1 lg:overflow-y-auto lg:border-0 lg:bg-transparent lg:px-3 lg:pb-0 lg:pt-0 lg:shadow-none"
       >
         <Suspense fallback={<NavLinks pathname={null} />}>
           <ActiveNavLinks />

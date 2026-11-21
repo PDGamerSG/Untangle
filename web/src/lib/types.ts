@@ -27,6 +27,29 @@ export interface Account {
   created_at_iso: string;
 }
 
+export interface AgentToken {
+  id: string;
+  name: string;
+  prefix: string;
+  created_at_iso: string | null;
+  last_used_at_iso?: string | null;
+  /** Present only in the response that creates the token. */
+  token?: string;
+}
+
+export interface AgentNote {
+  id: string;
+  subject: string;
+  topic: string;
+  decision: string;
+  rationale: string | null;
+  status: string;
+  recorded_by: string | null;
+  source_url: string | null;
+  about: string[];
+  recorded_at_iso: string | null;
+}
+
 export interface Health {
   ok: boolean;
   status?: "ok" | "degraded";

@@ -174,6 +174,7 @@ export function signalLabel(s: string): string {
     supersedes_text: "'supersedes' in text",
     llm_pr_thread: "PR discussion, summarised",
     llm_kt: "handover call, summarised",
+    agent_memory: "note from a coding agent",
   };
   return map[s] ?? s.replaceAll("_", " ");
 }

@@ -45,6 +45,8 @@ test.beforeEach(async ({ page, baseURL }) => {
     const path = decodeURIComponent(url.pathname.slice(4));
     let body: unknown;
     if (path === "/auth/me") body = { user: account };
+    else if (path === "/auth/tokens" && route.request().method() === "GET") body = { tokens: [], max: 10 };
+    else if (path === "/agent-notes") body = { repo: url.searchParams.get("repo"), notes: [] };
     else if (path === "/auth/logout") return route.fulfill({ status: 204, body: "" });
     else if (path === "/health") body = health;
     else if (path === "/repos") body = repos;
@@ -665,4 +667,35 @@ test("pages and the landing page send security headers", async ({ request }) => 
   }
   expect((await request.get("/")).headers()["content-security-policy"]).toContain("script-src 'self';");
   expect((await request.get("/.well-known/security.txt")).ok()).toBe(true);
+});
+
+test("a member creates an agent token, copies the connection command and revokes it", async ({ page }) => {
+  let tokens: Record<string, unknown>[] = [];
+  await page.route("**/api/auth/tokens**", async route => {
+    const method = route.request().method();
+    if (method === "POST") {
+      const created = { id: "0123456789abcdef", name: route.request().postDataJSON().name, prefix: "utg_abcd", created_at_iso: "2026-11-21T10:00:00Z", token: "utg_abcdEXAMPLEONLY" };
+      tokens = [{ ...created, token: undefined, last_used_at_iso: null }];
+      return route.fulfill({ status: 201, json: created });
+    }
+    if (method === "DELETE") { tokens = []; return route.fulfill({ status: 204, body: "" }); }
+    return route.fulfill({ json: { tokens, max: 10 } });
+  });
+  await page.route("**/api/agent-notes?**", route => route.fulfill({ json: { repo: "knadh/listmonk", notes: [{
+    id: "dec:knadh/listmonk:agent:1", subject: "schema.sql::app.concurrency", topic: "retry-policy", decision: "Keep concurrency at 10 until the SES quota is raised.",
+    rationale: "Higher values hit the provider's rate limit.", status: "active", recorded_by: "Asha Verma", source_url: "javascript:alert(1)",
+    about: ["schema.sql::app.concurrency"], recorded_at_iso: "2026-11-21T10:05:00Z" }] } }));
+  await page.goto("/agents");
+  await expect(page.getByRole("heading", { level: 1, name: "Connect a coding agent" })).toBeVisible();
+  await expect(page.getByText("remember_decision", { exact: true })).toBeVisible();
+  await page.getByLabel("Token name").fill("Claude Code laptop");
+  await page.getByRole("button", { name: "Create token" }).click();
+  await expect(page.getByLabel("New token")).toHaveText("utg_abcdEXAMPLEONLY");
+  await expect(page.getByText(/claude mcp add --transport http untangle http:\/\/127\.0\.0\.1:3100\/api\/mcp/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Agent notes" })).toContainText("Keep concurrency at 10");
+  // A note's link is only followed when it is a web address.
+  await expect(page.getByRole("list", { name: "Agent notes" }).getByRole("link", { name: "Source" })).toHaveCount(0);
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", { name: "Revoke Claude Code laptop" }).click();
+  await expect(page.getByText("No tokens yet.", { exact: false })).toBeVisible();
 });
