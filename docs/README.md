@@ -21,6 +21,12 @@ Start with the [project overview](../README.md) to run the application, or the
 - [Demo runbook](guides/DEMO.md): a walkthrough of the product.
 - [Handover recordings](../data/kt/README.md): sample transcript and recording guidance.
 
+## Product, security and research
+
+- [Roadmap](ROADMAP.md): what is built, how the evaluation criteria are met, and what comes next.
+- [Security audit](security/SECURITY_AUDIT.md): findings, fixes, accepted risks and how to re-run the checks.
+- [Expansion research](research/2026-11-21-expansion-research.md): competitors, use cases, internet-research design.
+
 ## Verification and design history
 
 - [Verification record](verification/VERIFICATION.md): previous checks and deployment evidence.

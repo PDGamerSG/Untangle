@@ -35,7 +35,7 @@ When the graph cannot support an answer, Untangle says so instead of guessing.
 
 ## 🚀 Three steps
 
-On the live app, open **Repositories**, paste a public GitHub URL,
+On the live app, create an account (email and password), then open **Repositories**, paste a public GitHub URL,
 and import it. Progress is saved while the background worker indexes the repository. Open its workspace when ready
 to use the tools below with your own repository. See [repository onboarding](docs/guides/REPOSITORY_IMPORTS.md) for coverage,
 limits and worker configuration.
@@ -179,6 +179,14 @@ For the single-project Vercel setup, required credentials, and checks on both pu
 Decisions are keyed by subject and predicate. A later value links to the older value with `SUPERSEDES` and records
 `valid_from` and `valid_to`; it never overwrites the earlier evidence. Handover decisions use separate `kt|…` keys and
 are reconciled with the active code decision as `CONFIRMS` or `CONTRADICTS`.
+
+## 🔐 Accounts and security
+
+Every workspace page and data endpoint requires a signed-in account. Passwords are stored as Argon2id hashes and
+sessions use HttpOnly, SameSite cookies whose tokens are stored only as hashes. Questions, handover uploads and
+imports have per-account limits, and only the person who uploaded a handover call (or an administrator) can delete
+it. Pages and API responses send a strict set of security headers. See the [security audit](docs/security/SECURITY_AUDIT.md)
+and [SECURITY.md](SECURITY.md) to report a vulnerability. The [roadmap](docs/ROADMAP.md) lists what is built and what is next.
 
 ## 🛡️ Responsible use
 

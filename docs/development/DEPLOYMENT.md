@@ -50,6 +50,11 @@ Set these on the **single project's Production environment**. Never put private 
 | `CORS_ORIGINS` | `https://untangle-code.vercel.app,https://untangle.pallabdas.me`. |
 | `UNTANGLE_DISPLAY_LANGUAGE` | `en` (default). Responses render stored Hindi and Hinglish in English; `original` turns this off. |
 | `REPO_IMPORTS_ENABLED` | `true` once the scheduled repository worker and its Actions secrets are configured. |
+| `UNTANGLE_ADMIN_EMAILS` | Optional comma-separated sign-in emails with the `admin` role (no quotas; may delete any handover call). |
+| `UNTANGLE_SESSION_DAYS` | Optional session lifetime in days, 1–30 (default 7). |
+| `UNTANGLE_COOKIE_SECURE` | Leave unset: Vercel defaults to Secure `__Host-` session cookies. Set `0` only for plain-HTTP local runs. |
+| `UNTANGLE_TRUSTED_ORIGINS` | Optional. Origins allowed to send state-changing requests; defaults to both public domains and local development. |
+| `UNTANGLE_API_DOCS` | Leave unset in production. `1` publishes `/docs` and `/openapi.json` for local development. |
 
 The embedding model runs on CPU through ONNX and needs no paid API or key. Vercel instances download it into
 `/tmp/untangle`; a cold instance can take longer to answer. It does not silently substitute fake embeddings if
@@ -91,12 +96,15 @@ existing records. Do not use `--reset` unless deliberately rebuilding the reposi
 
 ## API surface
 
-Interactive endpoint documentation is available at `/api/docs` on either public domain. Prefix each endpoint
-below with `/api` when calling the deployed application (the local CLI server retains unprefixed routes).
+Production does not publish interactive documentation or the OpenAPI schema; set `UNTANGLE_API_DOCS=1` locally to
+browse them at `/docs`. Prefix each endpoint below with `/api` when calling the deployed application (the local CLI
+server retains unprefixed routes). Every endpoint except `/health` and `/auth/*` requires a signed-in session.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /health` | Graph connection, configured model, embeddings, and Sarvam readiness. |
+| `POST /auth/register`, `POST /auth/login` | Create an account or sign in; sets the HttpOnly session cookie. |
+| `POST /auth/logout`, `GET /auth/me`, `DELETE /auth/account` | End the session, read the signed-in user, delete the account. |
+| `GET /health` | Public readiness only: graph, answers, search index and speech, without hosts, versions or model names. |
 | `GET /repos`, `GET /stats` | Ingested repositories and graph counts. |
 | `GET/POST /repository-imports`, `GET /repository-imports/{id}` | Add a public repository and track durable import progress. |
 | `GET /repository-overview` | Repository inventory, coverage and evidence-backed suggested questions. |
@@ -104,8 +112,8 @@ below with `/api` when calling the deployed application (the local CLI server re
 | `GET /decisions/{id}`, `GET /entities/{id}` | Evidence chains and entities. |
 | `GET /search`, `GET /timeline`, `GET /pulse` | Entity search, decision history, and risk signals. |
 | `GET /repository-map`, `GET /repository-map/obsidian` | Feature/import graph and paginated commit history; linked Obsidian vault ZIP. |
-| `GET /meetings`, `GET /meetings/{id}` | Handover summaries and transcripts. |
-| `POST /kt/ingest` | Multipart upload containing `repo`, optional `title`, and exactly one `audio` or `transcript` file. |
+| `GET /meetings`, `GET /meetings/{id}`, `DELETE /meetings/{id}` | Handover summaries and transcripts; the uploader or an admin can delete a call. |
+| `POST /kt/ingest` | Multipart upload containing `repo` (an imported repository), optional `title`, and exactly one `audio` or `transcript` file. |
 
 Browser uploads are limited to 4 MB and the API function has a 300-second execution budget. Use the CLI for longer
 recordings. Uploaded audio is processed temporarily and is not retained for playback.

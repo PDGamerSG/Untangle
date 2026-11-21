@@ -7,7 +7,8 @@ This is the source of truth every module is written against. Change it here firs
 - Python 3.12, `src/untangle` package, `uv` for everything (`uv sync --all-extras`, `uv run pytest`, `uv run ruff check`).
 - **Every Cypher query lives in `cypher/NN_name.cypher`** and is loaded with `untangle.graph.queries.load_cypher("name")`
   (or `Graph.run_named`). Numbering: `00` schema · `10–19` ingestion upserts · `20–29` decisions and supersession ·
-  `30–39` answering and retrieval · `40–49` handover calls (KT) · `50–59` baseline and evaluation · `60–69` stats and admin.
+  `30–39` answering and retrieval · `40–49` handover calls (KT) · `50–59` baseline and evaluation · `60–69` stats and admin ·
+  `70–79` translations · `80–88` accounts, sessions and request limits · `89–90` handover ownership and deletion.
   Cypher is bundled under `untangle/graph/cypher/` in wheels. Set `UNTANGLE_CYPHER_DIR` to select a custom
   query directory before the checkout or bundled copies. Parameters are `$name`. Batch writes take `$rows` (a list of maps) and `UNWIND $rows AS r`.
 - **Timestamps are epoch milliseconds (int)** on every node and relationship (`authored_at`, `created_at`, `valid_from`, …).
@@ -147,8 +148,18 @@ Display language: with `UNTANGLE_DISPLAY_LANGUAGE=en` (the default) the read end
 use their `text_en` as `text`; other strings are translated with Sarvam and cached in `(:Translation {key, en})`.
 Ids, URLs, paths, keys and Cypher parameters are never rewritten. The CLI and the graph keep the original text.
 
-- `GET /health` → legacy `ok`, `neo4j`, `llm`, `embed`, and `sarvam` fields plus `status` (`ok` or
-  `degraded`), `graph: {ok, version, aura, edition}`, and safe `optional_backends` availability summaries.
+- Access: every route except `GET /health` and `/auth/*` requires the session cookie (`__Host-untangle_session` over
+  HTTPS, `untangle_session` locally) and answers 401 without it. Browser requests that change state must come from a
+  trusted origin (403 otherwise). Per-user limits answer 429 with `Retry-After`: 40 questions per hour, 10 handover
+  uploads per day, 5 imports per day; administrators (`UNTANGLE_ADMIN_EMAILS`) are not limited.
+- `POST /auth/register {email, password, name?}` → 201 `{user}`; `POST /auth/login {email, password}` → `{user}`;
+  `POST /auth/logout` → 204; `GET /auth/me` → `{user}` or 401; `DELETE /auth/account` → 204.
+  `user = {id, email, name, role: member|admin, created_at_iso}`. Passwords: 10–128 characters, Argon2id hashes.
+  Nodes: `(:User {id, email, name, role, password_hash, created_at, last_login_at})-[:HAS_SESSION]->(:Session {id =
+  sha256(token), user_id, created_at, expires_at})`; `(:RateLimit {id, count, expires_at})` holds fixed windows.
+- `GET /health` → `ok`, `status` (`ok` or `degraded`), `version`, `neo4j: {ok, aura}`, `graph: {ok, aura}`,
+  `llm: {backend: hosted|fake, available}`, `embed: {backend: local|fake, dim, available}`, `sarvam: {configured}`
+  and `optional_backends`. It never returns hosts, versions, model names or error text.
 - `GET /repos` → `[{ full_name, head_sha, commit_count, ingested_at_iso, counts: {commits, prs, issues, decisions, meetings} }]`
 - `POST /ask` body `{ "question": str, "repo": str, "at": iso|null, "mode": "graph"|"baseline"|"both" }` → `AskResponse`
 - `GET /decisions/{id}` → `WhyPath`
