@@ -16,38 +16,49 @@ jobs:
   import:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # Database credentials are given only to the two steps that need them, never to third-party actions or to
+    # dependency installation.
     env:
-      NEO4J_URI: ${{ secrets.NEO4J_URI }}
-      NEO4J_USER: ${{ secrets.NEO4J_USER }}
-      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-      NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
       # Importing is deterministic; paid model calls remain in the deployed Ask API.
       LLM_BACKEND: fake
       EMBED_BACKEND: fastembed
       EMBED_MODEL: BAAI/bge-small-en-v1.5
       EMBED_DIM: '384'
-      GITHUB_TOKEN: ${{ github.token }}
       GIT_TERMINAL_PROMPT: '0'
     steps:
       - name: Check the import queue
         id: queue
         env:
-          IMPORT_API: https://untangle-code.vercel.app/api
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+        # Reads the queue through the database's HTTPS query endpoint before installing anything. If that check
+        # cannot answer, the worker runs anyway and simply finds nothing to do.
         run: |
           python3 - <<'PY'
-          import json, os, urllib.request
-          with urllib.request.urlopen(os.environ['IMPORT_API'] + '/repository-imports', timeout=45) as response:
-              data = json.load(response)
-          pending = any(job['status'] == 'queued' for job in data['jobs'])
+          import base64, json, os, urllib.request
+          pending = True
+          try:
+              host = os.environ['NEO4J_URI'].split('://', 1)[-1].split('/')[0].split(':')[0]
+              database = os.environ.get('NEO4J_DATABASE') or 'neo4j'
+              token = base64.b64encode(f"{os.environ['NEO4J_USER']}:{os.environ['NEO4J_PASSWORD']}".encode()).decode()
+              body = json.dumps({'statement': "MATCH (j:RepositoryImport {status: 'queued'}) RETURN count(j) > 0 AS pending"}).encode()
+              request = urllib.request.Request(f'https://{host}/db/{database}/query/v2', data=body, method='POST',
+                                               headers={'Authorization': f'Basic {token}', 'Content-Type': 'application/json'})
+              with urllib.request.urlopen(request, timeout=45) as response:
+                  pending = bool(json.load(response)['data']['values'][0][0])
+          except Exception as exc:  # noqa: BLE001 - fall back to running the worker
+              print(f'Queue check unavailable ({type(exc).__name__}); running the worker to check directly.')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write(f"pending={str(pending).lower()}\n")
           print('Queued imports found.' if pending else 'No queued imports.')
           PY
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         if: steps.queue.outputs.pending == 'true'
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         if: steps.queue.outputs.pending == 'true'
       - if: steps.queue.outputs.pending == 'true'
         run: uv python install 3.12
@@ -56,4 +67,10 @@ jobs:
       # Only our trusted worker executes. Imported repositories are cloned without checkout
       # and read as data; their workflows, build scripts, hooks and dependencies never run.
       - if: steps.queue.outputs.pending == 'true'
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: uv run untangle import-worker --max-jobs 1
