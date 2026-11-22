@@ -239,8 +239,11 @@ test("live pricing, return calculator, pilot request and plan readout", async ({
   }
   expect(await page.locator("body").innerText()).not.toMatch(/\b(Claude|Haiku|Sonnet|Opus|GPT-\d)\b/i);
   await expect(page.getByTestId("roi-team-cost")).toHaveText("₹14,990");
-  await page.getByLabel("Engineers on the codebase", { exact: true }).first().fill("20");
-  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹29,980");
+  // The page is static HTML first; a value typed before it hydrates is replaced, so retry until it takes.
+  await expect(async () => {
+    await page.getByLabel("Engineers on the codebase", { exact: true }).first().fill("20");
+    await expect(page.getByTestId("roi-team-cost")).toHaveText("₹29,980", { timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
 
   // A reserved example address: the API checks and answers it like any request but stores nothing.
   await page.getByRole("link", { name: "Start a 14-day pilot", exact: true }).first().click();
