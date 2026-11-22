@@ -40,6 +40,7 @@ from untangle.api.auth import CurrentUser, charge, enforce_access
 from untangle.api.auth import router as auth_router
 from untangle.api.english import to_english
 from untangle.api.health import shape_health
+from untangle.api.pilots import router as pilots_router
 from untangle.api.repositories import router as repositories_router
 from untangle.api.security import add_security_headers
 from untangle.auth import limits
@@ -73,6 +74,7 @@ app.add_middleware(
 add_security_headers(app)
 app.include_router(auth_router)
 app.include_router(repositories_router)
+app.include_router(pilots_router)
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -313,7 +315,7 @@ async def mcp_endpoint(request: Request, user: CurrentUser) -> Response:
         if user.is_guest and kind == "write":
             raise mcp_server.ToolError("Create an account to record decisions.")
         graph = service.get_graph()
-        scale = limits.for_guest if user.is_guest else (lambda limit: limit)
+        scale = limits.for_guest if user.is_guest else (lambda limit: limits.for_plan(limit, user.plan))
         limit = {"ask": limits.ASK, "write": limits.AGENT_NOTE}.get(kind)
         limit = scale(limit) if limit is not None else None
         calls = scale(limits.AGENT_CALL)

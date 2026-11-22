@@ -41,6 +41,17 @@ def for_guest(limit: Limit) -> Limit:
     return Limit(f"{limit.bucket}-guest", max(1, limit.count // 4), limit.window_s)
 
 
+# Paid plans (Team, Transition Pack, Enterprise) keep the same windows with five times the allowance. The bucket is
+# unchanged, so switching plans mid-window keeps the count already used.
+PAID_PLANS = frozenset({"team", "transition", "enterprise"})
+PLANS = frozenset({"free"}) | PAID_PLANS
+PAID_MULTIPLIER = 5
+
+
+def for_plan(limit: Limit, plan: str) -> Limit:
+    return Limit(limit.bucket, limit.count * PAID_MULTIPLIER, limit.window_s) if plan in PAID_PLANS else limit
+
+
 class LimitExceeded(Exception):
     def __init__(self, message: str, retry_after: int):
         super().__init__(message)

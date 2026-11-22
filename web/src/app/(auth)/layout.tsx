@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Mark } from "@/components/layout/Logo";
 
 /** Sign-in and sign-up: a single centred card on the page background, without the workspace navigation. */
@@ -13,7 +14,8 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <div className="card w-full max-w-[25rem] p-6 sm:p-8">{children}</div>
       <p className="mt-6 max-w-[25rem] text-center text-[0.78rem] leading-relaxed text-ink-3">
         Untangle reads public GitHub history and the handover calls your team uploads. Your password is stored only as a
-        one-way hash.
+        one-way hash. Free on public repositories; see{" "}
+        <Link href="/pricing" className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink">plans for teams and handovers</Link>.
       </p>
     </main>
   );

@@ -43,6 +43,8 @@ class User:
     name: str
     role: str
     created_at: int
+    # The billing plan: "free" until a paid plan is switched on after a pilot (see `untangle plan`).
+    plan: str = "free"
 
     @property
     def is_admin(self) -> bool:
@@ -54,7 +56,7 @@ class User:
 
     def public(self) -> dict[str, Any]:
         return {"id": self.id, "email": "" if self.is_guest else self.email, "name": self.name, "role": self.role, "guest": self.is_guest,
-                "created_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at / 1000))}
+                "plan": "guest" if self.is_guest else self.plan, "created_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.created_at / 1000))}
 
 
 # Account constraints are applied once per process before the first sign-up, so a deployment whose schema step
@@ -103,7 +105,8 @@ def token_hash(token: str) -> str:
 
 def _user(row: dict[str, Any]) -> User:
     role = "admin" if row["email"] in settings().admin_emails else (row.get("role") or "member")
-    return User(id=row["id"], email=row["email"], name=row.get("name") or row["email"], role=role, created_at=int(row.get("created_at") or 0))
+    return User(id=row["id"], email=row["email"], name=row.get("name") or row["email"], role=role, created_at=int(row.get("created_at") or 0),
+                plan=row.get("plan") or "free")
 
 
 def _start_session(graph: Graph, user_id: str, *, rehash: str | None = None) -> str:

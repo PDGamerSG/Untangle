@@ -222,6 +222,23 @@ code {
   margin-right: auto;
 }
 
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.25rem;
+  margin-right: -1rem;
+  color: var(--cotton);
+  font-size: var(--fs-sm);
+  font-weight: 560;
+  text-decoration: none;
+  text-underline-offset: 0.3em;
+}
+
+.nav__link:hover {
+  text-decoration: underline;
+}
+
 .brand__mark {
   flex: none;
   border-radius: 8px;
@@ -1290,6 +1307,77 @@ code {
   color: var(--cotton-2);
 }
 
+/* ---------- Pricing: four lines and the way to the full page ---------- */
+.chapter--plans {
+  padding: 16vh var(--gutter) 20vh;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-rows: auto 1fr;
+  gap: 2.5rem 5rem;
+  max-width: 82rem;
+}
+
+.plans .copy {
+  max-width: 32rem;
+}
+
+.prices {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.price {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.2rem 1.5rem;
+  padding: 1.15rem 0 1.15rem 1rem;
+  border-top: 1px solid var(--rule);
+  border-left: 2px solid transparent;
+}
+
+/* The pack most teams start with carries the thread. */
+.price--thread {
+  border-left-color: var(--madder);
+}
+
+.price__name {
+  font-size: var(--fs-md);
+  font-weight: 620;
+}
+
+.price__amount {
+  font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.6rem);
+  line-height: 1;
+  font-weight: 640;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.price__unit {
+  grid-column: 1 / -1;
+  font-size: var(--fs-sm);
+  color: var(--cotton-2);
+}
+
+.plans__actions {
+  grid-column: 1;
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .terminal {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -1552,6 +1640,21 @@ code {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .plans {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 2rem;
+  }
+
+  .prices {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .plans__actions {
+    grid-column: 1;
+  }
+
   .terminal {
     grid-column: 1;
     grid-row: auto;
@@ -1572,6 +1675,11 @@ code {
 }
 
 @media (max-width: 520px) {
+  /* No room beside the dashboard button; phones reach pricing through its chapter and the finale. */
+  .nav__link {
+    display: none;
+  }
+
   .hero__title {
     font-size: clamp(2.9rem, 14vw, 4.4rem);
   }

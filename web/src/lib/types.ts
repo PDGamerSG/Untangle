@@ -26,7 +26,45 @@ export interface Account {
   role: "member" | "admin" | "guest";
   /** A temporary account for trying Untangle; signing up or signing in keeps its work. */
   guest?: boolean;
+  /** The billing plan; "guest" for temporary accounts. Older API versions omit it. */
+  plan?: AccountPlan;
   created_at_iso: string;
+}
+
+export type AccountPlan = "guest" | "free" | "team" | "transition" | "enterprise";
+
+export interface Allowance {
+  used: number;
+  limit: number;
+  window_s: number;
+  resets_in_s: number;
+}
+
+/** The account's plan and how much of the current windows it has used; allowances are null for administrators. */
+export interface Usage {
+  plan: AccountPlan;
+  unlimited: boolean;
+  questions: Allowance | null;
+  handover_calls: Allowance | null;
+}
+
+export interface PilotRequest {
+  name: string;
+  email: string;
+  company: string;
+  role?: string;
+  team_size: number;
+  plan: "transition" | "team" | "enterprise";
+  message?: string;
+  /** Left empty by people; see the form. */
+  website?: string;
+}
+
+export interface PilotReceipt {
+  reference: string;
+  plan: PilotRequest["plan"];
+  follow_up: string;
+  stored: boolean;
 }
 
 export interface AgentToken {

@@ -200,6 +200,27 @@ record what they decided with `remember_decision`. Notes are stored in the Neo4j
 decisions; a later note on the same subject and topic supersedes the earlier one, and notes never replace evidence
 from the code history.
 
+## 💳 Plans and pricing
+
+Published at [untangle.pallabdas.me/pricing](https://untangle.pallabdas.me/pricing). Prices are in Indian rupees and
+exclude 18% GST.
+
+| Plan | Price | For |
+| --- | --- | --- |
+| Free | ₹0 | Public repositories, every feature, 40 questions an hour per person |
+| Team | ₹1,499 per engineer a month, from 5 engineers | Five times the free limits, priority imports, email support |
+| Transition Pack | ₹49,999 per application handover | 90 days, up to 25 engineers, the first 14 days are a free pilot |
+| Enterprise | Custom | 100+ engineers or self-hosted, invoice billing and an SLA |
+
+Private repositories and team workspaces are rolling out with pilot customers in Q1 2027. The pricing page's pilot
+form posts to `POST /api/pilot-requests`, which stores a `PilotRequest` node (the network address only as a digest);
+administrators read them with `GET /api/pilot-requests`. There is no card checkout: after a pilot is signed, switch the
+account's plan, which raises its limits five times:
+
+```bash
+uv run untangle plan buyer@company.com transition
+```
+
 ## 🔐 Accounts and security
 
 Every workspace page and data endpoint requires a signed-in account. Passwords are stored as Argon2id hashes and

@@ -225,6 +225,54 @@ test("live landing, application icons and phone navigation", async ({ page, requ
   await page.screenshot({ path: testInfo.outputPath("live-repositories-phone.png"), fullPage: true });
 });
 
+test("live pricing, return calculator, pilot request and plan readout", async ({ page, request }, testInfo) => {
+  await page.goto("/");
+  // The landing page shows the prices in its own chapter; the full page has the detail.
+  await page.getByRole("link", { name: "Pricing", exact: true }).first().click();
+  const prices = page.getByRole("list", { name: "Plans and prices" });
+  await expect(prices).toBeInViewport({ timeout: 15_000 });
+  for (const price of ["₹0", "₹1,499", "₹49,999", "Custom"]) await expect(prices).toContainText(price);
+  await page.getByRole("link", { name: "See plans and what is included", exact: true }).click();
+  await expect(page).toHaveURL(/\/pricing$/);
+  for (const [id, price] of [["free", "₹0"], ["team", "₹1,499"], ["transition", "₹49,999"], ["enterprise", "Custom"]]) {
+    await expect(page.getByTestId(`plan-${id}`)).toContainText(price);
+  }
+  expect(await page.locator("body").innerText()).not.toMatch(/\b(Claude|Haiku|Sonnet|Opus|GPT-\d)\b/i);
+  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹14,990");
+  await page.getByLabel("Engineers on the codebase", { exact: true }).first().fill("20");
+  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹29,980");
+
+  // A reserved example address: the API checks and answers it like any request but stores nothing.
+  await page.getByRole("link", { name: "Start a 14-day pilot", exact: true }).first().click();
+  const form = page.getByRole("form", { name: "Pilot request" });
+  await expect(form.getByLabel("Plan", { exact: true })).toHaveValue("transition");
+  await form.getByLabel("Your name", { exact: true }).fill("Live check");
+  await form.getByLabel("Work email", { exact: true }).fill("live-check@example.com");
+  await form.getByLabel("Company", { exact: true }).fill("Live check");
+  await form.getByLabel("Engineers on the codebase", { exact: true }).fill("12");
+  const answered = page.waitForResponse(r => r.url().endsWith("/api/pilot-requests") && r.request().method() === "POST");
+  await form.getByRole("button", { name: "Request a 14-day pilot" }).click();
+  const response = await answered;
+  expect(response.status()).toBe(201);
+  expect(await response.json()).toMatchObject({ plan: "transition", stored: false });
+  await expect(page.getByTestId("pilot-receipt")).toContainText(/UT-[A-Z2-9]{6}/);
+  await page.screenshot({ path: testInfo.outputPath("live-pricing-receipt.png"), fullPage: true });
+
+  expect((await request.get("/api/pilot-requests")).status()).toBe(403);
+  const usage = await request.get("/api/auth/usage");
+  expect(usage.ok()).toBe(true);
+  expect(await usage.json()).toMatchObject({ plan: "free", unlimited: false, questions: { limit: 40 } });
+
+  await page.goto("/dashboard");
+  await expect(page.getByTestId("account-plan")).toContainText(/Free plan · \d+\/40 questions this hour · (See plans|Raise your limit)/, { timeout: 30_000 });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/pricing");
+  await expect(page.getByTestId("plan-transition")).toContainText("₹49,999");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("live-pricing-phone.png"), fullPage: true });
+});
+
 test("live imported repository restores its job and uses its own inventory and tools", async ({ page, request }, testInfo) => {
   const repo = "pallets/itsdangerous";
   const errors: string[] = [];

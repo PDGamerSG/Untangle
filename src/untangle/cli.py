@@ -41,6 +41,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_stats)
 
+    p = sub.add_parser("plan", help="show or switch an account's billing plan after a pilot: untangle plan asha@acme.com team")
+    p.add_argument("email")
+    p.add_argument("plan", nargs="?", choices=["free", "team", "transition", "enterprise"], help="omit to show the current plan")
+    p.set_defaults(func=cmd_plan)
+
     p = sub.add_parser("serve", help="run the HTTP API")
     p.add_argument("--port", type=int, default=None)
     p.add_argument("--host", default=None)
@@ -105,6 +110,28 @@ def cmd_stats(args: argparse.Namespace) -> int:
     print("relationships:")
     for rel, n in stats["relationship_types"].items():
         print(f"  {rel:<14}{n:>9}")
+    return 0
+
+
+def cmd_plan(args: argparse.Namespace) -> int:
+    from untangle.auth import service as accounts
+    from untangle.graph.db import connect
+
+    graph = connect(require=True)
+    try:
+        email = accounts.normalize_email(args.email)
+        if args.plan is None:
+            current = graph.read("MATCH (u:User {email:$email}) RETURN coalesce(u.plan, 'free')", {"email": email}).scalar()
+        else:
+            current = graph.query("MATCH (u:User {email:$email}) WHERE u.role <> 'guest' SET u.plan = $plan RETURN u.plan",
+                                  {"email": email, "plan": args.plan}).scalar()
+    finally:
+        graph.close()
+    if current is None:
+        print(f"no account for {email}", file=sys.stderr)
+        return 1
+    # Signed-in sessions cache the account for up to 20 seconds per server process.
+    print(f"{email}: {current}" + (" (takes effect within a minute)" if args.plan else ""))
     return 0
 
 

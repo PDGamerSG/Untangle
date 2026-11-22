@@ -255,6 +255,35 @@ body {
   color: var(--ink);
 }
 
+/* A quiet line under a figure in the stat strip. */
+.stat-strip dd.stat-note {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+
+/* Plans side by side in one frame, rules between them (the same construction as the stat strip). */
+.plan-sheet {
+  display: grid;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: hidden;
+}
+.plan-sheet > * {
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  margin-top: -1px;
+  margin-left: -1px;
+}
+.plan-sheet > [data-recommended="true"] {
+  background: #f5f8ff;
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+
 /* Section heading: the title on the left, a count or link on the right. */
 .sec-head {
   display: flex;

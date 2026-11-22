@@ -35,6 +35,8 @@ const importJob = (status: "queued" | "running" | "complete" | "failed", extra: 
   summary: status === "complete" ? { commits: 42, decisions: 7 } : null, warnings: [], ...extra,
 });
 
+const usage = { plan: "free", unlimited: false, questions: { used: 3, limit: 40, window_s: 3600, resets_in_s: 1800 }, handover_calls: { used: 0, limit: 10, window_s: 86400, resets_in_s: 40000 } };
+
 const concurrencyKey = { id: "cfg:knadh/listmonk:schema.sql::app.concurrency", label: "ConfigKey", name: "app.concurrency", path: "schema.sql", key: "app.concurrency", score: 1 };
 
 const account = { id: "user:asha", email: "asha@example.com", name: "Asha Verma", role: "member", created_at_iso: "2026-11-01T00:00:00Z" };
@@ -107,6 +109,10 @@ test.beforeEach(async ({ page, baseURL }) => {
     let body: unknown;
     if (path === "/auth/me") body = { user: account };
     else if (path === "/auth/providers") body = { github: true };
+    else if (path === "/auth/usage") body = usage;
+    else if (path === "/pilot-requests" && route.request().method() === "POST") {
+      return route.fulfill({ status: 201, json: { reference: "UT-ABC234", plan: route.request().postDataJSON().plan, follow_up: "within one working day", stored: true } });
+    }
     else if (path === "/auth/github") body = { github: { login: "asha", avatar_url: "" } };
     else if (path === "/github/repositories") body = githubRepos;
     else if (path === "/my/repositories" && route.request().method() === "GET") body = savedRepos;
@@ -395,6 +401,64 @@ test("dashboard search opens an entity page and asks about it", async ({ page })
   await page.getByRole("link", { name: /Ask why/ }).click();
   await expect(page.getByLabel("Your question", { exact: true })).toHaveValue("why is app.concurrency like this?");
   await expect(page.getByText(/Answer from the graph/i)).toBeVisible();
+});
+
+test("pricing shows the plans, works out the return and sends a pilot request", async ({ page }, testInfo) => {
+  await page.goto("/");
+  // The landing page shows the prices in its own chapter; the full page has the detail.
+  await page.getByRole("link", { name: "Pricing", exact: true }).first().click();
+  const prices = page.getByRole("list", { name: "Plans and prices" });
+  await expect(prices).toBeInViewport({ timeout: 15_000 });
+  for (const price of ["₹0", "₹1,499", "₹49,999", "Custom"]) await expect(prices).toContainText(price);
+  await page.getByRole("link", { name: "See plans and what is included", exact: true }).click();
+  await expect(page).toHaveURL(/\/pricing$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Keep the why when people leave." })).toBeVisible();
+  for (const [id, price, unit] of [["free", "₹0", "for ever"], ["team", "₹1,499", "per engineer a month"], ["transition", "₹49,999", "per application handover"], ["enterprise", "Custom", "annual agreement"]]) {
+    await expect(page.getByTestId(`plan-${id}`)).toContainText(price);
+    await expect(page.getByTestId(`plan-${id}`)).toContainText(unit);
+  }
+  await expect(page.getByText(/excluding 18% GST/)).toBeVisible();
+
+  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹14,990");
+  await expect(page.getByTestId("roi-team-return")).toHaveText("4.3×");
+  await expect(page.getByTestId("roi-transition-return")).toHaveText("3.9×");
+  await page.getByLabel("Engineers on the codebase", { exact: true }).first().fill("20");
+  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹29,980");
+  await page.getByLabel("Engineers on the codebase", { exact: true }).first().fill("2");
+  await expect(page.getByTestId("roi-team-cost")).toHaveText("₹7,495");
+
+  await page.getByRole("link", { name: "Talk to us about Team", exact: true }).click();
+  const form = page.getByRole("form", { name: "Pilot request" });
+  await expect(form.getByLabel("Plan", { exact: true })).toHaveValue("team");
+  await expect(form.getByLabel("Your name", { exact: true })).toBeFocused();
+  await form.getByRole("button", { name: "Send request" }).click();
+  await expect(form.getByRole("alert")).toHaveText("Enter your name.");
+  await form.getByLabel("Your name", { exact: true }).fill("Asha Verma");
+  await form.getByLabel("Work email", { exact: true }).fill("asha@acme.example");
+  await form.getByLabel("Company", { exact: true }).fill("Acme GCC");
+  await form.getByLabel("Engineers on the codebase", { exact: true }).fill("18");
+  await form.getByLabel("Plan", { exact: true }).selectOption("transition");
+  await expect(form.getByText("One pack covers up to 25 engineers.")).toBeVisible();
+  const sent = page.waitForRequest(r => r.url().endsWith("/api/pilot-requests") && r.method() === "POST");
+  await form.getByRole("button", { name: "Request a 14-day pilot" }).click();
+  expect((await sent).postDataJSON()).toMatchObject({ name: "Asha Verma", email: "asha@acme.example", company: "Acme GCC", team_size: 18, plan: "transition" });
+  const receipt = page.getByTestId("pilot-receipt");
+  await expect(receipt).toContainText("UT-ABC234");
+  await expect(receipt).toContainText("set up your 14-day pilot");
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/pricing");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("pricing-phone.png"), fullPage: true });
+});
+
+test("the account card shows the plan, this hour's questions and the way to more", async ({ page }) => {
+  await page.goto("/dashboard");
+  const plan = page.getByTestId("account-plan");
+  await expect(plan).toContainText("Free plan");
+  await expect(plan).toContainText("3/40 questions this hour");
+  await plan.getByRole("link", { name: "See plans" }).click();
+  await expect(page).toHaveURL(/\/pricing$/);
 });
 
 test("landing call-to-action at the end of the story opens the dashboard", async ({ page }) => {
@@ -894,7 +958,7 @@ test("public pages meet WCAG AA in an automated check and publish sharing metada
   await page.route("**/api/auth/me", route => route.fulfill({ status: 401, json: { detail: "Sign in to use Untangle." } }));
   // Desktop width: the landing page's progress rail only appears on wide screens.
   await page.setViewportSize({ width: 1280, height: 800 });
-  for (const path of ["/", "/login", "/signup"]) {
+  for (const path of ["/", "/login", "/signup", "/pricing"]) {
     await page.context().clearCookies();
     await page.goto(path);
     await page.waitForTimeout(1000);

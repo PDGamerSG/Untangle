@@ -13,6 +13,8 @@ import type {
   ImportJob,
   MeetingDetail,
   MeetingSummary,
+  PilotReceipt,
+  PilotRequest,
   PreflightResponse,
   PulseResponse,
   RepoSummary,
@@ -25,6 +27,7 @@ import type {
   SpeakResponse,
   Timeline,
   TimelineDiff,
+  Usage,
   WhyPath,
 } from "./types";
 import * as sample from "./sample";
@@ -178,6 +181,15 @@ export const api = {
   logout: (): Promise<void> => request("/auth/logout", { method: "POST" }),
   startGuest: (): Promise<{ user: Account }> => request("/auth/guest", { method: "POST" }),
   deleteAccount: (): Promise<void> => request("/auth/account", { method: "DELETE" }),
+  usage: (signal?: AbortSignal): Promise<Usage> =>
+    SAMPLE_MODE
+      ? Promise.resolve({ plan: "free", unlimited: false, questions: { used: 3, limit: 40, window_s: 3600, resets_in_s: 1800 }, handover_calls: { used: 0, limit: 10, window_s: 86400, resets_in_s: 43200 } })
+      : request("/auth/usage", { signal }),
+  /** The pricing page's pilot request; public, so it works signed out. */
+  requestPilot: (body: PilotRequest): Promise<PilotReceipt> =>
+    SAMPLE_MODE
+      ? Promise.resolve({ reference: "UT-SAMPLE", plan: body.plan, follow_up: "within one working day", stored: false })
+      : request("/pilot-requests", { method: "POST", body: JSON.stringify(body) }),
   agentTokens: (signal?: AbortSignal): Promise<{ tokens: AgentToken[]; max: number }> => request("/auth/tokens", { signal }),
   createAgentToken: (name: string): Promise<AgentToken> => request("/auth/tokens", { method: "POST", body: JSON.stringify({ name }) }),
   revokeAgentToken: (id: string): Promise<void> => request(`/auth/tokens/${encodeURIComponent(id)}`, { method: "DELETE" }),

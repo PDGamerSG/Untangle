@@ -41,6 +41,7 @@
         </svg>
         <span class="brand__name">Untangle</span>
       </a>
+      <a class="nav__link" href="#plans">Pricing</a>
       <a class="btn btn--red btn--small" href="/dashboard">
         <span>Open dashboard</span>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M5 11 11 5M6 5h5v5"/></svg>
@@ -58,6 +59,7 @@
         <li><a href="#refuse" data-rail="refuse" aria-label="Honest gaps"><span>Honest gaps</span></a></li>
         <li><a href="#pulse" data-rail="pulse" aria-label="Pulse"><span>Pulse</span></a></li>
         <li><a href="#run" data-rail="run" aria-label="Run it"><span>Run it</span></a></li>
+        <li><a href="#plans" data-rail="plans" aria-label="Pricing"><span>Pricing</span></a></li>
         <li><a href="#end" data-rail="end" aria-label="End"><span>End</span></a></li>
       </ol>
     </nav>
@@ -249,17 +251,57 @@
         </div>
       </section>
 
+      <section id="plans" class="chapter chapter--plans" data-section="plans">
+        <div class="plans">
+          <div class="copy">
+            <h2 class="h2">Pay for the handover, not the guesswork.</h2>
+            <p>
+              Start free on public repositories. When an application changes hands, one Transition Pack covers the
+              whole handover, and the first 14 days are free.
+            </p>
+            <p class="small">Prices in Indian rupees, excluding 18% GST.</p>
+          </div>
+          <ul class="prices" aria-label="Plans and prices">
+            <li class="price">
+              <span class="price__name">Free</span>
+              <span class="price__amount">₹0</span>
+              <span class="price__unit">Public repositories, 40 questions an hour</span>
+            </li>
+            <li class="price">
+              <span class="price__name">Team</span>
+              <span class="price__amount">₹1,499</span>
+              <span class="price__unit">per engineer a month, from 5 engineers</span>
+            </li>
+            <li class="price price--thread">
+              <span class="price__name">Transition Pack</span>
+              <span class="price__amount">₹49,999</span>
+              <span class="price__unit">per application handover: 90 days, up to 25 engineers, first 14 days free</span>
+            </li>
+            <li class="price">
+              <span class="price__name">Enterprise</span>
+              <span class="price__amount">Custom</span>
+              <span class="price__unit">Self-hosted, 100 or more engineers</span>
+            </li>
+          </ul>
+          <div class="plans__actions">
+            <a class="btn btn--red" href="/pricing">See plans and what is included</a>
+            <a class="btn btn--ghost" href="/pricing#pilot">Start a 14-day pilot</a>
+          </div>
+        </div>
+      </section>
+
       <section id="end" class="finale" data-section="end">
         <div class="finale__inner">
           <p class="finale__line">Ask why the code is like this, and follow the evidence back through time.</p>
           <div class="finale__actions">
             <a class="btn btn--red" href="/dashboard">Open dashboard</a>
+            <a class="btn btn--ghost" href="/pricing">See pricing</a>
             <a class="btn btn--ghost" href="https://github.com/PDGamerSG/Untangle#-download-and-run">Read the quick start</a>
           </div>
           <p class="wordmark" aria-hidden="true">Untangle</p>
         </div>
         <footer class="footer">
-          <span>MIT licensed. Python, Neo4j, FastAPI and Next.js.</span>
+          <span>MIT licensed. Free on public repositories; <a href="/pricing">plans for teams and handovers</a>.</span>
           <span>Sample data from <a href="https://github.com/knadh/listmonk">knadh/listmonk</a>.</span>
         </footer>
       </section>

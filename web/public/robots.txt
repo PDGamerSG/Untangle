@@ -3,6 +3,7 @@ Allow: /$
 Allow: /welcome/
 Allow: /login
 Allow: /signup
+Allow: /pricing
 Disallow: /api/
 Disallow: /dashboard
 Disallow: /ask

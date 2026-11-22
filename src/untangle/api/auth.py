@@ -1,6 +1,6 @@
 """Sign-up, sign-in and the access rule every API route passes through.
 
-Only `/health` and the sign-in endpoints are public. Every other route needs a valid session cookie; the
+Only `/health`, the sign-in endpoints and the pricing page's pilot request form are public. Every other route needs a valid session cookie; the
 resolved user is available as `request.state.user`. State-changing requests from browsers must come from a
 trusted origin (the session cookie is also SameSite=Lax), which blocks cross-site request forgery."""
 
@@ -21,7 +21,7 @@ from untangle.auth.service import AuthProblem, User
 from untangle.config import settings
 
 PUBLIC_ROUTES = frozenset({"/health", "/auth/register", "/auth/login", "/auth/logout", "/auth/me", "/auth/guest", "/auth/github/start",
-                           "/auth/github/callback", "/auth/providers"})
+                           "/auth/github/callback", "/auth/providers", "/pilot-requests"})
 # Routes a coding agent may call with a personal access token instead of a browser session.
 TOKEN_ROUTES = frozenset({"/mcp"})
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
@@ -119,6 +119,12 @@ def charge(request: Request, limit: limits.Limit, message: str) -> None:
     if user.is_guest:
         limit = limits.for_guest(limit)
         message = f"{message} Guests have a smaller allowance: create an account for more."
+    elif user.plan in limits.PAID_PLANS:
+        limit = limits.for_plan(limit, user.plan)
+        names = {"team": "Team", "transition": "Transition Pack", "enterprise": "Enterprise"}
+        message = f"This account reached the {names[user.plan]} plan limit of {limit.count} for this period. Please wait."
+    else:
+        message = f"{message} Paid plans raise this limit: see /pricing."
     try:
         limits.hit(answers.get_graph(), limit, user.id, message)
     except limits.LimitExceeded as exc:
@@ -190,6 +196,24 @@ def me(request: Request) -> dict:
     page does not log a failed request in the browser console."""
     user = accounts.resolve(answers.get_graph(), session_token(request))
     return {"user": user.public() if user is not None else None}
+
+
+def _allowance(user: User, limit: limits.Limit) -> dict | None:
+    """How much of the current window's allowance this person has used; None for administrators, who are not
+    limited."""
+    if user.is_admin:
+        return None
+    applied = limits.for_guest(limit) if user.is_guest else limits.for_plan(limit, user.plan)
+    used, resets_in = limits.peek(answers.get_graph(), applied, user.id)
+    return {"used": min(used, applied.count), "limit": applied.count, "window_s": applied.window_s, "resets_in_s": resets_in}
+
+
+@router.get("/usage")
+def usage(user: CurrentUser) -> dict:
+    """The account's plan and how much of this hour's questions and today's handover calls it has used."""
+    plan = "guest" if user.is_guest else user.plan
+    return {"plan": plan, "unlimited": user.is_admin, "questions": _allowance(user, limits.ASK),
+            "handover_calls": _allowance(user, limits.HANDOVER_UPLOAD)}
 
 
 @router.delete("/account", status_code=204)
